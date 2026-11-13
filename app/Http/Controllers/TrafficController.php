@@ -97,7 +97,7 @@ class TrafficController extends Controller
 
 
 
-    public function FileRecievedLinkShowAll() // recieve by gd supervisor
+    public function trafficFileRecievedLink() // recieve by gd supervisor
     {
         try{
             // $fileRecieved = AoModel::where('to_email', Auth::user()->email)

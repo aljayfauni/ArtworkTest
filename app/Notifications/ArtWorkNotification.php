@@ -76,7 +76,7 @@ class ArtWorkNotification extends Notification
             'gd_to_ao' => [
             'Item_code' => $this->artwork->item_code,
             'title'   => 'Gd Send Back Supplied Verified form',
-            'message' => 'Commercial Gd SuperVisor For Approval of Supplied Verfied form : ' . $this->artwork->item_code,
+            'message' => 'Commercial Gd SuperVisor For GD ASSESS The Status of Supplied Verfied form : ' . $this->artwork->item_code,
             'icon'    => 'fas fa-paint-brush text-warning',
         ],
 

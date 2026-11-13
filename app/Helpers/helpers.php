@@ -30,7 +30,7 @@ if (!function_exists('getFileReceivedLinkById')) {
         //     return collect();
         // }
 
-        return AoModel::where('assigned_to_gd_supervisor', Auth::user()->role_id);
+        return AoModel::where('assigned_to_role_id', Auth::user()->role_id);
     }
 
     function getFileReceivedLinkById_NoItemCode()
@@ -39,7 +39,7 @@ if (!function_exists('getFileReceivedLinkById')) {
         //     return collect();
         // }
 
-        return ArtWorkFileLinkTemp::where('assigned_to_gd_supervisor', Auth::user()->role_id)
+        return ArtWorkFileLinkTemp::where('assigned_to_role_id', Auth::user()->role_id)
         ->whereNull('item_code')->orWhere('item_code','');
         
     }

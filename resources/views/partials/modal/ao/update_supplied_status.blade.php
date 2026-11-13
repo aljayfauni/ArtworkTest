@@ -15,18 +15,27 @@
                 <div class="modal-body">
                     <!-- Item Code Readonly Input -->
                     <div class="form-group">
-                        {{-- <label for="modalItemCode">Item Description</label>
-                        <p id="modalItemDescription"></p> --}}
+                    
                         <label for="modalItemCode">Item Code</label>
-                        <input type="text" class="form-control" id="modalItemCode" name="item_code" readonly required>
-                        
+                        <input type="text" class="form-control" id="modalItemCode" name="item_desc" readonly required>
+                        <label for="modalItemDescription">Item Description</label>
+                        <input type="text" class="form-control" id="modalItemDescription" name="item_code" readonly required>
+                        <label for="modalClientName">Client Name</label>
+                        <input type="text" class="form-control" id="modalClientName" name="client_name" readonly required>
+                         <label for="modalRfaRef">Rfa reference</label>
+                        <input type="text" class="form-control" id="modalRfaRef" name="rfa_ref" readonly required>
+                    modalClientName
                     </div>
 
                     <!-- Status Select (2 Options) -->
                     <div class="form-group">
                         <label for="supplied_status">Select Status</label>
                         <select class="form-control select2" id="supplied_status" name="supplied_status" required>
-                            <option value="GD to Assign Artist">Approve Supplied Verified</option>
+                            <option value="GD to Assign Artist">GD to Assign Artist</option>
+                            @can('is-traffic')
+                            <option value="Verifying">Verifying</option>
+                            @endcan
+                             <option value="Verified">Verified</option>
                             <option value="Completed"></option>
                         </select>
                     </div>
@@ -49,13 +58,18 @@ $(document).ready(function() {
 
     // 1. Event listener to open modal when clicking status badge
     $(document).on('click', '.open-status-modal', function() {
+        var rfaRef = $(this).data('rfa-reference');
         var itemCode = $(this).data('item-code');
         var itemDesc = $(this).data('item-desc');
+        var client_name = $(this).data('client-name');
         var currentStatus = $(this).data('status');
-        console.log(itemCode);
+        console.log(itemDesc);
         $('#modalItemCode').val(itemCode);
-        $('#modalItemDescription').text=itemDesc;
+        $('#modalItemDescription').val(itemDesc);
         $('#modalStatus').val(currentStatus);
+        $('#modalRfaRef').val(rfaRef);
+         $('#modalClientName').val(client_name);
+    
         $('#statusModal').modal('show');
     });
 

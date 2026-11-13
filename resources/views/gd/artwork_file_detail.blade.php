@@ -1,23 +1,7 @@
 @extends('adminlte::page')
 
-@section('title', 'RFA Details - Acme Corp')
+@section('title', 'RFA Details ')
 
-{{-- @section('content_header')
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-dark font-weight-bold">RFA Submission Details</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">AO RFA Submissions</a></li>
-                    <li class="breadcrumb-item active">View Details</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-@stop --}}
 
 @section('content')
     <div class="container-fluid">
@@ -310,10 +294,12 @@
                         </div>
 
                         <!-- Card Footer Actions -->
+                        @can('is-admin')
                         <div class="card-footer bg-white border-top pb-4 pt-3 px-4 d-flex justify-content-between align-items-center">
                             <a href="{{ route('rfa_file_list') }}" class="btn btn-light rounded-pill px-4 py-2 text-secondary font-weight-bold" style="font-size: 0.88rem;">
                                 Cancel
                             </a>
+                            
                             <button type="submit" id="btn_update_rfa" class="btn btn-warning text-dark font-weight-bold rounded-pill px-4 py-2 shadow-none" style="font-size: 0.88rem;">
                                 <span class="btn-text">
                                     <i class="fas fa-save mr-2" style="font-size: 0.8rem;"></i> Save Changes
@@ -322,6 +308,16 @@
                                     <i class="fas fa-spinner fa-spin mr-2" style="font-size: 0.85rem;"></i> Updating...
                                 </span>
                             </button>
+                            @endcan
+
+                                  @can('is-traffic')
+                        <div class="card-footer bg-white border-top pb-4 pt-3 px-4 d-flex justify-content-between align-items-center">
+                            <a href="{{ route('traffic_officer.all') }}" class="btn btn-light rounded-pill px-4 py-2 text-secondary font-weight-bold" style="font-size: 0.88rem;">
+                                Cancel
+                            </a>
+                            
+                      
+                            @endcan
                         </div>
                     </form>
 

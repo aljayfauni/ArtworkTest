@@ -8,6 +8,7 @@ use App\Models\ArtWorkFileLinkTemp;
 use App\Models\ArtworkLog;
 use App\Models\FileVerification;
 use App\Models\GdSupervisorCommerial;
+use App\Models\Traffic;
 use App\Models\User;
 use App\Notifications\ArtWorkNotification;
 use Illuminate\Http\Request;
@@ -316,7 +317,7 @@ class AoFormController extends Controller
                 $record->from_email    = $user->email;
                 $record->ao_name       = $user->name;
                 // $record->to_email      = $email;
-                $record->assigned_to_gd_supervisor      = 2; //role id == 2 for supervisor
+                $record->assigned_to_role_id      = 3; //role id == 3 initially assigned to traffic officer
                 $record->file_link     = $sharedLink;
                 $record->file_info     = $request->input("file_info.{$index}");
                 $record->spread_size   = $request->input("spread_size.{$index}");
@@ -337,6 +338,14 @@ class AoFormController extends Controller
                 $record->with_lsd      =$request->input("description.{$index}" ?? "");
                 $record->save();
 
+               //insert also in traffic_officer table
+                $traffic  = new Traffic();
+                $traffic->item_code = $record->item_code ?? "";
+                $traffic->rfa_reference = $record->rfa_reference ?? "";
+                $traffic->file_link = $record->file_link ?? "";
+                $traffic->status = $record->status ?? "";
+                $traffic->save();
+               
                 $this->logActivity($record, 'File Link Sent', $record->created_at);
 
                 $savedRecords[] = $record;
@@ -413,7 +422,7 @@ public function store_without_itemcode(Request $request)
             $rfa_file_link->client_name = $clientName;
             $rfa_file_link->is_sent     = 1;
             $rfa_file_link->status      = "For File Verification";
-            $rfa_file_link->assigned_to_gd_supervisor      = 2; //role id == 2 for supervisor
+            $rfa_file_link->assigned_to_role_id      = 3; 
             $rfa_file_link->save();
 
             $this->logActivity($rfa_file_link, 'File Link Sent', $rfa_file_link->created_at);
@@ -431,7 +440,7 @@ public function store_without_itemcode(Request $request)
             $rfa_file_link_temp->client_name   = $clientName;
             $rfa_file_link_temp->is_sent       = 1;
             $rfa_file_link_temp->status        = "For File Verification";
-            $rfa_file_link->assigned_to_gd_supervisor      = 2; //role id == 2 for supervisor
+            $rfa_file_link->assigned_to_role_id      = 3; //role id == 2 for supervisor
             $rfa_file_link_temp->save();
 
             $this->logActivity($rfa_file_link_temp, 'File Link Save as Temporary, No Item Code yet', $rfa_file_link_temp->created_at);

@@ -63,7 +63,7 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
     Route::middleware('can:is-supervisor')->group(function () {
         // GD SuperVisor
         Route::get('/gd_supervisor', [App\Http\Controllers\GdController::class, 'gd_supervisor'])->name('gd_supervisor');
-        Route::get('/suppliedVerified/{id}', [FileVerificationController::class, 'showSuppliedFileVerified'])->name('suppliedVerified.show');
+        Route::get('/gd_suppliedVerified/{id}', [FileVerificationController::class, 'showSuppliedFileVerified'])->name('gd_suppliedVerified.show');
         Route::get('/suppliedVerifiedNoItemCode/{id}', [FileVerificationController::class, 'showSuppliedFileVerified_NoItemCode'])->name('suppliedVerifiedNoItemCode.show');
         Route::get('/specifications/{id}', [FileVerificationController::class, 'showSuppliedFileVerified'])->name('specifications.show');
         
@@ -85,7 +85,13 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
     // traffic
      Route::middleware('can:is-traffic')->group(function () {
         Route::get('/traffic_officer',[TrafficController::class, 'traffic_officer'])->name('traffic_officer.all');
-      });
+          Route::get('/suppliedVerified/{id}', [FileVerificationController::class, 'showSuppliedFileVerified'])->name('suppliedVerified.show');
+        Route::get('/suppliedVerifiedNoItemCode/{id}', [FileVerificationController::class, 'showSuppliedFileVerified_NoItemCode'])->name('suppliedVerifiedNoItemCode.show');
+    Route::get('/getArtworkFileDetail/{item_id}',[\App\Http\Controllers\ArtworkController::class,'getArtworkFileDetail'])->name('getArtworkFileDetail');
+
+          Route::get('/trafficFileRecievedLink',[\App\Http\Controllers\TrafficController::class,'trafficFileRecievedLink'])->name('trafficFileRecievedLink');
+    Route::post('/update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('update-supplied-status'); //update file status if opened
+    });
     
       Route::middleware('can:password-change')->group(function () {
         Route::get('/password_change',[\App\Http\Controllers\UserController::class,'indexChangePass'])->name('password.index');

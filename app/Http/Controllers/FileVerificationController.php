@@ -117,7 +117,7 @@ public function FileRecievedLinkShowAll()
 
         //find the supplied file verification with status for approval 
         $forApprovalSuppliedVerified = FileVerification::whereIn('item_code', $itemCodes)
-        ->where('status','For Approval')
+        ->where('status','GD Assess')
         ->pluck('item_code')
         ->toArray();
 
@@ -417,13 +417,25 @@ public function saveFileVerification(Request $request)
         $suppliedVerified->text_specs         = $request->input('text_specs');
         $suppliedVerified->other_specs        = is_array($request->input('other_specs')) ? json_encode($request->input('other_specs')) : json_encode([]);
         $suppliedVerified->image_type         = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
-        $suppliedVerified->status             = "For Approval";
+        $suppliedVerified->status             = "GD Assess";
       
         // 6. Persist to MS SQL Server
         $suppliedVerified->save();
 
+        //ao_file_links
 
-
+        $aoModelRecord = AoModel::where('item_code', trim($request->input('item_code')))->first();
+        if ($aoModelRecord) {
+        $aoModelRecord->status = "GD Assess";
+         $aoModelRecord->save();
+        }
+        //artworkFileTemp
+         
+        $artwork_filelink_temp = ArtWorkFileLinkTemp::where('item_code', trim($request->input('item_code')))->first();
+          if ($artwork_filelink_temp) {
+        $artwork_filelink_temp->status = "GD Assess";
+        $artwork_filelink_temp->save();
+           }
     //   // 1. Find the existing record (e.g., by ID or item_code)
     //     // ==========================================
     //     // PROCESS 2: Find and Update existing AoModel
@@ -719,19 +731,30 @@ public function suppliedVerified_no_item_code(Request $request)
 
     public function updateStatus(Request $request)
         {
-            $request->validate([
-                'item_code' => 'required',
-                'supplied_status'    => 'required',
-            ]);
+            // $request->validate([
+            //     'item_code' => 'required',
+            //     'supplied_status'    => 'required',
+            // ]);
+      
+            // $item = FileVerification::where('item_code', $request->item_code)->firstOrFail();
+            // $item->status = $request->supplied_status;
+            // $item->save();
 
-            $item = FileVerification::where('item_code', $request->item_code)->firstOrFail();
-            $item->status = $request->supplied_status;
-            $item->save();
+            // $item = AoModel::where('item_code', $request->item_code)->firstOrFail();
+            // $item->status = $request->supplied_status;
+            // $item->save();
 
-            $item = AoModel::where('item_code', $request->item_code)->firstOrFail();
-            $item->status = $request->supplied_status;
-            $item->save();
+            $verification = FileVerification::where('rfa_number', $request->rfa_ref)->first();
 
+            if ($verification) {
+                $verification->status = $request->supplied_status;
+                $verification->save();
+            }
+
+            $ao = AoModel::where('rfa_reference', $request->rfa_ref)->firstOrFail();
+            $ao->status = $request->supplied_status;
+            $ao->assigned_to_role_id = 2;
+            $ao->save();
 
             return response()->json([
                 'success' => true,

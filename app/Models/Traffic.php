@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Traffic extends Model
 {
     use HasFactory;
+    protected $table = 'traffic_officer';
+     protected $fillable = [
+        'item_code',
+        'rfa_reference',
+        'file_link',
+        'status',
+     ];
 }

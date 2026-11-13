@@ -1481,74 +1481,7 @@ var FileSendLinkTable = $('#FileSendTable_NoItemCode').DataTable({
     `;
 }
         },
-        // NEW COLUMN: Dynamic To Assign Column
-        // {
-        //     data: null,
-        //     orderable: false,
-        //     searchable: false,
-
-        //     render: function(data, type, row) {
-        //         let artistName = row.is_Assign_to_Artist;
-        //         console.log(row);
-        //         // If an artist is assigned, show their name inside a badge/text
-        //         if (artistName) {
-        //             return `<span class="badge badge-success font-weight-bold p-1 btn-assign open-assign-to-artist-modal" style="cursor: pointer;">
-        //                         <i class="fas fa-user-check mr-1"></i>${artistName}
-        //                     </span>`;
-        //         }
-        //         if(row.is_verified ===true || row.is_verified ==1){
-        //             return `
-        //                     <button type="button" 
-        //                             class="btn btn-secondary btn-sm btn-assign open-assign-to-artist-modal" 
-        //                             data-id="${row.item_code}" 
-        //                             data-item-code="${row.item_code ?? ''}">
-        //                         <i class="fas fa-file-alt mr-1"></i> Assign To Artist
-        //                     </button>
-        //                 `;
-        //         }
-        //         return '<span class="text-muted">-</span>';    
-
-        //     // If not assigned, render the "Assign To Artist" modal trigger button
-            
-        //     },
-
-            
-            
-        // },
-//         {
-//             data: null,
-//             orderable: false,
-//             searchable: false,
-
-//             render: function(data, type, row) {
-//                 // If an artist is assigned, show their name inside a badge/text
-         
-//                 if(row.is_verified ===true || row.is_verified ==1){
-//                     return `
-                       
-
-//                         <a href="${"{{ route('artwork', ':id') }}".replace(':id', row.item_code)}" 
-//        class="btn btn-xs btn-outline-info " 
-//        data-id="${row.item_code}" 
-//        target="_blank">
-//         <i class="fas fa-eye mr-1"></i> Check Artwork
-//     </a>
-
-// <a href="${"{{ route('timeline', ':id') }}".replace(':id', row.item_code)}" 
-//        class="btn btn-xs btn-outline-info " 
-//        data-id="${row.item_code}" 
-//        target="_blank">
-//         <i class="fas fa-line mr-1"></i> View TimeLine
-//     </a>
-//                         `;
-//                 }
-//                 return '<span class="text-muted">-</span>';    
-
-//             // If not assigned, render the "Assign To Artist" modal trigger button
-            
-//             }
-//         },
-        
+      
     ]
 });
 
@@ -1645,7 +1578,7 @@ $('#FileSendTable').on('click', '.btn-verify', function () {
     console.log($(this).data());
 
     $.ajax({
-        url: "/suppliedVerified/" + recordId, // Replace with your Laravel route URL
+        url: "/gd_suppliedVerified/" + recordId, // Replace with your Laravel route URL
         type: "GET",
         dataType: "json",
         success: function (response) {
@@ -1663,8 +1596,16 @@ $('#FileSendTable').on('click', '.btn-verify', function () {
               $('#folded_w').val(response.data.spread_w);
               $('#folded_l').val(response.data.spread_l);
                $('#default_color_text').val(response.data.colors);
+               $('#application').val(response.data.application);
+              $(`input[name="file_source"][value="${response.data.file_source}"]`).prop('checked', true);
+               $(`input[name="color"][value="${response.data.colors}"]`).prop('checked', true);
+               $(`input[name="color"][value="${response.data.colors}"]`).prop('checked', true);
+               $(`input[name="text_specs"][value="${response.data.text_specs}"]`).prop('checked', true);
+               $('#file_link').val(response.data.file_link);
+               $('#default_color_text').val(response.data.colors);
                $('#text_specs').val(response.data.text_specs);
               $('#item_description').val(response.data.file_info);
+       
        
       
             // $('#item_description').val(item_description);

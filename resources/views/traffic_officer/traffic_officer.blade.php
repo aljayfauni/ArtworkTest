@@ -370,8 +370,9 @@
                             <th>Shared File/Link</th>
                             <th>Date Sent</th>
                             <th>Status</th>
+                              <th>View</th>
                             <th>Action</th>
-                             <th>View</th>
+                           
                             <!--<th>Actions</th>-->
                         </tr>
                     </thead>
@@ -434,7 +435,8 @@
 @endsection
     
 @section('js')
-@include('partials.modal.gd.assign_to_artist')
+@include('partials.modal.ao.update_supplied_status')
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -490,13 +492,14 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
         processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
     },
     ajax: {
-        url: "{{ route('FileRecievedLinkShowAll') }}",
+        url: "{{ route('trafficFileRecievedLink') }}",
         type: 'GET'
     },
     columns: [
         { data: 'item_code' },
         { data: 'client_name' },
         { data: 'ao_name' },
+          { data: 'rfa_reference' },
 
         // Shared File / Link Column (Styled as Inspect Link Button)
         {
@@ -519,53 +522,21 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
         // Restored Original Status Column
         { data: 'status' },
 
-        // Restored Original Action Buttons (Verify & Specs)
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
-    render: function(data, type, row) {
-    // 1. Convert values to Booleans (handles true/false, "1"/"0", 1/0)
-    let isVerified =  row.is_verified ;
-    let isAoApprove = row.is_Ao_Approve;
+               {
+            data: 'rfa_reference', 
+            orderable: false, 
+            searchable: false, 
+            render: function (data) {
+               
+                var editUrl = "{{ route('getArtworkFileDetail', ':item_id') }}";
+                editUrl = editUrl.replace(':item_id', data);
 
-    // 2. Default state: Supplied File
-    let btnText = "Supplied File";
-    let btnClass = "btn-secondary";
-    let btnIcon = "fa-file-alt";
-    let disabled = "";
+                return '<button type="button" class="btn btn-xs btn-info edit-btn" data-url="' + editUrl + '">' +
+                            '<i class="fas fa-eye mr-1"></i> View Specs' +
+                       '</button>';
+            }
+        
 
-    // 3. Conditional states
-    if (!isAoApprove && isVerified) {
-        btnText = "Supplied Verified";
-        btnClass = "btn-success";
-        btnIcon = "fa-check";
-        disabled = "disabled";
-    } else if (isAoApprove && !isVerified) {
-        btnText = "Supplied Submitted";
-        btnClass = "btn-primary";
-        btnIcon = "fa-paper-plane";
-    }
-
-    // 4. Specifications Button logic
-    let is_specification_exist = row.is_specification_exist; 
-    let specClass = "btn-success";
-    let specText  = "Specifications";
-    let specIcon  = "fa-check";
-
-    return `
-        <div class="btn-group btn-group-sm" role="group"> 
-            <!-- Verify Button --> 
-            <button type="button" class="btn ${btnClass} btn-verify mr-1" data-id="${row.id}" data-client="${row.client_name ?? ''}" title="${btnText}" ${disabled}> 
-                <i class="fas ${btnIcon} mr-1"></i> ${btnText} 
-            </button> 
-            <!-- Specifications Button 
-            <button type="button" class="btn ${specClass} btn-specifications" data-id="${row.id}" data-itemcode="${row.item_code ?? ''}" title="${specText}"> 
-                <i class="fas ${specIcon} mr-1"></i> ${specText} 
-            </button>  -->
-        </div>
-    `;
-}
         },
         // NEW COLUMN: Dynamic To Assign Column
         {
@@ -573,26 +544,23 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
             orderable: false,
             searchable: false,
 
-            render: function(data, type, row) {
+            render: function(data,type,row) {
                 let artistName = row.is_Assign_to_Artist;
-                console.log(row);
-                // If an artist is assigned, show their name inside a badge/text
-                if (artistName) {
-                    return `<span class="badge badge-success font-weight-bold p-1 btn-assign open-assign-to-artist-modal" style="cursor: pointer;">
-                                <i class="fas fa-user-check mr-1"></i>${artistName}
-                            </span>`;
-                }
-                if(row.is_verified ===true || row.is_verified ==1){
+          
+              
+            
                     return `
                             <button type="button" 
-                                    class="btn btn-secondary btn-sm btn-assign open-assign-to-artist-modal" 
-                                    data-id="${row.item_code}" 
-                                    data-item-code="${row.item_code ?? ''}">
-                                <i class="fas fa-file-alt mr-1"></i> Assign To Artist
+                                    class="btn btn-warning btn-sm open-status-modal" 
+                                    data-id="${row.rfa_reference}" 
+                                    data-item-code="${row.item_code ?? ''}"
+                                     data-rfa-reference="${row.rfa_reference}"
+                                     data-item-desc="${row.file_info}"
+                                        data-client-name="${row.client_name}"
+                                    >
+                                <i class="fas fa-edit mr-1"></i> Update Status
                             </button>
                         `;
-                }
-                return '<span class="text-muted">-</span>';    
 
             // If not assigned, render the "Assign To Artist" modal trigger button
             
@@ -601,41 +569,43 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
             
             
         },
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
 
-            render: function(data, type, row) {
-                // If an artist is assigned, show their name inside a badge/text
-         
-                if(row.is_verified ===true || row.is_verified ==1){
-                    return `
-                       
-
-                        <a href="${"{{ route('artwork', ':id') }}".replace(':id', row.item_code)}" 
-       class="btn btn-xs btn-outline-info " 
-       data-id="${row.item_code}" 
-       target="_blank">
-        <i class="fas fa-eye mr-1"></i> Check Artwork
-    </a>
-
-<a href="${"{{ route('timeline', ':id') }}".replace(':id', row.item_code)}" 
-       class="btn btn-xs btn-outline-info " 
-       data-id="${row.item_code}" 
-       target="_blank">
-        <i class="fas fa-line mr-1"></i> View TimeLine
-    </a>
-                        `;
-                }
-                return '<span class="text-muted">-</span>';    
-
-            // If not assigned, render the "Assign To Artist" modal trigger button
-            
-            }
-        },
         
     ]
+});
+
+$('#FileSendTable').on('click', '.edit-btn', function() {
+    var targetUrl = $(this).data('url'); // Grab the dynamic URL from the clicked button
+
+    // Step 1: Show confirmation choice prompt
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to open and view this artwork file record?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, proceed!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // Step 2: Show native SweetAlert loading screen feedback while routing transfers pages
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait while we redirect you.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                didOpen: () => {
+                    Swal.showLoading(); 
+                }
+            });
+
+            // Step 3: Shift pages to the edit view
+            window.location.href = targetUrl;
+        }
+    });
 });
 
 //no item code 
@@ -1080,48 +1050,6 @@ $('#FileSendTable').on('click', '.btn-specifications', function (e) {
 //     $('#specificationsModal').modal('show');
 // });
 
-
-$('#btn_start_time').on('click', function() {
-        // 1. Get the selected ID value from your Select2 input
-        
-        let selectedId = $('#select-tag').val();
-        // 2. Alert the user if they haven't selected an option yet
-        if (!selectedId) {
-            Toast.fire({ icon: 'error', title: 'Please select a Item first!' });
-            return;
-        }
-
-        Swal.fire({  
-            title: 'Are you sure you want to Start this?', 
-            icon: 'warning', 
-            showCancelButton: true,  
-            confirmButtonText: 'Yes',  
-            cancelButtonText: 'No',
-        }).then((result) => {  
-            if (result.isConfirmed || result.value) { 
-                $.ajax({
-                    url: '/timeStart', 
-                    type: 'post',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        id: selectedId 
-                    },
-                    success: function(response){
-                        if (response.success){
-                            Toast.fire({ icon: 'success', title: response.success });
-                            
-                            let currentCount = parseInt($('#total-start-count').text()) || 0;
-                            if (currentCount > 0) {
-                                $('#total-start-count').text(currentCount - 1);
-                            }
-                        } else if(response.error){
-                            Toast.fire({ icon: 'error', title: response.error });
-                        }
-                    }
-                }); 
-            }
-        });
-    });
 //stoptime
        // ==========================================
         // 3. MO SEARCH MODAL & DATATABLE

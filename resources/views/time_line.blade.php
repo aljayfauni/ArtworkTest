@@ -350,7 +350,7 @@
                             $isAssignment = (
                                 str_contains($eventName, 'assigned') ||
                                 isset($properties['gd_supervisor_name']) ||
-                                isset($properties['assigned_to_gd_supervisor_name']) ||
+                                isset($properties['assigned_to_role_id']) ||
                                 isset($properties['commercial_artist_name']) ||
                                 isset($properties['artist_name'])
                             );
