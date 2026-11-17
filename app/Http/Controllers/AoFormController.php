@@ -293,12 +293,14 @@ class AoFormController extends Controller
 
         // Retrieve latest ID once for shared item grouping across batch inserts
         $latestId = (AoModel::max('id') ?? 0) + 1;
-
+        
         // Loop through each submitted form card
         foreach ($itemCodes as $index => $itemCode) {
             // $emails = $request->input("employee_email.{$index}", []);
             $sharedLink = $request->input("link.{$index}");
-
+            //create reference number
+            $currentNumber = $latestId + $index;
+            $rfaReference = 'RFA-' . date('Y') . '-' . str_pad($currentNumber, 5, '0', STR_PAD_LEFT); // e.g., RFA-2026-00001
             // // Filter out non-email values for actual email sending
             // $validEmails = array_values(array_filter($emails, function ($item) {
             //     return filter_var($item, FILTER_VALIDATE_EMAIL);
@@ -335,7 +337,11 @@ class AoFormController extends Controller
                 $record->description   = $request->input("description.{$index}");
                 $record->is_sent       = 1;
                 $record->status      = "Submitted";
-                $record->with_lsd      =$request->input("description.{$index}" ?? "");
+                $record->other_specs1      = $request->input("other_specs1.{$index}");
+                $record->other_specs2      = $request->input("other_specs2.{$index}");
+                $record->other_specs3      = $request->input("other_specs3.{$index}");
+                $record->with_lsd           =$request->input("with_lsd.{$index}" ?? "");
+                $record->rfa_reference      = $rfaReference;
                 $record->save();
 
                //insert also in traffic_officer table
@@ -356,10 +362,10 @@ class AoFormController extends Controller
      // 2. Send notifications OUTSIDE the transaction loop to the actual recipients
  foreach ($savedRecords as $record) {
     // FIX: Pull the email directly from the database record property
-    $recipientUser = \App\Models\User::where('role_id', 2)->first();
+    $recipientUser = \App\Models\User::where('role_id', 3)->first();
 
     if ($recipientUser) {
-        $recipientUser->notify(new ArtWorkNotification($record,'ao_to_gd'));
+        $recipientUser->notify(new ArtWorkNotification($record,'ao_to_traffic'));
     }
 }
 
@@ -602,29 +608,47 @@ public function store_without_itemcode(Request $request)
         ]); 
     }
 
-    public function aoAddedItemCode(Request $request){
+public function aoAddedItemCode(Request $request)
+{
+    $request->validate([
+        'rfa_reference' => 'required|string',
+        'item_code'     => 'required|string',
+    ]);
 
-         $addItemCode_ao_file_links = AoModel::where('rfa_reference', trim($request->input('rfa_reference')))->first();
-         $addItemCode_file_verifications = FileVerification::where('rfa_number', trim($request->input('rfa_reference')))->first();
-        $addItemCode_artwork_fileLink_temp = ArtWorkFileLinkTemp::where('rfa_reference', trim($request->input('rfa_reference')))->first();
-        // dd($addItemCode);
-        if ($addItemCode_ao_file_links) {
-                $addItemCode_ao_file_links->item_code      = $request->input('item_code');
-                $addItemCode_ao_file_links->status      = "Submitted";
-                $addItemCode_ao_file_links->save();
-        }
-         if ($addItemCode_file_verifications) {
-                $addItemCode_file_verifications->item_code      = $request->input('item_code');
-                $addItemCode_file_verifications->status      = "Submitted";
-                $addItemCode_file_verifications->save();
-        }
-                if ($addItemCode_artwork_fileLink_temp) {
-                $addItemCode_artwork_fileLink_temp->item_code      = $request->input('item_code');
-                $addItemCode_artwork_fileLink_temp->status      = "Submitted";
-                $addItemCode_artwork_fileLink_temp->save();
-        }
+    $rfaReference = trim($request->input('rfa_reference'));
+    $itemCode = trim($request->input('item_code'));
 
-        return redirect()->back()->with('success', 'Item Code Updated &  saved successfully!');
+    $aoFileLink = AoModel::where('rfa_reference', $rfaReference)->first();
+    $fileVerification = FileVerification::where('rfa_number', $rfaReference)->first();
+    $artworkFileLinkTemp = ArtWorkFileLinkTemp::where('rfa_reference', $rfaReference)->first();
+
+    // Check if the record exists first, not its status property
+    if ($aoFileLink) {
+        $aoFileLink->item_code = $itemCode;
+        $aoFileLink->status = 'Verified';
+        $aoFileLink->save();
     }
 
+    if ($fileVerification) {
+        $fileVerification->item_code = $itemCode;
+        $fileVerification->status = 'Verified';
+        $fileVerification->save();
+    }
+
+    if ($artworkFileLinkTemp) {
+        $artworkFileLinkTemp->item_code = $itemCode;
+        $artworkFileLinkTemp->status = 'Verified';
+        $artworkFileLinkTemp->save();
+    }
+
+    return redirect()->back()->with('success', 'Item Code Updated & saved successfully!');
 }
+
+
+
+    
+
+}
+
+
+

@@ -80,6 +80,13 @@ class ArtWorkNotification extends Notification
             'icon'    => 'fas fa-paint-brush text-warning',
         ],
 
+         'ao_to_traffic' => [
+            'Item_code' => $this->artwork->item_code,
+            'title'   => 'New Artwork Assigned',
+            'message' => 'Traffic Controller assigned artwork for Item: ' . $this->artwork->item_code,
+            'icon'    => 'fas fa-paint-brush text-warning',
+        ],
+
         // Default fallback if an unexpected stage value is given
         default => [
             'title'   => 'New Artwork Assigned',

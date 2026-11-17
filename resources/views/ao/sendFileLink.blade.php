@@ -622,14 +622,14 @@
 
                     <div class="form-group col-md-4">
                         <label class="text-uppercase text-xs text-muted font-weight-bold">With LSD</label>
-                        {{-- <input type="text" name="with_lsd[]" class="form-control" placeholder="Details regarding LSD"> --}}
-                        <select name="image_type[]" class="form-control select2-email"  >
+                        <input type="text" name="with_lsd[]" class="form-control" placeholder="Details regarding LSD">
+                        {{-- <select name="image_type[]" class="form-control select2-email"  >
                                     <option value="">--Select--</option>
                                     <option value="Yes">Yes</option>
                                     <option value="No">No</option>
                                    
                               
-                            </select>
+                            </select> --}}
                     </div>
                 </div>
             </div>

@@ -84,11 +84,29 @@ public function FileRecievedLinkShowAll()
         //     ->orderBy('created_at', 'desc')
         //     ->get();
 
-              $fileRecieved = getFileReceivedLinkById() 
-            ->whereNotNull('item_code')
-            ->Where('item_code','!=','')
+            //   $fileRecieved = getFileReceivedLinkById() 
+            // ->whereNotNull('item_code')
+            // ->Where('item_code','!=','')
+            //     ->orderBy('created_at', 'desc')
+            //     ->get();//helper function
+
+
+                
+              $fileRecieved = AoModel::whereNotNull('item_code')
+                ->whereIn('assigned_to_role_id', [1,2,3,4])
+                ->whereIn('status', ['Verified', 'GD Assess', 'GD to Assign Artist','Assigned To Artist'])
                 ->orderBy('created_at', 'desc')
-                ->get();//helper function
+                ->get();
+
+                
+//          // ✅ Correct: Group the roles first, then apply status
+// $fileRecieved = AoModel::where(function ($query) {
+//         $query->where('assigned_to_role_id', Auth::user()->role_id)
+//               ->orWhere('assigned_to_role_id', 3);
+//     })
+//     ->where('status', 'Verified')
+//     ->orderBy('created_at', 'desc')
+//     ->get();
 
 // $fileRecieved = geFileRecievedLinkById()
 //     // Join 1: AO User details
@@ -123,7 +141,7 @@ public function FileRecievedLinkShowAll()
 
         // Find which item_codes exist in the FileVerification table in 1 query
         $verifiedItemCodes = FileVerification::whereIn('item_code', $itemCodes)
-            ->where('status','GD to Assign Artist')
+            ->whereIn('status',['GD Assess','Assigned To Artist','GD to Assign Artist'])
             ->pluck('item_code')
             ->toArray();
 
@@ -185,9 +203,17 @@ public function FileRecievedLinkShowAllNoItemCode()
 {
     try {
         // Fetch AoModel records via your helper function
-        $fileRecieved = getFileReceivedLinkById_NoItemCode() 
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // $fileRecieved = getFileReceivedLinkById_NoItemCode() 
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+
+                    $fileRecieved = getFileReceivedLinkById_NoItemCode() 
+                ->orWhere('assigned_to_role_id',2)
+         
+                // ->orWhere('assigned_to_role_id',1)
+                // ->whereIn('status',['Verified','GD Assess','GD to Assign Artist'])
+                ->orderBy('created_at', 'desc')
+                ->get();//helper function
 
         // Pluck item_codes from AoModel collection
         $itemCodes = $fileRecieved->pluck('item_code')->filter()->toArray();
@@ -269,42 +295,105 @@ public function FileRecievedLinkShowAllNoItemCode()
     }
 }
 
-    public function showSuppliedFileVerified($id)
-    {
-        try {
-            // Reuses helper query + security check on to_email
-            $data = getFileReceivedLinkById()->findOrFail($id);
+    // public function showSuppliedFileVerified($id)
+    // {
+    //     try {
+    //         // Reuses helper query + security check on to_email
+    //         // $data = getFileReceivedLinkById()->findOrFail($id);
 
-            return response()->json([
-                'status' => 'success',
-                'data'   => $data
-            ]);
-        } catch (Exception $e) {
+    //          $data = getFileReceivedLinkById()
+    //          ->orWhere('assigned_to_role_id',3)
+
+    //          ->where('rfa_reference',$id)->first();
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'data'   => $data
+    //         ]);
+    //     } catch (Exception $e) {
+    //         return response()->json([
+    //             'status'  => 'error',
+    //             'message' => 'Record not found or access denied.'
+    //         ], 404);
+    //     }
+    // }
+
+public function showSuppliedFileVerified($id)
+{
+    try {
+        // Group the query conditions properly to prevent global OR leakage
+        $data = getFileReceivedLinkById()
+            ->where(function ($query) use ($id) {
+                $query->where('rfa_reference', $id)
+                      ->orWhere('assigned_to_role_id', 3);
+            })
+            // If $id is actually the primary key, change this to ->where('id', $id) 
+            // Or if $id is the rfa_reference string, keep it as below:
+            ->where('rfa_reference', $id) 
+            ->first();
+
+        if (!$data) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Record not found or access denied.'
             ], 404);
         }
-    }
 
-        public function showSuppliedFileVerified_NoItemCode($id)
-    {
-        try {
+        return response()->json([
+            'status' => 'success',
+            'data'   => $data
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+    //     public function showSuppliedFileVerified_NoItemCode($id)
+    // {
+    //     try {
          
-            // Reuses helper query + security check on to_email
-            $data = getFileReceivedLinkById_NoItemCode()->findOrFail($id);
+    //         // Reuses helper query + security check on to_email
+    //         $data = getFileReceivedLinkById_NoItemCode()->findOrFail($id);
 
-            return response()->json([
-                'status' => 'success',
-                'data'   => $data
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Record not found or access denied.'
-            ], 404);
-        }
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'data'   => $data
+    //         ]);
+    //     } catch (Exception $e) {
+    //         return response()->json([
+    //             'status'  => 'error',
+    //             'message' => 'Record not found or access denied.'
+    //         ], 404);
+    //     }
+    // }
+
+    public function showSuppliedFileVerified_NoItemCode($id)
+{
+    try {
+        // Use where() on the rfa_reference column instead of assuming primary key id
+        $data = getFileReceivedLinkById_NoItemCode()
+            ->where('rfa_reference', $id)
+            ->firstOrFail();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $data
+        ]);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Record not found or access denied.'
+        ], 404);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
     }
+}
 
         public function getSuppliedVeried()
     {
@@ -382,9 +471,12 @@ public function saveFileVerification(Request $request)
         ]);
        
         // 2. Instantiate object
-        $suppliedVerified = new FileVerification();
+   // 2. Find existing record by item_code, or instantiate a new one if it doesn't exist
+        $suppliedVerified = FileVerification::firstOrNew([
+            'item_code' => $request->input('item_code')
+        ]);
+
         // 3. Map primary requirements
-        $suppliedVerified->item_code          = $request->input('item_code');
         $suppliedVerified->client             = $validated['client'];
         $suppliedVerified->item_description   = $validated['item_description'];
 
@@ -392,13 +484,12 @@ public function saveFileVerification(Request $request)
         $suppliedVerified->file_source        = $request->input('file_source'); // Text from Radio Button
         $suppliedVerified->application        = $request->input('application');  // Text from Dropdown Select
         $suppliedVerified->file_source_other  = $request->input('file_source_other');
-        
+
         // Map document trackers
         $suppliedVerified->rfa_number         = $request->input('rfa_reference');
-        $suppliedVerified->item_code          = $request->input('item_code');
         $suppliedVerified->size_spread        = $request->input('size_spread');
         $suppliedVerified->size_folded        = $request->input('size_folded');
-        
+
         // Dimensional Metrics
         $suppliedVerified->spread_h           = $request->input('spread_h');
         $suppliedVerified->spread_w           = $request->input('spread_w');
@@ -406,114 +497,136 @@ public function saveFileVerification(Request $request)
         $suppliedVerified->folded_h           = $request->input('folded_h');
         $suppliedVerified->folded_w           = $request->input('folded_w');
         $suppliedVerified->folded_l           = $request->input('folded_l');
-        
+
         // Verification & Audit metrics
         $suppliedVerified->number_of_colors   = $request->input('number_of_colors');
         $suppliedVerified->verified_by_date   = $request->input('verified_by_date');
         $suppliedVerified->verified_by        = $request->input('verified_by');
 
         // 5. Keep checkbox groups structured as JSON strings for SQL Server compatibility
-        $suppliedVerified->color              = $request->input('color') ;
+        $suppliedVerified->color              = $request->input('color');
         $suppliedVerified->text_specs         = $request->input('text_specs');
         $suppliedVerified->other_specs        = is_array($request->input('other_specs')) ? json_encode($request->input('other_specs')) : json_encode([]);
         $suppliedVerified->image_type         = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
-        $suppliedVerified->status             = "GD Assess";
-      
-        // 6. Persist to MS SQL Server
-        $suppliedVerified->save();
+        $suppliedVerified->status             = $suppliedVerified->status ;
 
+        // 6. Persist to MS SQL Server (Runs UPDATE if found, INSERT if new)
+        $suppliedVerified->save();
         //ao_file_links
 
-        $aoModelRecord = AoModel::where('item_code', trim($request->input('item_code')))->first();
-        if ($aoModelRecord) {
-        $aoModelRecord->status = "GD Assess";
-         $aoModelRecord->save();
-        }
+        // $aoModelRecord = AoModel::where('item_code', trim($request->input('item_code')))->first();
+        
+        // $aoModelRecord->status =  $aoModelRecord->status;
+
+        // if ($aoModelRecord) {
+
+               
+        //         $aoModelRecord->spread_size   = $request->input('size_spread');
+        //         $aoModelRecord->folded_size   = $request->input('size_folded');
+        //         $aoModelRecord->spread_h      = $request->input('spread_h');
+        //         $aoModelRecord->spread_w      = $request->input('spread_w');
+        //         $aoModelRecord->spread_l      = $request->input('spread_l');
+  
+        //         $aoModelRecord->folded_h      = $request->input('folded_h');
+        //         $aoModelRecord->folded_w      = $request->input('folded_w');
+        //         $aoModelRecord->folded_l      = $request->input('folded_l');
+        //         $aoModelRecord->colors        = $request->input('color');
+        //         $aoModelRecord->num_of_colors = $request->input("number_of_colors");
+        //         $aoModelRecord->image_type    = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
+        //         $aoModelRecord->client_name   = $request->input("client");
+             
+        //         $aoModelRecord->is_sent       = 1;
+        //         $aoModelRecord->status      = $aoModelRecord->status  ;
+          
+
+        //  $aoModelRecord->save();
+        // }
         //artworkFileTemp
          
-        $artwork_filelink_temp = ArtWorkFileLinkTemp::where('item_code', trim($request->input('item_code')))->first();
-          if ($artwork_filelink_temp) {
-        $artwork_filelink_temp->status = "GD Assess";
-        $artwork_filelink_temp->save();
-           }
+        // $artwork_filelink_temp = ArtWorkFileLinkTemp::where('item_code', trim($request->input('item_code')))->first();
+        //   if ($artwork_filelink_temp) {
+        // $artwork_filelink_temp->status = "GD Assess";
+        // $artwork_filelink_temp->save();
+        //    }
     //   // 1. Find the existing record (e.g., by ID or item_code)
     //     // ==========================================
     //     // PROCESS 2: Find and Update existing AoModel
     //     // ==========================================
-    //     $aoModelRecord = AoModel::where('rfa_reference', trim($request->input('rfa_reference')))->first();
+        $aoModelRecord = AoModel::where('rfa_reference', trim($request->input('rfa_reference')))->first();
+    //  dd($request);
+        if ($aoModelRecord) {
+           
+            // Map fields using your exact database column names
+            $aoModelRecord->item_code      = $request->input('item_code');
+            $aoModelRecord->client_name    = $validated['client']; // Matches [client_name]
+            $aoModelRecord->description    = $request->input('item_description'); // Matches [description]
+            $aoModelRecord->file_info    = $request->input('item_description'); // Matches [description]
+            
+            // Sizes & Dimensions
+            $aoModelRecord->spread_size    = $request->input('size_spread'); // Matches [spread_size]
+            $aoModelRecord->folded_size    = $request->input('size_folded'); // Matches [folded_size]
+            
+            $aoModelRecord->spread_h       = $request->input('spread_h');
+            $aoModelRecord->spread_w       = $request->input('spread_w');
+            $aoModelRecord->spread_l       = $request->input('spread_l');
+            $aoModelRecord->folded_h       = $request->input('folded_h');
+            $aoModelRecord->folded_w       = $request->input('folded_w');
+            $aoModelRecord->folded_l       = $request->input('folded_l');
+            //file source
+            $aoModelRecord->file_source  = $request->input('file_source');
+            $aoModelRecord->file_source_other  = $request->input('file_source_other');
+            // Colors & Specs
+            $aoModelRecord->num_of_colors  = $request->input('number_of_colors'); // Matches [num_of_colors]
+            $aoModelRecord->colors         = $request->input('color'); // Matches [colors]
+            //text specs
+              $aoModelRecord->text_specs         = $request->input('text_specs');
+            // JSON fields that exist in your schema
+            $aoModelRecord->image_type     = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
+            
+            // Status update
+            $aoModelRecord->status         = $aoModelRecord->status ;
+            // application 
+             $aoModelRecord->application         = $request->input('application');
+            // Save updates to AoModel table
+            $aoModelRecord->save();
+        }
 
-    //     if ($aoModelRecord) {
-    //         // Map fields using your exact database column names
-    //         $aoModelRecord->item_code      = $request->input('item_code');
-    //         $aoModelRecord->client_name    = $validated['client']; // Matches [client_name]
-    //         $aoModelRecord->description    = $request->input('item_description'); // Matches [description]
-    //         $aoModelRecord->file_info    = $request->input('item_description'); // Matches [description]
-            
-    //         // Sizes & Dimensions
-    //         $aoModelRecord->spread_size    = $request->input('size_spread'); // Matches [spread_size]
-    //         $aoModelRecord->folded_size    = $request->input('size_folded'); // Matches [folded_size]
-            
-    //         $aoModelRecord->spread_h       = $request->input('spread_h');
-    //         $aoModelRecord->spread_w       = $request->input('spread_w');
-    //         $aoModelRecord->spread_l       = $request->input('spread_l');
-    //         $aoModelRecord->folded_h       = $request->input('folded_h');
-    //         $aoModelRecord->folded_w       = $request->input('folded_w');
-    //         $aoModelRecord->folded_l       = $request->input('folded_l');
-    //         //file source
-    //         $aoModelRecord->file_source  = $request->input('file_source');
-    //         $aoModelRecord->file_source_other  = $request->input('file_source_other');
-    //         // Colors & Specs
-    //         $aoModelRecord->num_of_colors  = $request->input('number_of_colors'); // Matches [num_of_colors]
-    //         $aoModelRecord->colors         = $request->input('color'); // Matches [colors]
-    //         //text specs
-    //           $aoModelRecord->text_specs         = $request->input('text_specs');
-    //         // JSON fields that exist in your schema
-    //         $aoModelRecord->image_type     = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
-            
-    //         // Status update
-    //         $aoModelRecord->status         = "For Item Code Creation";
-    //         // application 
-    //          $aoModelRecord->application         = $request->input('application');
-    //         // Save updates to AoModel table
-    //         $aoModelRecord->save();
-    //     }
+         $artwork_filelink_temp = ArtWorkFileLinkTemp::where('rfa_reference', trim($request->input('rfa_reference')))->first();
 
-    //      $artwork_filelink_temp = ArtWorkFileLinkTemp::where('rfa_reference', trim($request->input('rfa_reference')))->first();
-
-    //     if ($artwork_filelink_temp) {
-    //         // Map fields using your exact database column names
-    //         $artwork_filelink_temp->item_code      = $request->input('item_code');
-    //         $artwork_filelink_temp->client_name    = $validated['client']; // Matches [client_name]
-    //         $artwork_filelink_temp->description    = $request->input('item_description'); // Matches [description]
-    //         $artwork_filelink_temp->file_info    = $request->input('item_description'); // Matches [description]
+        if ($artwork_filelink_temp) {
+            // Map fields using your exact database column names
+            $artwork_filelink_temp->item_code      = $request->input('item_code');
+            $artwork_filelink_temp->client_name    = $validated['client']; // Matches [client_name]
+            $artwork_filelink_temp->description    = $request->input('item_description'); // Matches [description]
+            $artwork_filelink_temp->file_info    = $request->input('item_description'); // Matches [description]
             
-    //         // Sizes & Dimensions
-    //         $artwork_filelink_temp->spread_size    = $request->input('size_spread'); // Matches [spread_size]
-    //         $artwork_filelink_temp->folded_size    = $request->input('size_folded'); // Matches [folded_size]
+            // Sizes & Dimensions
+            $artwork_filelink_temp->spread_size    = $request->input('size_spread'); // Matches [spread_size]
+            $artwork_filelink_temp->folded_size    = $request->input('size_folded'); // Matches [folded_size]
             
-    //         $artwork_filelink_temp->spread_h       = $request->input('spread_h');
-    //         $artwork_filelink_temp->spread_w       = $request->input('spread_w');
-    //         $artwork_filelink_temp->spread_l       = $request->input('spread_l');
-    //         $artwork_filelink_temp->folded_h       = $request->input('folded_h');
-    //         $artwork_filelink_temp->folded_w       = $request->input('folded_w');
-    //         $artwork_filelink_temp->folded_l       = $request->input('folded_l');
-    //          //file source
-    //         $artwork_filelink_temp->file_source  = $request->input('file_source');
-    //         $artwork_filelink_temp->file_source_other  = $request->input('file_source_other');
-    //         // Colors & Specs
-    //         $artwork_filelink_temp->num_of_colors  = $request->input('number_of_colors'); // Matches [num_of_colors]
-    //         $artwork_filelink_temp->colors         = $request->input('color'); // Matches [colors]
+            $artwork_filelink_temp->spread_h       = $request->input('spread_h');
+            $artwork_filelink_temp->spread_w       = $request->input('spread_w');
+            $artwork_filelink_temp->spread_l       = $request->input('spread_l');
+            $artwork_filelink_temp->folded_h       = $request->input('folded_h');
+            $artwork_filelink_temp->folded_w       = $request->input('folded_w');
+            $artwork_filelink_temp->folded_l       = $request->input('folded_l');
+             //file source
+            $artwork_filelink_temp->file_source  = $request->input('file_source');
+            $artwork_filelink_temp->file_source_other  = $request->input('file_source_other');
+            // Colors & Specs
+            $artwork_filelink_temp->num_of_colors  = $request->input('number_of_colors'); // Matches [num_of_colors]
+            $artwork_filelink_temp->colors         = $request->input('color'); // Matches [colors]
             
-    //         // JSON fields that exist in your schema
-    //         $artwork_filelink_temp->image_type     = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
+            // JSON fields that exist in your schema
+            $artwork_filelink_temp->image_type     = is_array($request->input('image_type')) ? json_encode($request->input('image_type')) : json_encode([]);
             
-    //         // Status update
-    //         $artwork_filelink_temp->status         = "For Item Code Creation";
-    //         // application 
-    //          $artwork_filelink_temp->application         = $request->input('application');
-    //         // Save updates to AoModel table
-    //         $artwork_filelink_temp->save();
-    //     }
+            // Status update
+            $artwork_filelink_temp->status         = $artwork_filelink_temp->status;
+            // application 
+             $artwork_filelink_temp->application         = $request->input('application');
+            // Save updates to AoModel table
+            $artwork_filelink_temp->save();
+        }
 
    
         // FIX: Pull the email directly from the database record property
@@ -561,10 +674,11 @@ public function suppliedVerified_no_item_code(Request $request)
 
     try {
         // 1. Validate only primary fields
-      
-       
-        // 2. Instantiate object
-        $suppliedVerified = new FileVerification();
+       $suppliedVerified = FileVerification::firstOrNew([
+            'rfa_number' => $request->input('rfa_reference_no_item_code')
+        ]);
+
+    
         // 3. Map primary requirements
         $suppliedVerified->item_code          = $request->input('item_code_no_item_code');
         $suppliedVerified->client             = $request->input('client_no_item_code');
@@ -743,17 +857,57 @@ public function suppliedVerified_no_item_code(Request $request)
             // $item = AoModel::where('item_code', $request->item_code)->firstOrFail();
             // $item->status = $request->supplied_status;
             // $item->save();
+            $status_request = $request->input('supplied_status');
+           switch ($status_request) {
+                case 'Submitted':
+                    // Logic to approve the order
+                    $assign_to_role_id = 2; //admin / ao
+                    break;
 
+                case 'Verifying':
+                    // Logic to reject the order
+                    $assign_to_role_id = 3; //traffic
+                    break;
+
+                case 'Verified':
+                    // Logic to reject the order
+                    $assign_to_role_id = 3; //traffic
+                    break;
+
+                case 'For Revision':
+                    // Logic to reject the order
+                    $assign_to_role_id = 3; //traffic
+                    break;
+                case 'GD Assess':
+                    // Logic to reject the order
+                    $assign_to_role_id = 2; //traffic
+                    break;
+
+                case 'Assigned To Artist':
+                    // Logic to reject the order
+                    $assign_to_role_id = 4; //traffic
+                    break;
+
+                case 'GD to Assign Artist':
+                // Logic to reject the order
+                $assign_to_role_id = 2; //traffic
+                break;
+                // default:
+                //     $assign_to_role_id = 1;
+                //     break;
+            }
+                // dd($assign_to_role_id);
             $verification = FileVerification::where('rfa_number', $request->rfa_ref)->first();
-
+            //    dd($request->rfa_ref);
             if ($verification) {
-                $verification->status = $request->supplied_status;
+                  $verification->rfa_number = $request->rfa_ref ?? '';
+                $verification->status = $request->supplied_status ?? '';
                 $verification->save();
             }
-
-            $ao = AoModel::where('rfa_reference', $request->rfa_ref)->firstOrFail();
+              
+            $ao = AoModel::where('rfa_reference', $request->rfa_ref)->first();
             $ao->status = $request->supplied_status;
-            $ao->assigned_to_role_id = 2;
+            $ao->assigned_to_role_id = $assign_to_role_id;
             $ao->save();
 
             return response()->json([

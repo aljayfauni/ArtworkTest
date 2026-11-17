@@ -367,6 +367,7 @@
                             <th>Shared File/Link</th>
                             <th>Date Sent</th>
                             <th>Status</th>
+                             <th>Action</th>
                             <th>Forms</th>
                              <th>To Assign</th>
                              <th>View</th>
@@ -615,436 +616,7 @@
 
 
 
-<!-- Modern Tracking Grid Wrapper --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
 
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row line --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll step track container -->
-                    </div> <!-- End lane right node container track row -->
-                </div> <!-- End global item tracking block wrapper line -->
-            @endif
-
-            {{-- 1. CLEAN MODERN BLOCK ROW COMPONENT CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white rounded-2xl p-4 shadow-sm border border-slate-100 w-100 d-block mb-4" style="border-radius: 16px;">
-                
-                <!-- Minimal Row Header Title Line Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-xl d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #eff6ff; color: #2563eb; border-radius: 12px;">
-                            <i class="fas fa-cube" style="font-size: 16px;"></i>
-                        </div>
-                        <div>
-                            <h5 class="m-0 font-weight-bold tracking-tight text-slate-900" style="font-size: 16px; color: #0f172a;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h5>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 12px; color: #64748b;">Code Reference: {{ $row->item_code }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Process Flow Stream -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-2 pt-3 align-items-start" style="position: relative; gap: 40px;">
-                        
-                        <!-- Minimal background connect rail line -->
-                        <div class="process-rail-line" style="position: absolute; top: 18px; left: 24px; right: 24px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. MINIMALIST PLAY / START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #bbf7d0; color: #15803d; border: 4px solid #fff;">
-                        <i class="fas fa-play" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #f0fdf4; color: #16a34a; font-size: 11px; border-radius: 6px;">STARTED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. MINIMALIST STOP / PAUSE EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #fecaca; color: #b91c1c; border: 4px solid #fff;">
-                        <i class="fas fa-stop" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #fef2f2; color: #dc2626; font-size: 11px; border-radius: 6px;">STOPPED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs mb-2" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-
-                    @if($row->start_time)
-                        <div class="d-flex align-items-center justify-content-between px-1 py-1 rounded" style="background: #f1f5f9;">
-                            <span class="text-uppercase tracking-wider font-weight-bold text-slate-400" style="font-size: 9px; color: #64748b;">Duration Tracked</span>
-                            <span class="font-weight-bold text-slate-700" style="font-size: 11px; color: #334155;">
-                                {{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endif
-
-        {{-- Tie together all row markup layout segments at loop termination --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal step track container -->
-                </div> <!-- End lane right node container track row -->
-            </div> <!-- End global item tracking block wrapper line -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border rounded-2xl shadow-xs" style="border-radius: 16px;">
-            <div class="text-slate-300 mb-3"><i class="fas fa-inbox fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-
-
-{{-- ------------------------------------------ --}}
-
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-
-{{-- horizontal timeline Design --}}
-
-{{-- <div class="row mr-4">
-    <div class="col-12 mt-4">
-        <div class="card card-primary card-outline">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">
-                    <i class="fas fa-stream mr-1"></i> Item Activity Timelines
-                </h3>
-                <div>
-                    <a href="{{ route('users.create') }}" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus"></i> Add User
-                    </a>
-                </div>
-            </div>
-            
-            <div class="card-body">
-                <!-- Hidden DataTables instance for AJAX server-side fetching -->
-                <table id="UsersTable" class="d-none">
-                    <thead><tr><th>Data</th></tr></thead>
-                </table>
-
-                <!-- Main container for Item Cards -->
-                <div id="itemTimelinesContainer">
-                    <div class="text-center p-4 text-muted">
-                        <i class="fas fa-spinner fa-spin fa-2x"></i>
-                        <p class="mt-2">Loading item timelines...</p>
-                    </div>
-                </div>
-            </div>
-        </div>          
-    </div>
-</div> --}}
 @endcan
 
 @include('partials.modal.item_search')
@@ -1055,7 +627,9 @@
 @endsection
     
 @section('js')
+
 @include('partials.modal.gd.assign_to_artist')
+@include('partials.modal.gd.update_supplied_status')
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -1244,7 +818,36 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
 
         // Restored Original Status Column
         { data: 'status' },
+        {
+            data: null,
+            orderable: false,
+            searchable: false,
 
+            render: function(data,type,row) {
+                let artistName = row.is_Assign_to_Artist;
+          
+              
+            
+                    return `
+                            <button type="button" 
+                                    class="btn btn-warning btn-sm open-status-modal" 
+                                    data-id="${row.rfa_reference}" 
+                                    data-item-code="${row.item_code ?? ''}"
+                                     data-rfa-reference="${row.rfa_reference}"
+                                     data-item-desc="${row.file_info}"
+                                        data-client-name="${row.client_name}"
+                                    >
+                                <i class="fas fa-edit mr-1"></i> Update Status
+                            </button>
+                        `;
+
+            // If not assigned, render the "Assign To Artist" modal trigger button
+            
+            },
+
+            
+            
+        },
         // Restored Original Action Buttons (Verify & Specs)
         {
             data: null,
@@ -1255,6 +858,8 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
     let isVerified =  row.is_verified ;
     let isAoApprove = row.is_Ao_Approve;
 
+  
+
     // 2. Default state: Supplied File
     let btnText = "Supplied File";
     let btnClass = "btn-secondary";
@@ -1262,11 +867,11 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
     let disabled = "";
 
     // 3. Conditional states
-    if (!isAoApprove && isVerified) {
+    if ( isVerified) {
         btnText = "Supplied Verified";
         btnClass = "btn-success";
         btnIcon = "fa-check";
-        disabled = "disabled";
+        disabled = "";
     } else if (isAoApprove && !isVerified) {
         btnText = "Supplied Submitted";
         btnClass = "btn-primary";
@@ -1282,7 +887,7 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
     return `
         <div class="btn-group btn-group-sm" role="group"> 
             <!-- Verify Button --> 
-            <button type="button" class="btn ${btnClass} btn-verify mr-1" data-id="${row.id}" data-client="${row.client_name ?? ''}" title="${btnText}" ${disabled}> 
+            <button type="button" class="btn ${btnClass} btn-verify mr-1" data-id="${row.id}" data-client="${row.client_name ?? ''}" data-rfaReference="${row.rfa_reference}" title="${btnText}" ${disabled}> 
                 <i class="fas ${btnIcon} mr-1"></i> ${btnText} 
             </button> 
             <!-- Specifications Button 
@@ -1311,10 +916,10 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
                 if(row.is_verified ===true || row.is_verified ==1){
                     return `
                             <button type="button" 
-                                    class="btn btn-secondary btn-sm btn-assign open-assign-to-artist-modal" 
+                                    class="btn btn-primary btn-sm btn-assign open-assign-to-artist-modal" 
                                     data-id="${row.item_code}" 
                                     data-item-code="${row.item_code ?? ''}">
-                                <i class="fas fa-file-alt mr-1"></i> Assign To Artist
+                                <i class="fas fa-paint-brush mr-1"></i> Assign To Artist
                             </button>
                         `;
                 }
@@ -1573,9 +1178,16 @@ $('#FileSendTable').on('click', '.file-link', function(e) {
 //     $('#verificationModal').modal('show');
 // });
 $('#FileSendTable').on('click', '.btn-verify', function () {
-    var recordId = $(this).data('id');
-  
-    console.log($(this).data());
+    var recordId = $(this).data('rfareference'); // rfa reference number
+
+    // 1. CLEAR PREVIOUS DATA: Reset the form so old data doesn't linger
+    $('#verificationModal').find('form').trigger('reset');
+    $('#item_code_label').text('');
+    $('#rfa_reference_label').text('');
+    $('#modal_file_link').attr('href', '#').addClass('d-none');
+
+    // 2. Show the modal immediately (optional, or show inside success)
+    $('#verificationModal').modal('show');
 
     $.ajax({
         url: "/gd_suppliedVerified/" + recordId, // Replace with your Laravel route URL
@@ -1583,53 +1195,55 @@ $('#FileSendTable').on('click', '.btn-verify', function () {
         dataType: "json",
         success: function (response) {
             console.log(response.data);
-            // Populate all modal fields using response data
-            // console.log(response.data.item_code)
-             $('#item_code_label').text(response.data.item_code);
-           $('#verify_file_id').val(recordId);
-             $('#item_code').val(response.data.item_code);
-              $('#client').val(response.data.id);
-              $('#spread_h').val(response.data.spread_h);
-              $('#spread_w').val(response.data.spread_w);
-              $('#spread_l').val(response.data.spread_l);
-              $('#folded_h').val(response.data.spread_h);
-              $('#folded_w').val(response.data.spread_w);
-              $('#folded_l').val(response.data.spread_l);
-               $('#default_color_text').val(response.data.colors);
-               $('#application').val(response.data.application);
-              $(`input[name="file_source"][value="${response.data.file_source}"]`).prop('checked', true);
-               $(`input[name="color"][value="${response.data.colors}"]`).prop('checked', true);
-               $(`input[name="color"][value="${response.data.colors}"]`).prop('checked', true);
-               $(`input[name="text_specs"][value="${response.data.text_specs}"]`).prop('checked', true);
-               $('#file_link').val(response.data.file_link);
-               $('#default_color_text').val(response.data.colors);
-               $('#text_specs').val(response.data.text_specs);
-              $('#item_description').val(response.data.file_info);
+
+            if (!response.data) {
+                console.error("No data found in response");
+                return;
+            }
+           
+            // Populate text labels and inputs
+            $('#item_code_label').text(response.data.item_code);
+            $('#rfa_reference_label').text(response.data.rfa_reference); // Fixed syntax error here
+            $('#rfa_reference').val(response.data.rfa_reference); // Fixed syntax error here
+            $('#verify_file_id').val(recordId);
+            $('#item_code').val(response.data.item_code);
+            $('#client').val(response.data.client_name);
+            $('#spread_h').val(response.data.spread_h);
+            $('#spread_w').val(response.data.spread_w);
+            $('#spread_l').val(response.data.spread_l);
+            $('#folded_h').val(response.data.spread_h);
+            $('#folded_w').val(response.data.spread_w);
+            $('#folded_l').val(response.data.spread_l);
+            $('#default_color_text').val(response.data.colors);
+            $('#application').val(response.data.application);
+
+            // Handle radio buttons safely
+            $(`input[name="file_source"]`).prop('checked', false);
+            $(`input[name="file_source"][value="${response.data.file_source}"]`).prop('checked', true);
+
+            $(`input[name="color"]`).prop('checked', false);
+            $(`input[name="color"][value="${response.data.colors}"]`).prop('checked', true);
+
+            $(`input[name="text_specs"]`).prop('checked', false);
+            $(`input[name="text_specs"][value="${response.data.text_specs}"]`).prop('checked', true);
+
+            $('#file_link').val(response.data.file_link);
+            $('#text_specs').val(response.data.text_specs);
+            $('#item_description').val(response.data.file_info);
        
-       
-      
-            // $('#item_description').val(item_description);
-            
-            // Handle links or custom elements
-            if (response.file_link) {
-                $('#modal_file_link').attr('href', response.file_link).removeClass('d-none');
+            // Handle links
+            if (response.data.file_link) {
+                $('#modal_file_link').attr('href', response.data.file_link).removeClass('d-none');
             } else {
                 $('#modal_file_link').addClass('d-none');
             }
-
-            // If you have nested relations, access them directly:
-            // $('#modal_client_address').val(response.client ? response.client.address : '');
         },
         error: function (xhr, status, error) {
             console.error("Failed to fetch full record:", error);
             alert("Could not load details. Please try again.");
+            $('#verificationModal').modal('hide'); // Hide modal if fetch fails
         }
     });
-    // Populate data inside the modal form
-    
-
-    // Show the modal
-    $('#verificationModal').modal('show');
 });
 
 $('#FileSendTable_NoItemCode').on('click', '.btn-verify', function () {

@@ -96,27 +96,92 @@ $(document).ready(function() {
 $(document).ready(function() {
 
     // 1. Event listener to open modal when clicking status badge
-$(document).on('click', '.add-item-code', function() {
-var rfaRef = $(this).data('rfa-reference');
+// $(document).on('click', '.add-item-code', function() {
+// var rfaRef = $(this).data('rfa-reference');
     
-    // Set values in the modal form
-    $('#rfa_reference').val(rfaRef);
-    var itemCode = $(this).data('rfa-reference');
-    console.log(itemCode);
-    // 1. Set hidden item code input
-    // $('#modalItemCode').val(itemCode);
+//     // Set values in the modal form
+//     $('#rfa_reference').val(rfaRef);
+//     var itemCode = $(this).data('rfa-reference');
+//     console.log(itemCode);
+//     // 1. Set hidden item code input
+//     // $('#modalItemCode').val(itemCode);
 
-    // 2. Show the modal
-    $('#addItemCodeModal').modal('show');
+//     // 2. Show the modal
+//     $('#addItemCodeModal').modal('show');
 
-});
+// });
 
   
        
   
 
-    // 2. AJAX Submission to Laravel Controller
-   $('#addItemCodeForm').on('submit', function(e) {
+//     // 2. AJAX Submission to Laravel Controller
+//    $('#addItemCodeForm').on('submit', function(e) {
+//     e.preventDefault();
+
+//     var $form = $(this);
+//     var $submitBtn = $('#btnSaveItemCode');
+//     var formData = $form.serialize();
+
+//     $.ajax({
+//         url: "{{ route('aoCreateItemCode') }}",
+//         type: "POST",
+//         data: formData,
+//         headers: {
+//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//         },
+//         beforeSend: function() {
+//             $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Saving...');
+//         },
+//         success: function(response) {
+//             $submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Changes');
+            
+//             // Hide modal and reset form values
+//             $('#addItemCodeModal').modal('hide');
+//             $form[0].reset();
+
+//             // Reload DataTables without resetting pagination
+//             if ($.fn.DataTable.isDataTable('#yourTableId')) {
+//                 $('#yourTableId').DataTable().ajax.reload(null, false);
+//             }
+
+//             // Notification
+//             if (typeof toastr !== 'undefined') {
+//                 toastr.success(response.message || 'Item Code added successfully!');
+//             }
+//         },
+//         error: function(xhr) {
+//             $submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Changes');
+//             var errorMsg = xhr.responseJSON?.message || 'An error occurred while saving item code.';
+            
+//             if (typeof toastr !== 'undefined') {
+//                 toastr.error(errorMsg);
+//             } else {
+//                 alert(errorMsg);
+//             }
+//         }
+//     });
+// });
+
+// 1. Open Modal and Set RFA Reference
+$(document).on('click', '.add-item-code', function() {
+    var rfaRef = $(this).data('rfa-reference');
+    
+    // Clear form and set the RFA reference value
+    $('#addItemCodeForm')[0].reset();
+    $('#addItemCodeForm select').val(null).trigger('change');
+    
+    $('#rfa_reference').val(rfaRef);
+    
+    console.log("RFA Reference:", rfaRef);
+
+    // Show the modal
+    $('#addItemCodeModal').modal('show');
+});
+
+
+// 2. AJAX Submission to Laravel Controller
+$('#addItemCodeForm').on('submit', function(e) {
     e.preventDefault();
 
     var $form = $(this);
@@ -136,29 +201,35 @@ var rfaRef = $(this).data('rfa-reference');
         success: function(response) {
             $submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Changes');
             
-            // Hide modal and reset form values
+            // Hide modal and reset form values & Select2
             $('#addItemCodeModal').modal('hide');
             $form[0].reset();
+            $form.find('select').val(null).trigger('change');
 
-            // Reload DataTables without resetting pagination
-            if ($.fn.DataTable.isDataTable('#yourTableId')) {
-                $('#yourTableId').DataTable().ajax.reload(null, false);
+            // Reload DataTables without resetting pagination (using your table ID)
+            if ($.fn.DataTable.isDataTable('#FileSendTable')) {
+                $('#FileSendTable').DataTable().ajax.reload(null, false);
             }
 
-            // Notification
-            if (typeof toastr !== 'undefined') {
-                toastr.success(response.message || 'Item Code added successfully!');
-            }
+            // SweetAlert Success Notification
+            Swal.fire({
+                title: 'Success!',
+                text: response.message || 'Item Code added successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
         },
         error: function(xhr) {
             $submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save Changes');
             var errorMsg = xhr.responseJSON?.message || 'An error occurred while saving item code.';
             
-            if (typeof toastr !== 'undefined') {
-                toastr.error(errorMsg);
-            } else {
-                alert(errorMsg);
-            }
+            // SweetAlert Error Notification
+            Swal.fire({
+                title: 'Error!',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         }
     });
 });

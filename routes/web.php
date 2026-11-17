@@ -79,6 +79,9 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
         
         
         // save supplied verify
+
+        //update supplied status
+        Route::post('/gd_update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('gd_update-supplied-status'); //update file status if opened
        
     });
 
@@ -86,11 +89,11 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
      Route::middleware('can:is-traffic')->group(function () {
         Route::get('/traffic_officer',[TrafficController::class, 'traffic_officer'])->name('traffic_officer.all');
           Route::get('/suppliedVerified/{id}', [FileVerificationController::class, 'showSuppliedFileVerified'])->name('suppliedVerified.show');
-        Route::get('/suppliedVerifiedNoItemCode/{id}', [FileVerificationController::class, 'showSuppliedFileVerified_NoItemCode'])->name('suppliedVerifiedNoItemCode.show');
+        Route::get('/traffic_suppliedVerifiedNoItemCode/{id}', [FileVerificationController::class, 'showSuppliedFileVerified_NoItemCode'])->name('suppliedVerifiedNoItemCode.show');
     Route::get('/getArtworkFileDetail/{item_id}',[\App\Http\Controllers\ArtworkController::class,'getArtworkFileDetail'])->name('getArtworkFileDetail');
 
           Route::get('/trafficFileRecievedLink',[\App\Http\Controllers\TrafficController::class,'trafficFileRecievedLink'])->name('trafficFileRecievedLink');
-    Route::post('/update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('update-supplied-status'); //update file status if opened
+    Route::post('/traffic_update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('update-supplied-status'); //update file status if opened
     });
     
       Route::middleware('can:password-change')->group(function () {

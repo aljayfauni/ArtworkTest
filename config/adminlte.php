@@ -381,7 +381,7 @@ return [
             'can' => 'is-artist',
         ],
    [
-        'header' => 'TRAFFIC OFFICER',
+        'header' => 'TRAFFIC CONTROLLER',
         'can'    => 'is-traffic', // Optional: hides the title if the user doesn't have permission
     ],
         

@@ -51,7 +51,7 @@ class FileVerification extends Model
 
                 if ($artwork) {
                     $oldStatus = $artwork->status;
-                    $newStatus = 'For AO Approval';
+                    $newStatus = 'GD Assess';
 
                     // Update parent tracking record
                     $artwork->status = $newStatus;

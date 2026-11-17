@@ -338,10 +338,10 @@
         <div class="container-fluid">
            <div class="alert role-highlight-banner border-secondary shadow-sm bg-white" style="border-left:5px solid;" >
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-solid fa-traffic-light fa-2x text-secondary mr-3"></i>
-                                <i class="fas fa-solid fa-user-tie fa-2x text-secondary mr-3"></i>
+                                {{-- <i class="fas fa-solid fa-traffic-light fa-2x text-secondary mr-3"></i> --}}
+                                <i class="fas fa-solid fa-user-gear fa-2x text-secondary mr-3"></i>
                                 <div>
-                                    <h5 class="mb-0 font-weight-bold text-dark">Traffic Officer</h5>
+                                    <h5 class="mb-0 font-weight-bold text-dark">Traffic Controller</h5>
                                     <p class="mb-0 text-muted">Recieves file links from AO, and Check the requierments.</p>
                                 </div>
                             </div>
@@ -372,6 +372,7 @@
                             <th>Status</th>
                               <th>View</th>
                             <th>Action</th>
+                            <th>Check ArtWork</th>
                            
                             <!--<th>Actions</th>-->
                         </tr>
@@ -568,6 +569,39 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
 
             
             
+        },
+              {
+            data: null,
+            orderable: false,
+            searchable: false,
+
+            render: function(data, type, row) {
+                // If an artist is assigned, show their name inside a badge/text
+         
+                if(row.is_verified ===true || row.is_verified ==1){
+                    return `
+                       
+
+                        <a href="${"{{ route('artwork', ':id') }}".replace(':id', row.item_code)}" 
+       class="btn btn-xs btn-outline-info " 
+       data-id="${row.item_code}" 
+       target="_blank">
+        <i class="fas fa-eye mr-1"></i> Check Artwork
+    </a>
+
+<a href="${"{{ route('timeline', ':id') }}".replace(':id', row.item_code)}" 
+       class="btn btn-xs btn-outline-info " 
+       data-id="${row.item_code}" 
+       target="_blank">
+        <i class="fas fa-line mr-1"></i> View TimeLine
+    </a>
+                        `;
+                }
+                return '<span class="text-muted">-</span>';    
+
+            // If not assigned, render the "Assign To Artist" modal trigger button
+            
+            }
         },
 
         

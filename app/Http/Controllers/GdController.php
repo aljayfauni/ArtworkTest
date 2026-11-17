@@ -6,6 +6,7 @@ use App\Models\AoFileLink; // Your actual database model
 use App\Models\AoModel;
 use App\Models\ArtworkLog;
 use App\Models\CommercialArtist;
+use App\Models\FileVerification;
 use App\Models\User;
 use App\Notifications\ArtWorkNotification;
 use Exception;
@@ -107,6 +108,7 @@ class GdController extends Controller
             $fileRecieved = getFileReceivedLinkById() 
                 ->orderBy('created_at', 'desc')
                 ->get();//helper function
+                
 
 
         // Pluck item_codes from AoModel collection
@@ -312,40 +314,6 @@ class GdController extends Controller
 
        
     }
-
-    // public function store(Request $request)
-    // {
-    //     dd($request);
-    //     $validated = $request->validate([
-    //         'employee_email' => 'required|email',
-    //         'link'           => 'required|url'
-    //     ]);
-
-   
-    //     // Save directly into your database mapping inputs to database columns
-    //     AoModel::create([
-    //         'from_email' => Auth::user()->email,
-    //         'ao_name'    => Auth::user()->first_name . ' ' . Auth::user()->last_name,
-    //         'ao_user_id' => Auth::id(), // Shorthand for Auth::user()->id
-    //         'to_email'   => $validated['employee_email'],
-    //         'file_link'  => $validated['link'],
-    //     ]);
-
-    //     // 2. Send email directly using an inline layout closure
-    //     $sharedLink = $validated['link'];
-        
-    //     Mail::html("
-    //         <p>Hello,</p>
-    //         <p>An administrator has shared a link with you:</p>
-    //         <p><a href='{$sharedLink}' target='_blank'>{$sharedLink}</a></p>
-    //         <p>Thank you!</p>
-    //     ", function ($message) use ($validated) {
-    //         $message->to($validated['employee_email'])
-    //                 ->subject('A New Link Has Been Shared With You');
-    //     });
-
-    //     return redirect()->back()->with('success', 'Link successfully recorded and emailed to the employee!');
-    // }
 
     public function updateFileStatus(Request $request)
 {
@@ -606,62 +574,130 @@ class GdController extends Controller
 //     ]);
 // }
 
+// public function assignToArtist(Request $request)
+// {
+//     $request->validate([
+//         'item_code'       => 'required',
+//         'assigned_artist' => 'required',
+//     ]);
+
+//     // Check if the item code already exists
+//     $exists = CommercialArtist::where('item_code', $request->item_code)->exists();
+
+//     if ($exists) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Item code already exists!'
+//         ], 422);
+//     }
+
+//     // Save if it does not exist
+//     $item = new CommercialArtist();
+//     $item->item_code  = $request->item_code;
+//     $item->user_id    = $request->assigned_artist;
+//     // $item->ref_number = $request->ref_number ?? null; // Added fallback to avoid undefined field errors
+//     $item->save();
+
+//     // Send notification to artist
+//     $recipientUser = \App\Models\User::where('emp_id', $request->assigned_artist)->first();
+
+//     if ($recipientUser) {
+//         $recipientUser->notify(new ArtWorkNotification($item, 'gd_to_artist'));
+//     }
+
+//     // 2. Find the corresponding artwork asset
+//     $artwork = AoModel::where('item_code', $request->item_code)->first();
+//     $file_verification =  FileVerification::where('item_code', $request->item_code)->first();
+//     $file_verification->status = "Assigned To Artist";
+//     $file_verification->save();
+//     if ($artwork) {
+  
+//     // status 
+//     $artwork->status = "Assigned To Artists";
+//     $artwork->save();
+//         // 3. Manually push a history entry to the logging pipeline
+//         // 💡 FIX: Changed $artist to $item to match the model instance variable declared above
+//         $artwork->activityLogs()->create([
+//             'user_id'     => auth()->id(),
+//             'log_type'    => 'history',
+//             'event'       => 'artist_assigned',
+//             'description' => (auth()->user()?->name ?? 'Supervisor') . " assigned artist [" . ($recipientUser->name ?? $request->assigned_artist) . "] to Item Code [{$request->item_code}].",
+//             'properties'  => [
+//                 // 'ref_number'     => $item->ref_number,
+//                 'artist_user_id' => $item->user_id,
+//                 'artist_name'    => $recipientUser->name ?? 'Unknown Artist'
+//             ]
+//         ]);
+//     }
+   
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Item Assigned To Artist!'
+//     ]);
+// }
+
 public function assignToArtist(Request $request)
 {
-    $request->validate([
-        'item_code'       => 'required',
+    $validated = $request->validate([
+        'item_code'       => 'required|string',
         'assigned_artist' => 'required',
     ]);
 
     // Check if the item code already exists
-    $exists = CommercialArtist::where('item_code', $request->item_code)->exists();
-
-    if ($exists) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Item code already exists!'
-        ], 422);
+    if (CommercialArtist::where('item_code', $validated['item_code'])->exists()) {
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Item code already exists!');
     }
 
-    // Save if it does not exist
-    $item = new CommercialArtist();
-    $item->item_code  = $request->item_code;
-    $item->user_id    = $request->assigned_artist;
-    // $item->ref_number = $request->ref_number ?? null; // Added fallback to avoid undefined field errors
-    $item->save();
+    DB::transaction(function () use ($validated) {
+        // 1. Create assignment record
+        $item = new CommercialArtist();
+        $item->item_code = $validated['item_code'];
+        $item->user_id   = $validated['assigned_artist'];
+        $item->save();
 
-    // Send notification to artist
-    $recipientUser = \App\Models\User::where('emp_id', $request->assigned_artist)->first();
+        // 2. Update FileVerification safely
+        $fileVerification = FileVerification::where('item_code', $validated['item_code'])->first();
+        if ($fileVerification) {
+            $fileVerification->status = 'Assigned To Artist';
+            $fileVerification->save();
+        }
 
-    if ($recipientUser) {
-        $recipientUser->notify(new ArtWorkNotification($item, 'gd_to_artist'));
-    }
+        // 3. Update Artwork & log activity
+        $artwork = AoModel::where('item_code', $validated['item_code'])->first();
+        $recipientUser = User::where('emp_id', $validated['assigned_artist'])->first();
 
-    // 2. Find the corresponding artwork asset
-    $artwork = AoModel::where('item_code', $request->item_code)->first();
+        if ($artwork) {
+            $artwork->status = 'Assigned To Artist';
+            $artwork->save();
 
-    if ($artwork) {
-        // 3. Manually push a history entry to the logging pipeline
-        // 💡 FIX: Changed $artist to $item to match the model instance variable declared above
-        $artwork->activityLogs()->create([
-            'user_id'     => auth()->id(),
-            'log_type'    => 'history',
-            'event'       => 'artist_assigned',
-            'description' => (auth()->user()?->name ?? 'Supervisor') . " assigned artist [" . ($recipientUser->name ?? $request->assigned_artist) . "] to Item Code [{$request->item_code}].",
-            'properties'  => [
-                // 'ref_number'     => $item->ref_number,
-                'artist_user_id' => $item->user_id,
-                'artist_name'    => $recipientUser->name ?? 'Unknown Artist'
-            ]
-        ]);
-    }
+            $assignerName = auth()->user()?->name ?? 'Supervisor';
+            $artistName   = $recipientUser->name ?? $validated['assigned_artist'];
+
+            $artwork->activityLogs()->create([
+                'user_id'     => auth()->id(),
+                'log_type'    => 'history',
+                'event'       => 'artist_assigned',
+                'description' => "{$assignerName} assigned artist [{$artistName}] to Item Code [{$validated['item_code']}].",
+                'properties'  => [
+                    'artist_user_id' => $item->user_id,
+                    'artist_name'    => $recipientUser->name ?? 'Unknown Artist',
+                ]
+            ]);
+        }
+
+        // 4. Send notification after database writes succeed
+        if ($recipientUser) {
+            $recipientUser->notify(new ArtWorkNotification($item, 'gd_to_artist'));
+        }
+
+         return redirect()->route('gd_supervisor')->with('success', 'Item Assigned To Artist!');
+    });
+
    
-    return response()->json([
-        'success' => true,
-        'message' => 'Item Assigned To Artist!'
-    ]);
-}
 
+}
 
 public function gdArtist(){
     

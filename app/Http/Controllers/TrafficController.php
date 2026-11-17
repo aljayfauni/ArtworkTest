@@ -6,6 +6,7 @@ use App\Models\AoFileLink; // Your actual database model
 use App\Models\AoModel;
 use App\Models\ArtworkLog;
 use App\Models\CommercialArtist;
+use App\Models\FileVerification;
 use App\Models\User;
 use App\Notifications\ArtWorkNotification;
 use Exception;
@@ -99,18 +100,32 @@ class TrafficController extends Controller
 
     public function trafficFileRecievedLink() // recieve by gd supervisor
     {
+  
         try{
             // $fileRecieved = AoModel::where('to_email', Auth::user()->email)
             //     ->orderBy('created_at', 'desc')
             //     ->get();
 
-            $fileRecieved = getFileReceivedLinkById() 
+                 $fileRecieved = getFileReceivedLinkById() 
+                ->orWhere('assigned_to_role_id','!=',3)
+                // ->orWhere('assigned_to_role_id',1)
+                // ->whereIn('status',['Verified','GD Assess','GD to Assign Artist'])
                 ->orderBy('created_at', 'desc')
                 ->get();//helper function
 
-
         // Pluck item_codes from AoModel collection
         $itemCodes = $fileRecieved->pluck('item_code')->filter()->toArray();
+
+            $forApprovalSuppliedVerified = FileVerification::whereIn('item_code', $itemCodes)
+        ->where('status','GD Assess')
+        ->pluck('item_code')
+        ->toArray();
+
+        // Find which item_codes exist in the FileVerification table in 1 query
+        $verifiedItemCodes = FileVerification::whereIn('item_code', $itemCodes)
+            ->whereIn('status',['GD Assess','Assigned To Artist','GD to Assign Artist'])
+            ->pluck('item_code')
+            ->toArray();
 
         // Find which item_codes exist in the FileVerification table in 1 query
        
@@ -125,7 +140,7 @@ class TrafficController extends Controller
 
       
             ->addColumn('ao_name',function($data){
-               
+                // dd($data->rfa_reference);
                  return strtoupper($data->ao_name);
             })
             // ->addColumn('ao_user_id',function($data){
@@ -144,7 +159,16 @@ class TrafficController extends Controller
             ->addColumn('status', function($data){
             return $data->status;
 
-            })      
+            })  
+            // Add custom column checking if item_code exists in FileVerification
+            ->addColumn('is_verified', function($data) use ($verifiedItemCodes) {
+                return in_array($data->item_code, $verifiedItemCodes);
+            })
+                       ->addColumn('rfa_reference', function($data){
+            return $data->rfa_reference;
+
+            }) 
+        
              ->addColumn('created_at',function($data){
                 return strtoupper($data->created_at);
             })

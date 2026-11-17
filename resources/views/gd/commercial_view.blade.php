@@ -468,7 +468,7 @@
     <div class="card card-dark card-outline shadow-sm">
         <div class="card-header bg-white">
             <h3 class="card-title font-weight-bold text-dark">
-                <i class="fas fa-users text-primary mr-2"></i>User Time Consumption (Task ID: <span id="sharedTaskIdLabel" class="text-primary font-mono">{{ $artwork->item_code }}</span>)
+                <i class="fas fa-users text-primary mr-2"></i>User Time Consumption (Item Code: <span id="sharedTaskIdLabel" class="text-primary font-mono">{{ $artwork->item_code }}</span>)
             </h3>
         </div>
         <div class="card-body p-0 table-responsive">
