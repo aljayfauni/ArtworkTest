@@ -61,6 +61,7 @@ class AoModel extends Model
     'folded_h',
     'folded_w',
     'folded_l',
+    'action_taken',
 ];
 
     /**

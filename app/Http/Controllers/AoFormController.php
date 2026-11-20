@@ -617,7 +617,7 @@ public function aoAddedItemCode(Request $request)
 
     $rfaReference = trim($request->input('rfa_reference'));
     $itemCode = trim($request->input('item_code'));
-
+    $createdAoRecords = [];
     $aoFileLink = AoModel::where('rfa_reference', $rfaReference)->first();
     $fileVerification = FileVerification::where('rfa_number', $rfaReference)->first();
     $artworkFileLinkTemp = ArtWorkFileLinkTemp::where('rfa_reference', $rfaReference)->first();
@@ -639,6 +639,16 @@ public function aoAddedItemCode(Request $request)
         $artworkFileLinkTemp->item_code = $itemCode;
         $artworkFileLinkTemp->status = 'Verified';
         $artworkFileLinkTemp->save();
+    }
+
+        // 2. Send notifications outside transaction only for the primary AoModel records
+    $recipientUser = \App\Models\User::where('role_id', 3)->first();
+    $createdAoRecords [] = $aoFileLink;
+   
+    if ($recipientUser) {
+        foreach ($createdAoRecords as $record) {
+            $recipientUser->notify(new ArtWorkNotification($record, 'ao_to_traffic'));
+        }
     }
 
     return redirect()->back()->with('success', 'Item Code Updated & saved successfully!');

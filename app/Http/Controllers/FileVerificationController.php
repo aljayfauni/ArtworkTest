@@ -370,23 +370,28 @@ public function showSuppliedFileVerified($id)
     //     }
     // }
 
-    public function showSuppliedFileVerified_NoItemCode($id)
+public function showSuppliedFileVerified_NoItemCode($id)
 {
     try {
-        // Use where() on the rfa_reference column instead of assuming primary key id
+        // Decode URL-encoded characters (in case rfa_reference had slashes or spaces)
+        $rfaReference = urldecode($id);
+
+        // Use first() instead of firstOrFail() so it works on both Query Builder & Eloquent
         $data = getFileReceivedLinkById_NoItemCode()
-            ->where('rfa_reference', $id)
-            ->firstOrFail();
+            ->where('rfa_reference', $rfaReference)
+            ->first();
+    
+        if (!$data) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Record not found for RFA: ' . $rfaReference
+            ], 404);
+        }
 
         return response()->json([
             'status' => 'success',
             'data'   => $data
         ]);
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'Record not found or access denied.'
-        ], 404);
     } catch (\Exception $e) {
         return response()->json([
             'status'  => 'error',

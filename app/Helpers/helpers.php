@@ -33,17 +33,25 @@ if (!function_exists('getFileReceivedLinkById')) {
         return AoModel::where('assigned_to_role_id', Auth::user()->role_id)->whereNotNull('item_code');
     }
 
+    // function getFileReceivedLinkById_NoItemCode()
+    // {
+    //     // if (!Auth::check()) {
+    //     //     return collect();
+    //     // }
+
+    //     // return ArtWorkFileLinkTemp::where('assigned_to_role_id', Auth::user()->role_id)
+    //     // ->whereNull('item_code')->orWhere('item_code','');
+
+    //      return ArtWorkFileLinkTemp::
+    //     whereNull('item_code')->orWhere('item_code','');
+        
+    // }
+
     function getFileReceivedLinkById_NoItemCode()
     {
-        // if (!Auth::check()) {
-        //     return collect();
-        // }
-
-        // return ArtWorkFileLinkTemp::where('assigned_to_role_id', Auth::user()->role_id)
-        // ->whereNull('item_code')->orWhere('item_code','');
-
-         return ArtWorkFileLinkTemp::
-        whereNull('item_code')->orWhere('item_code','');
-        
+        return ArtWorkFileLinkTemp::where(function ($query) {
+            $query->whereNull('item_code')
+                ->orWhere('item_code', '');
+        });
     }
 }

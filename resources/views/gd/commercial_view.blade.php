@@ -7,1467 +7,982 @@
 @section('plugins.DatatablesPlugins', true)
 
 @section('content_header')
-    {{-- <h1><i class="fas fa-solid fa-chart-line"></i> Dashboard</h1> --}}
-        <style>
-         .main-sidebar { display: none !important; }
-          .content-wrapper, .main-header { margin-left: 0 !important; } */
-        </style>
+    <style>
+        /* Layout Overrides */
+        .main-sidebar { display: none !important; }
+        .content-wrapper, .main-header { margin-left: 0 !important; }
+        .content-wrapper {
+            background-color: #f8faff !important;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 45%),
+                radial-gradient(at 100% 10%, rgba(236, 72, 153, 0.06) 0px, transparent 45%),
+                radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.06) 0px, transparent 50%);
+        }
+
+        /* Modern Colorful Card System */
+        .modern-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 10px 28px -6px rgba(15, 23, 42, 0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modern-card:hover {
+            box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.1);
+        }
+
+        /* Top Gradient Accent Strips */
+        .card-accent-bar {
+            height: 5px;
+            width: 100%;
+        }
+        .accent-indigo { background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899); }
+        .accent-emerald { background: linear-gradient(90deg, #10b981, #06b6d4); }
+        .accent-cyan { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+        .accent-purple { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+
+        .modern-card-header {
+            background: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Vibrant Hero Card Header for Main Workbench */
+        .gflow-hero-header {
+            background: linear-gradient(120deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
+            padding: 1.35rem 1.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            color: #ffffff;
+        }
+        .gflow-hero-header .modern-card-title {
+            color: #ffffff;
+            font-size: 1.2rem;
+        }
+        .gflow-hero-header #taskDescHeader {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+
+        .modern-card-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-icon-pill {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .icon-grad-emerald { background: linear-gradient(135deg, #10b981, #06b6d4); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25); }
+        .icon-grad-blue { background: linear-gradient(135deg, #3b82f6, #06b6d4); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25); }
+        .icon-grad-purple { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25); }
+
+        .modern-card-body {
+            padding: 1.5rem;
+        }
+
+        /* Badges & Status Pills */
+        .code-pill {
+            background: linear-gradient(135deg, #eef2ff, #fae8ff);
+            color: #4f46e5;
+            border: 1px solid #e0e7ff;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.42rem 0.9rem;
+            border-radius: 999px;
+            letter-spacing: 0.03em;
+        }
+        .hero-code-pill {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(8px);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.45rem 1rem;
+            border-radius: 999px;
+            letter-spacing: 0.03em;
+        }
+        .status-pill {
+            padding: 0.5rem 1.1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+        .pulse-live {
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.65); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        /* Colorful Hero Timer Box */
+        .timer-hero-box {
+            background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf2f8 100%);
+            border: 1px solid #e0e7ff;
+            border-radius: 16px;
+            padding: 1.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+        }
+        @media (min-width: 768px) {
+            .timer-hero-box {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        .timer-icon-ring {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+            flex-shrink: 0;
+        }
+        .timer-display-modern {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1e1b4b, #4f46e5, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        /* Vibrant Gradient Buttons */
+        .btn-modern {
+            border-radius: 11px;
+            font-weight: 700;
+            padding: 0.65rem 1.35rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+        }
+        .btn-modern:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+        }
+        .btn-modern:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .btn-grad-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #ffffff !important; }
+        .btn-grad-success { background: linear-gradient(135deg, #10b981, #059669); color: #ffffff !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
+        .btn-grad-warning { background: linear-gradient(135deg, #f59e0b, #ea580c); color: #ffffff !important; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
+        .btn-grad-info    { background: linear-gradient(135deg, #06b6d4, #2563eb); color: #ffffff !important; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3); }
+        .btn-grad-danger  { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #ffffff !important; box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3); }
+
+        /* Artist Action Form Panel */
+        .artist-action-panel {
+            background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+            border: 1px solid #e0e7ff;
+            border-left: 5px solid #6366f1;
+            border-radius: 14px;
+            padding: 1.35rem;
+            margin-bottom: 1.35rem;
+        }
+        .artist-action-panel label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+        }
+        .artist-action-panel .form-control {
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            padding: 0.52rem 0.85rem;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .artist-action-panel .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .artist-action-panel .form-control[readonly] {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        /* Modern Table */
+        .modern-table thead th {
+            background: linear-gradient(90deg, #f8fafc, #f1f5f9);
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-top: none;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.95rem 1.25rem;
+        }
+        .modern-table tbody td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+        .modern-table tbody tr:hover {
+            background-color: #f8faff;
+        }
+        .modern-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* File Link Item */
+        .asset-item-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #f0f9ff, #eff6ff);
+            border: 1px solid #bae6fd;
+            border-radius: 14px;
+        }
+        .asset-file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Event Count Pill */
+        .event-count-pill {
+            background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+            color: #7e22ce;
+            border: 1px solid #e9d5ff;
+            border-radius: 999px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        /* Custom Scrollbar for Activity Logs */
+        .activity-scroll-area {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #c7d2fe transparent;
+        }
+        .activity-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .activity-scroll-area::-webkit-scrollbar-thumb {
+            background-color: #c7d2fe;
+            border-radius: 9999px;
+        }
+    </style>
+
     @can('is-admin')
     <style>
-         .main-sidebar { display: none !important; }
-        /* .main-sidebar {  }
-        .content-wrapper, .main-header { margin-left: 0 !important; } */
-    </style>
-    <!-- Custom CSS for Horizontal Scrolling Timeline Layout -->
-    {{-- <style>
-    .horizontal-timeline-wrapper {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 20px 10px;
-        display: flex;
-        align-items: flex-start;
-        gap: 25px;
-        scroll-behavior: smooth;
-    }
-    .timeline-node {
-        min-width: 320px;
-        max-width: 320px;
-        display: inline-block;
-        vertical-align: top;
-        white-space: normal; /* Allows text to wrap normally inside the card */
-        position: relative;
-    }
-    /* Horizontal connector line linking the cards */
-    .timeline-node:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 25px;
-        left: 100%;
-        width: 25px;
-        height: 4px;
-        background-color: #dee2e6;
-        z-index: 1;
-    }
-    .node-icon-badge {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px auto;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        color: #fff;
-        font-size: 1.2rem;
-    }
-</style> --}}
-
-<style>
-    .horizontal-timeline-wrapper {
-        background: #f8fafc;
-        padding: 24px;
-        border-radius: 16px;
-    }
-
-    .item-timeline-lane + .item-timeline-lane {
-        border-top: 1px solid #e2e8f0;
-        padding-top: 24px;
-        margin-top: 12px;
-    }
-
-    .item-lane-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-
-    .item-title-area {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .item-title-icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #e0e7ff;
-        color: #4338ca;
-        font-size: 19px;
-    }
-
-    .item-code-badge {
-        background: #e2e8f0;
-        color: #475569;
-        padding: 7px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .horizontal-scroll-lane {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: stretch;
-        gap: 24px;
-        overflow-x: auto;
-        padding: 18px 5px 24px;
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
-    }
-
-    .timeline-node {
-        width: 275px;
-        min-width: 275px;
-        flex: 0 0 275px;
-        position: relative;
-        padding-top: 17px;
-    }
-
-    .timeline-node::before {
-        content: "";
-        position: absolute;
-        top: 7px;
-        left: 0;
-        right: -24px;
-        height: 2px;
-        background: #cbd5e1;
-    }
-
-    .timeline-node:last-child::before {
-        right: 50%;
-    }
-
-    .node-icon-badge {
-        position: absolute;
-        z-index: 2;
-        top: 0;
-        left: 16px;
-        width: 16px;
-        height: 16px;
-        border: 4px solid #f8fafc;
-        box-sizing: content-box;
-        border-radius: 50%;
-    }
-
-    .node-icon-badge.bg-success {
-        background: #16a34a !important;
-    }
-
-    .node-icon-badge.bg-danger {
-        background: #dc2626 !important;
-    }
-
-    .timeline-modern-card {
-        height: 100%;
-        overflow: hidden;
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 3px 12px rgba(15, 23, 42, .05);
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-    .timeline-modern-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, .09);
-    }
-
-    .timeline-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        padding: 15px;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .timeline-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 9px;
-        border-radius: 7px;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: .4px;
-    }
-
-    .timeline-status.started {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .timeline-status.stopped {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .timeline-clock {
-        color: #475569;
-        font-size: 12px;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .timeline-card-body {
-        padding: 15px;
-    }
-
-    .timeline-user-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 11px;
-        margin-bottom: 14px;
-        border-radius: 10px;
-        background: #f8fafc;
-        border: 1px solid #f1f5f9;
-    }
-
-    .timeline-user-avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: #e2e8f0;
-        color: #475569;
-    }
-
-    .timeline-user-name {
-        color: #1e293b;
-        font-size: 13px;
-        font-weight: 700;
-        overflow-wrap: anywhere;
-    }
-
-    .timeline-user-id {
-        display: block;
-        margin-top: 3px;
-        color: #94a3b8;
-        font-size: 11px;
-    }
-
-    .timeline-date {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .timeline-date strong {
-        color: #334155;
-    }
-
-    .timeline-duration {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 14px;
-        padding: 10px;
-        border-radius: 9px;
-        background: #eef2ff;
-        color: #4338ca;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .timeline-empty {
-        text-align: center;
-        padding: 50px 15px;
-        color: #94a3b8;
-    }
-
-    .timeline-empty i {
-        display: block;
-        font-size: 34px;
-        margin-bottom: 12px;
-    }
-
-    @media (max-width: 576px) {
         .horizontal-timeline-wrapper {
-            padding: 15px;
+            background: linear-gradient(135deg, #f8faff, #fdf4ff);
+            border: 1px solid #e0e7ff;
+            padding: 24px;
+            border-radius: 18px;
         }
-
+        .item-timeline-lane + .item-timeline-lane {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 24px;
+            margin-top: 12px;
+        }
+        .item-lane-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .item-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .item-title-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            color: #ffffff;
+            font-size: 19px;
+            box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
+        }
+        .item-code-badge {
+            background: linear-gradient(135deg, #eef2ff, #fae8ff);
+            color: #4f46e5;
+            border: 1px solid #c7d2fe;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .horizontal-scroll-lane {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            gap: 24px;
+            overflow-x: auto;
+            padding: 18px 5px 24px;
+            scrollbar-width: thin;
+            scrollbar-color: #c7d2fe transparent;
+        }
         .timeline-node {
-            width: 255px;
-            min-width: 255px;
-            flex-basis: 255px;
+            width: 275px;
+            min-width: 275px;
+            flex: 0 0 275px;
+            position: relative;
+            padding-top: 17px;
         }
-
-        .item-title-area h5 {
-            font-size: 16px;
+        .timeline-node::before {
+            content: "";
+            position: absolute;
+            top: 7px;
+            left: 0;
+            right: -24px;
+            height: 3px;
+            background: linear-gradient(90deg, #c7d2fe, #e9d5ff);
         }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
+        .timeline-node:last-child::before {
+            right: 50%;
+        }
+        .node-icon-badge {
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 16px;
+            width: 16px;
+            height: 16px;
+            border: 4px solid #ffffff;
+            box-sizing: content-box;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+        }
+        .node-icon-badge.bg-success { background: linear-gradient(135deg, #10b981, #059669) !important; }
+        .node-icon-badge.bg-danger { background: linear-gradient(135deg, #f43f5e, #e11d48) !important; }
         .timeline-modern-card {
-            transition: none;
+            height: 100%;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, .05);
+            transition: transform .2s ease, box-shadow .2s ease;
         }
-    }
-    .clock-widget{
-        float: right;
-    }
-</style>
-@endcan
-@stop
+        .timeline-modern-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, .1);
+        }
+        .timeline-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .timeline-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .4px;
+        }
+        .timeline-status.started { background: #d1fae5; color: #065f46; }
+        .timeline-status.stopped { background: #ffe4e6; color: #9f1239; }
+        .timeline-clock {
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .timeline-card-body { padding: 15px; }
+        .timeline-user-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8fafc, #eef2ff);
+            border: 1px solid #e0e7ff;
+        }
+        .timeline-user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #ffffff;
+        }
+        .timeline-user-name {
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+        .timeline-user-id {
+            display: block;
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 11px;
+        }
+        .timeline-date { color: #64748b; font-size: 12px; }
+        .timeline-date strong { color: #334155; }
+        .timeline-duration {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #eef2ff, #fae8ff);
+            color: #4f46e5;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .timeline-empty {
+            text-align: center;
+            padding: 50px 15px;
+            color: #94a3b8;
+        }
+        .timeline-empty i {
+            display: block;
+            font-size: 34px;
+            margin-bottom: 12px;
+            color: #818cf8;
+        }
+        @media (max-width: 576px) {
+            .horizontal-timeline-wrapper { padding: 15px; }
+            .timeline-node { width: 255px; min-width: 255px; flex-basis: 255px; }
+            .item-title-area h5 { font-size: 16px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .timeline-modern-card { transition: none; }
+        }
+        .clock-widget { float: right; }
+    </style>
+    @endcan
+@endsection
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <section class="content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center justify-content-between">
+<div class="container-fluid py-3">
+    <section class="content">
+        <div class="tab-content">
+            <!-- PANE 1: WORKBENCH & TIMER -->
+            <div class="tab-pane fade active show" id="tracker-pane">
 
-            {{-- Page Title --}}
-        
-
-        </div>
-    </div>
-</section>
-    </div>
-</div>
-<div class="row mr-4">
-    
-    
-
-    <div class="col-12">
-    
-        <div class="container-fluid">
-     <section class="content">
-            <div class="container-fluid">
-
-                <!-- TOP KPI OVERVIEW CARDS -->
-                {{-- <div class="row">
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-white border shadow-sm">
-                            <div class="inner">
-                                <h3 id="kpiTotalDuration" class="timer-display text-primary">04:18:22</h3>
-                                <p class="text-muted mb-0 font-weight-bold">Shared Task Consumed Time</p>
+                <!-- MAIN LIVE TIMER CARD CONTAINER -->
+                <div class="modern-card">
+                    <div class="gflow-hero-header">
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 14px;">
+                            <span id="ticketBadge" class="hero-code-pill">{{ $artwork->item_code }}</span>
+                            <div>
+                                <h3 id="taskTitleHeader" class="modern-card-title">Artwork Work Flow (GFLOW)</h3>
+                                <p id="taskDescHeader" class="mb-0 mt-1" style="font-size: 0.9rem;">
+                                    <i class="far fa-building mr-1"></i> {{ $artwork->client_name }}
+                                </p>
                             </div>
-                            <div class="icon"><i class="fas fa-stopwatch text-primary opacity-50"></i></div>
                         </div>
+
+                        <span id="taskStatusBadge" class="badge {{ $artwork->is_running ? 'badge-success pulse-live' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'badge-secondary' : 'badge-warning') }} status-pill">
+                            <i class="fas {{ $artwork->is_running ? 'fa-play-circle' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'fa-check-circle' : 'fa-pause-circle') }}"></i>
+                            {{ $artwork->is_running ? 'Running' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'Stopped' : 'Paused') }}
+                        </span>
                     </div>
 
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-white border shadow-sm">
-                            <div class="inner">
-                                <h3 id="kpiStatus" class="text-capitalize text-success font-weight-bold">In Progress</h3>
-                                <p class="text-muted mb-0 font-weight-bold">Current Task Status</p>
-                            </div>
-                            <div class="icon"><i class="fas fa-signal text-success opacity-50"></i></div>
-                        </div>
-                    </div>
+                    <div class="modern-card-body">
+                        @php
+                            $lastLog = $artwork->timeLogs->whereIn('action', ['start', 'resume'])->last();
+                            $startTimeIso = ($artwork->is_running && $lastLog) ? $lastLog->recorded_at->toIso8601String() : '';
+                            $lastActionTaken = optional($artwork->timeLogs->last())->action_taken ?? ($artwork->action_taken ?? '');
+                        @endphp
 
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-white border shadow-sm">
-                            <div class="inner">
-                                <h3 id="kpiContributors">3 Users</h3>
-                                <p class="text-muted mb-0 font-weight-bold">Active Team Contributors</p>
-                            </div>
-                            <div class="icon"><i class="fas fa-users text-warning opacity-50"></i></div>
-                        </div>
-                    </div>
+                        <!-- STEP 1: ARTIST ACTION / STATUS SELECTION (REQUIRED BEFORE TIMER) -->
+                        @can('is-artist')
+                        <div class="artist-action-panel">
+                            <form id="actionTaken" method="POST">
+                                @csrf
+                              
+                                {{-- Hidden inputs to preserve form submission values --}}
+                                <input type="hidden" id="modalItemCode" name="item_code" value="{{ $artwork->item_code }}">
+                                <input type="hidden" id="modalItemDescription" name="item_desc" value="{{ $artwork->description }}">
+                                <input type="hidden" id="modalClientName" name="client_name" value="{{ $artwork->client_name }}">
+                                <input type="hidden" id="modalRfaRef" name="rfa_ref" value="{{ $artwork->rfa_reference }}">
 
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-white border shadow-sm">
-                            <div class="inner">
-                                <h3 id="kpiTimelineSteps">5 Steps</h3>
-                                <p class="text-muted mb-0 font-weight-bold">Recorded Stage Checkpoints</p>
-                            </div>
-                            <div class="icon"><i class="fas fa-route text-info opacity-50"></i></div>
-                        </div>
-                    </div>
-                </div> --}}
+                                {{-- Modern Description Grid --}}
+                                <div class="row mb-3 pb-3 border-bottom" style="border-color: #e0e7ff !important;">
+                                    <div class="col-md-3 col-sm-6 mb-2 mb-md-0">
+                                        <span class="d-block text-uppercase font-weight-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.06em;">
+                                            <i class="fas fa-barcode text-indigo mr-1"></i> Item Code
+                                        </span>
+                                        <span class="d-inline-block mt-1 px-2 py-1 rounded font-weight-bold" style="background: #eef2ff; color: #4f46e5; font-family: monospace; font-size: 0.88rem;">
+                                            {{ $artwork->item_code ?? 'N/A' }}
+                                        </span>
+                                    </div>
 
-                <div class="tab-content">
-                    
-                    <!-- PANE 1: WORKBENCH & TIMER -->
-                    <div class="tab-pane fade active show" id="tracker-pane">
-                        
-<!-- MAIN LIVE TIMER CARD CONTAINER -->
-<div class="card card-primary card-outline shadow-sm">
-    <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
-        <div class="d-flex align-items-center">
-            <span id="ticketBadge" class="badge badge-primary font-mono p-2 mr-2">{{ $artwork->item_code }}</span>
-            <h3 id="taskTitleHeader" class="card-title font-weight-bold text-dark mb-0">Artwork Work Flow (GFLOW)</h3>
-        </div>
-        <span id="taskStatusBadge" class="badge {{ $artwork->is_running ? 'badge-success pulse-live' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'badge-secondary' : 'badge-warning') }} status-pill">
-            <i class="fas {{ $artwork->is_running ? 'fa-play-circle' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'fa-check-circle' : 'fa-pause-circle') }} mr-1"></i>
-            {{ $artwork->is_running ? 'Running' : ($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'finish' ? 'Stopped' : 'Paused') }}
-        </span>
-    </div>
+                                    <div class="col-md-3 col-sm-6 mb-2 mb-md-0">
+                                        <span class="d-block text-uppercase font-weight-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.06em;">
+                                            <i class="fas fa-file-alt text-primary mr-1"></i> Item Description
+                                        </span>
+                                        <p class="mb-0 mt-1 font-weight-bold text-dark" style="font-size: 0.92rem;">
+                                            {{ $artwork->description ?? 'N/A' }}
+                                        </p>
+                                    </div>
 
-    <div class="card-body">
-        <p id="taskDescHeader" class="text-muted mb-4">{{ $artwork->client_name }}</p>
+                                    <div class="col-md-3 col-sm-6 mb-2 mb-sm-0">
+                                        <span class="d-block text-uppercase font-weight-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.06em;">
+                                            <i class="fas fa-building text-info mr-1"></i> Client Name
+                                        </span>
+                                        <p class="mb-0 mt-1 font-weight-bold text-dark" style="font-size: 0.92rem;">
+                                            {{ $artwork->client_name ?? 'N/A' }}
+                                        </p>
+                                    </div>
 
-        @php
-            $lastLog = $artwork->timeLogs->whereIn('action', ['start', 'resume'])->last();
-            $startTimeIso = ($artwork->is_running && $lastLog) ? $lastLog->recorded_at->toIso8601String() : '';
-        @endphp
-
-        <div class="p-4 rounded border bg-light d-flex flex-column flex-md-row align-items-center justify-content-between shadow-sm"
-             id="live-counter"
-             data-start="{{ $startTimeIso }}"
-             data-accumulated="{{ $artwork->total_seconds }}"
-             data-running="{{ $artwork->is_running ? 'true' : 'false' }}"
-             data-action-state="{{ $artwork->timeLogs->last() ? $artwork->timeLogs->last()->action : '' }}">
-             
-            <input type="hidden" id="artwork-code" value="{{ $artwork->item_code }}">
-
-            <div class="d-flex align-items-center mb-3 mb-md-0">
-                <div class="p-3 bg-white border rounded-circle shadow-sm text-primary mr-3">
-                    <i class="fas fa-clock fa-2x"></i>
-                </div>
-                <div>
-                    <h6 class="text-uppercase font-weight-bold text-muted">Active Session Ticker (<span id="activeUserLabel" class="text-primary">{{ $artwork->artist_name ?? 'Unassigned' }}</span>)</h6>
-                    <div id="sessionTimerDisplay" class="timer-display h2 font-weight-bold text-dark mb-0 text-monospace">00:00:00</div>
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center">
-                
-                <div class="mr-2">
-                    @can('is-artist')
-                    <button id="btnStart" class="btn btn-success btn-lg font-weight-bold px-4 action-btn" data-action="start">
-                        <i class="fas fa-play mr-1"></i> Start
-                    </button>
-                    <button id="btnPause" class="btn btn-warning btn-lg font-weight-bold px-4 action-btn d-none" data-action="pause">
-                        <i class="fas fa-pause mr-1"></i> Pause
-                    </button>
-                    <button id="btnResume" class="btn btn-info btn-lg font-weight-bold px-4 action-btn d-none" data-action="resume">
-                        <i class="fas fa-redo mr-1"></i> Resume
-                    </button>
-                    @endcan
-                </div>
-
-                <div>
-                     @can('is-artist')
-                        <button id="btnFinish" class="btn btn-danger btn-lg font-weight-bold px-4 action-btn" data-action="finish">
-                            <i class="fas fa-check-circle mr-1"></i> Finish Task
-                        </button>
-                    @endcan
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-                <div class="row">
-                    <!-- MULTI-USER ACCUMULATED TIME TABLE -->
-               <div class="col-lg-7">
-    <div class="card card-dark card-outline shadow-sm">
-        <div class="card-header bg-white">
-            <h3 class="card-title font-weight-bold text-dark">
-                <i class="fas fa-users text-primary mr-2"></i>User Time Consumption (Item Code: <span id="sharedTaskIdLabel" class="text-primary font-mono">{{ $artwork->item_code }}</span>)
-            </h3>
-        </div>
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0 text-sm">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Assigned User</th>
-                        <th>Role</th>
-                        <th>Time Spent</th>
-                        <th>Duration Share</th>
-                    </tr>
-                </thead>
-                <!-- Targeted ID for the jQuery script -->
-                <tbody id="timeSpentDuration">
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-3">Loading breakdown records...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-                    <!-- TASK ASSETS & ATTACHMENTS -->
-                    <div class="col-lg-5">
-                        <div class="card card-secondary card-outline shadow-sm">
-                            <div class="card-header bg-white">
-                                <h3 class="card-title font-weight-bold text-dark">
-                                    <i class="fas fa-paperclip text-info mr-2"></i> Item &amp; File Link
-                                </h3>
-                            </div>
-                            <div class="card-body p-0">
-                                <ul class="list-group list-group-flush" id="taskAssetsList">
-                <li class="list-group-item d-flex align-items-center justify-content-between">
-                <div>
-                    <i class="far fa-file-alt text-primary mr-2"></i>
-                    <strong class="text-dark">{{ $artwork->file_info }}</strong>
-                    {{-- <small class="text-muted ml-2">(4.2 MB)</small> --}}
-                </div>
-                {{-- <button class="btn btn-xs btn-outline-primary" onclick="toastr.info('Downloading asset package...', 'Download')">
-                    <i class="fas fa-download mr-1"></i> Get Link
-                </button> --}}
-                <a href="{{ $artwork->file_link }}" class="btn btn-xs btn-outline-info file-link" data-id="{{ $artwork->item_code }}" target="_blank">
-                        <i class="fas fa-external-link-alt mr-1"></i> View Link
-                    </a>
-            </li>
-        
-          
-        </ul>
+                                    <div class="col-md-3 col-sm-6">
+                                        <span class="d-block text-uppercase font-weight-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.06em;">
+                                            <i class="fas fa-hashtag text-purple mr-1" style="color: #9333ea;"></i> RFA Reference
+                                        </span>
+                                        <p class="mb-0 mt-1 font-weight-bold text-dark" style="font-size: 0.92rem;">
+                                            {{ $artwork->rfa_reference ?? 'N/A' }}
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
+                                <h3 id="activeUserLabel" style="color: #4f46e5;">Action Taken</h3>
+                                <div class="row align-items-end mt-2">
+                                    <div class="col-md-6 mb-2 mb-md-0">
+                                        <label for="action_taken" style="color: #4f46e5;">
+                                            <i class="fas fa-tasks mr-1"></i> Step 1: Select Action / Status Before Timing <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-control select2" id="action_taken" name="action_taken" required>
+                                            <option value="" disabled {{ !$lastActionTaken ? 'selected' : '' }}>-- Choose Action Taken First --</option>
+                                            <option value="Re-touching" {{ $lastActionTaken === 'Re-touching' ? 'selected' : '' }}>Re-touching</option>
+                                            <option value="Revision" {{ $lastActionTaken === 'Revision' ? 'selected' : '' }}>Revision</option>
+                                            <option value="Redesign" {{ $lastActionTaken === 'Redesign' ? 'selected' : '' }}>Redesign</option>
+                                            <option value="For Profreading" {{ $lastActionTaken === 'For Profreading' ? 'selected' : '' }}>For Proofreading</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 d-flex justify-content-md-end" style="gap: 10px;">
+                                        <button type="button" class="btn btn-light border btn-modern" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-grad-primary btn-modern" id="btnSaveStatus">
+                                            <i class="fas fa-save mr-1"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @if(session('success'))
+                                    <div class="alert alert-success mt-3 mb-0 rounded-lg">
+                                        <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+                                    </div>
+                                @endif
+                            </form>
                         </div>
+                        @endcan
 
+                        <!-- STEP 2: LIVE COUNTER HERO BANNER -->
+                        <div class="timer-hero-box"
+                             id="live-counter"
+                             data-start="{{ $startTimeIso }}"
+                             data-accumulated="{{ $artwork->total_seconds }}"
+                             data-running="{{ $artwork->is_running ? 'true' : 'false' }}"
+                             data-action-state="{{ $artwork->timeLogs->last() ? $artwork->timeLogs->last()->action : '' }}">
+
+                            <input type="hidden" id="artwork-code" value="{{ $artwork->item_code }}">
+
+                            <!-- Left: Ticker Display -->
+                            <div class="d-flex align-items-center" style="gap: 18px;">
+                                <div class="timer-icon-ring">
+                                    <i class="fas fa-stopwatch fa-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="text-uppercase font-weight-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.06em;">
+                                        Active Session Ticker • <span id="activeUserLabel" style="color: #4f46e5;">{{ $artwork->artist_name ?? $artwork->ao_name ?? 'Unassigned' }}</span>
+                                    </div>
+                                    <div id="sessionTimerDisplay" class="timer-display timer-display-modern mt-1">00:00:00</div>
+                                    @can('is-artist')
+                                    <small id="currentActionIndicator" class="text-muted font-weight-bold d-block mt-1">
+                                        <i class="fas fa-info-circle text-warning mr-1"></i> Please select a status above to unlock timer actions
+                                    </small>
+                                    @endcan
+                                </div>
+                            </div>
+
+                            <!-- Right: Timer Controls -->
+                            @can('is-artist')
+                            <div class="d-flex flex-column align-items-md-end">
+                                <span class="text-uppercase font-weight-bold text-muted mb-2" style="font-size: 0.7rem; letter-spacing: 0.06em;">
+                                   
+                                </span>
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                                    <button id="btnStart" class="btn btn-grad-success btn-modern action-btn" data-action="start" disabled>
+                                        <i class="fas fa-play mr-1"></i> Start
+                                    </button>
+                                    <button id="btnPause" class="btn btn-grad-warning btn-modern action-btn d-none" data-action="pause" disabled>
+                                        <i class="fas fa-pause mr-1"></i> Pause
+                                    </button>
+                                    <button id="btnResume" class="btn btn-grad-info btn-modern action-btn d-none" data-action="resume" disabled>
+                                        <i class="fas fa-redo mr-1"></i> Resume
+                                    </button>
+                                    <button id="btnFinish" class="btn btn-grad-danger btn-modern action-btn" data-action="finish" disabled>
+                                        <i class="fas fa-check-circle mr-1"></i> Finish Task
+                                    </button>
+                                </div>
+                            </div>
+                            @endcan
+                        </div>
                     </div>
+                </div>
 
-                    <!-- PANE 2: DELIVERY-STYLE TIMELINE -->
-                    <div class="tab-pane fade" id="timeline-pane">
-                        <div class="card card-info card-outline shadow-sm">
-                            <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
-                                <h3 class="card-title font-weight-bold text-dark">
-                                    <i class="fas fa-truck text-info mr-2"></i> Delivery-Style Stage Execution Timeline
+                <!-- BOTTOM TWO-COLUMN GRID -->
+                <div class="row">
+                    <!-- LEFT COLUMN: MULTI-USER ACCUMULATED TIME TABLE -->
+                    <div class="col-lg-7">
+                        <div class="modern-card">
+                            <div class="card-accent-bar accent-emerald"></div>
+                            <div class="modern-card-header">
+                                <h3 class="modern-card-title">
+                                    <span class="header-icon-pill icon-grad-emerald">
+                                        <i class="fas fa-users"></i>
+                                    </span>
+                                    <span>User Time Consumption</span>
                                 </h3>
-                                <div class="card-tools">
-                                    <select id="timelineFilterSelect" onchange="renderTimeline()" class="form-control form-control-sm">
-                                        <option value="ALL">All Stages</option>
-                                        <option value="START">Start Events</option>
-                                        <option value="PAUSE">Pause Events</option>
-                                        <option value="RESUME">Resume Events</option>
-                                        <option value="FINISH">Finish Events</option>
-                                    </select>
-                                </div>
+                                <span id="sharedTaskIdLabel" class="code-pill">{{ $artwork->item_code }}</span>
                             </div>
-
-                            <div class="card-body bg-light">
-                                <div class="delivery-timeline" id="deliveryTimelineContainer">
-            <div class="delivery-step">
-                <div class="d-flex align-items-start">
-                    <div class="delivery-badge bg-success text-white mr-3">
-                        <i class="fas fa-play"></i>
-                    </div>
-                    <div class="card card-outline card-light shadow-sm flex-fill mb-0">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-success text-white px-2 py-1 font-weight-bold text-uppercase">START CHECKPOINT</span>
-                                <small class="text-muted font-mono"><i class="far fa-clock mr-1"></i>2026-11-03 09:00:12</small>
-                            </div>
-                            <p class="font-weight-normal text-dark mb-2">Task initialized &amp; moodboard created.</p>
-                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;auto=format&amp;fit=crop&amp;q=80" class="img-circle elevation-1 mr-2" style="width:24px; height:24px;" alt="Alex Rivera">
-                                    <span class="font-weight-bold text-dark text-xs">Alex Rivera</span>
-                                    <small class="text-muted ml-1">(Lead Designer)</small>
-                                </div>
-                                <div>
-                                    <small class="text-muted font-weight-bold mr-1">Duration:</small>
-                                    <span class="badge badge-light border font-mono">+00:00:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="delivery-step">
-                <div class="d-flex align-items-start">
-                    <div class="delivery-badge bg-warning text-dark mr-3">
-                        <i class="fas fa-pause"></i>
-                    </div>
-                    <div class="card card-outline card-light shadow-sm flex-fill mb-0">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-warning text-dark px-2 py-1 font-weight-bold text-uppercase">PAUSE CHECKPOINT</span>
-                                <small class="text-muted font-mono"><i class="far fa-clock mr-1"></i>2026-11-03 11:15:00</small>
-                            </div>
-                            <p class="font-weight-normal text-dark mb-2">Paused for client feedback review call.</p>
-                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&amp;auto=format&amp;fit=crop&amp;q=80" class="img-circle elevation-1 mr-2" style="width:24px; height:24px;" alt="Alex Rivera">
-                                    <span class="font-weight-bold text-dark text-xs">Alex Rivera</span>
-                                    <small class="text-muted ml-1">(Lead Designer)</small>
-                                </div>
-                                <div>
-                                    <small class="text-muted font-weight-bold mr-1">Duration:</small>
-                                    <span class="badge badge-light border font-mono">+02:14:48</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="delivery-step">
-                <div class="d-flex align-items-start">
-                    <div class="delivery-badge bg-info text-white mr-3">
-                        <i class="fas fa-redo"></i>
-                    </div>
-                    <div class="card card-outline card-light shadow-sm flex-fill mb-0">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-info text-white px-2 py-1 font-weight-bold text-uppercase">RESUME CHECKPOINT</span>
-                                <small class="text-muted font-mono"><i class="far fa-clock mr-1"></i>2026-11-03 13:00:00</small>
-                            </div>
-                            <p class="font-weight-normal text-dark mb-2">UI Component library drafting started.</p>
-                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&amp;auto=format&amp;fit=crop&amp;q=80" class="img-circle elevation-1 mr-2" style="width:24px; height:24px;" alt="Elena Rostova">
-                                    <span class="font-weight-bold text-dark text-xs">Elena Rostova</span>
-                                    <small class="text-muted ml-1">(UI/UX Designer)</small>
-                                </div>
-                                <div>
-                                    <small class="text-muted font-weight-bold mr-1">Duration:</small>
-                                    <span class="badge badge-light border font-mono">+00:00:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="delivery-step">
-                <div class="d-flex align-items-start">
-                    <div class="delivery-badge bg-warning text-dark mr-3">
-                        <i class="fas fa-pause"></i>
-                    </div>
-                    <div class="card card-outline card-light shadow-sm flex-fill mb-0">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-warning text-dark px-2 py-1 font-weight-bold text-uppercase">PAUSE CHECKPOINT</span>
-                                <small class="text-muted font-mono"><i class="far fa-clock mr-1"></i>2026-11-03 14:20:00</small>
-                            </div>
-                            <p class="font-weight-normal text-dark mb-2">Handed off 3D asset specs to Marcus.</p>
-                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&amp;auto=format&amp;fit=crop&amp;q=80" class="img-circle elevation-1 mr-2" style="width:24px; height:24px;" alt="Elena Rostova">
-                                    <span class="font-weight-bold text-dark text-xs">Elena Rostova</span>
-                                    <small class="text-muted ml-1">(UI/UX Designer)</small>
-                                </div>
-                                <div>
-                                    <small class="text-muted font-weight-bold mr-1">Duration:</small>
-                                    <span class="badge badge-light border font-mono">+01:20:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="delivery-step">
-                <div class="d-flex align-items-start">
-                    <div class="delivery-badge bg-info text-white mr-3">
-                        <i class="fas fa-redo"></i>
-                    </div>
-                    <div class="card card-outline card-light shadow-sm flex-fill mb-0">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-info text-white px-2 py-1 font-weight-bold text-uppercase">RESUME CHECKPOINT</span>
-                                <small class="text-muted font-mono"><i class="far fa-clock mr-1"></i>2026-11-03 15:00:00</small>
-                            </div>
-                            <p class="font-weight-normal text-dark mb-2">Cinema4D render testing initiated.</p>
-                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&amp;auto=format&amp;fit=crop&amp;q=80" class="img-circle elevation-1 mr-2" style="width:24px; height:24px;" alt="Marcus Vance">
-                                    <span class="font-weight-bold text-dark text-xs">Marcus Vance</span>
-                                    <small class="text-muted ml-1">(3D Motion Artist)</small>
-                                </div>
-                                <div>
-                                    <small class="text-muted font-weight-bold mr-1">Duration:</small>
-                                    <span class="badge badge-light border font-mono">+00:00:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PANE 3: AUDIT & ACTION LOGS -->
-                    <div class="tab-pane fade" id="activity-pane">
-                        <div class="card card-warning card-outline shadow-sm">
-                            <div class="card-header bg-white d-flex align-items-center justify-content-between">
-                                <h3 class="card-title font-weight-bold text-dark">
-                                    <i class="fas fa-history text-warning mr-2"></i> Activity Audit Feed
-                                </h3>
-                                <div class="card-tools">
-                                    <input type="text" id="logSearchInput" class="form-control form-control-sm" placeholder="Search activity logs..." onkeyup="renderActivityLogs()">
-                                </div>
-                            </div>
-                            <div class="card-body p-0 table-responsive" style="max-height: 500px;">
-                                <table class="table table-hover table-striped mb-0 text-sm">
-                                    <thead class="thead-light sticky-top">
+                            <div class="table-responsive">
+                                <table class="table modern-table table-hover mb-0">
+                                    <thead>
                                         <tr>
-                                            <th>Timestamp</th>
-                                            <th>User</th>
-                                            <th>Action Type</th>
-                                            <th>Event Summary</th>
+                                            <th>Assigned User</th>
+                                            <th>Role</th>
+                                            <th>Time Spent</th>
+                                            <th>Duration Share</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="activityLogsTableBody">
-            <tr>
-                <td class="font-mono text-muted text-nowrap"><i class="far fa-clock mr-1"></i>15:00:00</td>
-                <td><strong>Marcus Vance</strong></td>
-                <td><span class="badge badge-info">RESUME</span></td>
-                <td>Resumed work on 3D Motion Assets</td>
-            </tr>
-        
-            <tr>
-                <td class="font-mono text-muted text-nowrap"><i class="far fa-clock mr-1"></i>14:20:00</td>
-                <td><strong>Elena Rostova</strong></td>
-                <td><span class="badge badge-warning">PAUSE</span></td>
-                <td>Paused session. Logged 01h 20m</td>
-            </tr>
-        
-            <tr>
-                <td class="font-mono text-muted text-nowrap"><i class="far fa-clock mr-1"></i>13:00:00</td>
-                <td><strong>Elena Rostova</strong></td>
-                <td><span class="badge badge-info">RESUME</span></td>
-                <td>Switched active session to Elena</td>
-            </tr>
-        
-            <tr>
-                <td class="font-mono text-muted text-nowrap"><i class="far fa-clock mr-1"></i>11:15:00</td>
-                <td><strong>Alex Rivera</strong></td>
-                <td><span class="badge badge-warning">PAUSE</span></td>
-                <td>Paused session. Logged 02h 14m</td>
-            </tr>
-        
-            <tr>
-                <td class="font-mono text-muted text-nowrap"><i class="far fa-clock mr-1"></i>09:00:12</td>
-                <td><strong>Alex Rivera</strong></td>
-                <td><span class="badge badge-success">START</span></td>
-                <td>Initialized project timer for TSK-9402</td>
-            </tr>
-        </tbody>
+                                    <tbody id="timeSpentDuration">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">
+                                                <i class="fas fa-spinner fa-spin mr-1 text-primary"></i> Loading breakdown records...
+                                            </td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                </div>
-
-            </div>
-        </section>
-    </div>     
-
-        {{-- end --}}
-
-        {{-- request form   {{ route('artwork-request.store') }} --}}
-        @include('partials.modal.supplied_file_verification')
-        {{-- specifications form  {{ route('specifications.store') }} --}}
-         @include('partials.modal.specifications')
-        {{-- end specification --}}
-
-        {{-- checklist form test --}}
-
-            @can('read-only')
-          <!-- A. CONTROL PANEL (Start a new task) -->
-            <div class="card card-primary card-outline shadow-sm">
-                <div class="card-header bg-light">
-                    <h3 class="card-title font-weight-bold"><i class="fas fa-play-circle text-success mr-2"></i> Search Item</h3>
-                </div>
-                <div class="card-body p-3">
-                    <form id="CreateForm">
-                        <div class="row">
-                            <!-- Column 1: Personnel -->
-                            <div class="col-md-6" id="operator_section">
-                                {{-- <div class="form-group mb-2">
-                                    <label class="mb-1 text-sm">Operator: <span class="text-danger">*</span></label>
-                                    <select id="operator_id" name="operator_id[]" class="form-control form-control-sm select2bs4" multiple required> --}}
-                                        {{-- <option value="">Select Operator</option> --}}
-                                    {{-- </select> --}}
-                                {{-- </div> --}}
-                                {{-- <div class="form-group mb-0">
-                                    <label class="mb-1 text-sm">Companions:</label>
-                                    <select id="asst_operator_id" name="asst_operator_id[]" class="form-control form-control-sm select2bs4" multiple>
-                                        {{-- <option value="">Select Assistant</option> --}}
-                                  
-                                {{-- </div>  --}}
-
-                            <div class="row align-items-end mb-3">
-                            <div class="col-md-12">
-                                <div class="form-group mb-0">
-                                    <label class="mb-1 text-sm" id="target_label"></label>
-                                    <div class="d-flex align-items-center">
-                                        
-                                        <!-- PRODUCTION BUTTONS -->
-                                        <div id="mo_jo_buttons">
-                                            <!-- Search MO Button -->
-                                            <button type="button" class="btn btn-secondary mr-2" onclick="showMOSearch()">
-                                                <i class="fas fa-search"></i> Search Item
-                                            </button>
-
-                                            <!-- Manual JO Button -->
-                                            {{-- @if($user->allow_manual_jo) --}}
-                                                <button type="button" class="btn btn-outline-primary" onclick="showManualJOModal()">
-                                                    <i class="fas fa-edit"></i> External / Campaign Ref
-                                                </button>
-                                            {{-- @endif --}}
-                                        </div>
-
-                                        <!-- DOWNTIME BUTTON (Hidden by default) -->
-                                        <div id="downtime_button_wrapper" class="d-none">
-                                            <button type="button" class="btn btn-danger shadow-sm font-weight-bold px-4" onclick="startDowntime()">
-                                                <i class="fas fa-power-off"></i> Start Downtime
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                </div>
+                    <!-- RIGHT COLUMN: ASSETS & ACTIVITY LOGS -->
+                    <div class="col-lg-5">
+                        <!-- TASK ASSETS & ATTACHMENTS -->
+                        <div class="modern-card">
+                            <div class="card-accent-bar accent-cyan"></div>
+                            <div class="modern-card-header">
+                                <h3 class="modern-card-title">
+                                    <span class="header-icon-pill icon-grad-blue">
+                                        <i class="fas fa-paperclip"></i>
+                                    </span>
+                                    <span>Item &amp; File Link</span>
+                                </h3>
                             </div>
-                        </div>
-                            </div>
-
-                            <!-- Column 2: Action Setup -->
-                            <div class="col-md-6 border-left">
-                                <div class="form-group mb-2">
-                                    <label class="mb-1 text-sm">Action Type: <span class="text-danger">*</span></label>
-                                    <select class="form-control select2 select2-hidden-accessible" style="width: 100%;" data-select2-id="1" tabindex="-1" aria-hidden="true">
-                                        <option selected="selected" data-select2-id="3">ArtWorkFlow</option>
-                                        <option data-select2-id="35">Retouching</option>
-                                        <option data-select2-id="36">Apparel</option>
-                                        <option data-select2-id="37">Revision</option>
-                                       
-                                    </select>
-                                    {{-- <div class="d-flex action-btn-group gap-2">
-                                        <button type="button" class="btn btn-sm btn-success mr-1">DIRECT</button>
-                                        <button type="button" class="btn btn-sm btn-warning mr-1 text-dark">NON-PROD.</button>
-                                        <button type="button" class="btn btn-sm btn-danger">PROD. DOWN</button>
-                                    </div> --}}
-                                </div>
-                                <div class="form-group mb-2">
-                                    {{-- <label class="mb-1 text-sm">Action: <span class="text-danger">*</span></label>
-                                    <select id="action_id" class="form-control form-control-sm select2bs4">
-                                        <option value="">Select Action...</option>
-                                    </select> --}}
-                                </div>
-
-                                <!-- ========================================== -->
-                                <!-- INSERT NEW CONFIGURATION CONTAINER HERE    -->
-                                <!-- ========================================== -->
-                                <div id="job_type_container" class="form-group mt-3" style="display: none;">
-                                    <label class="mb-1 text-sm">Job Type <span class="text-danger">*</span></label>
-                                    <div class="d-flex align-items-center text-sm">
-                                        <div class="custom-control custom-radio mr-3">
-                                            <input class="custom-control-input" type="radio" id="type_new" name="job_type" value="NEW">
-                                            <label for="type_new" class="custom-control-label">NEW</label>
+                            <div class="modern-card-body">
+                                <ul class="list-unstyled mb-0" id="taskAssetsList">
+                                    <li class="asset-item-box">
+                                        <div class="d-flex align-items-center text-truncate" style="gap: 12px;">
+                                            <div class="asset-file-icon">
+                                                <i class="far fa-file-alt fa-lg"></i>
+                                            </div>
+                                            <strong class="text-dark text-truncate">{{ $artwork->file_info }}</strong>
                                         </div>
-                                        
-                                        {{-- Make Ready Specific --}}
-                                        <div class="custom-control custom-radio mr-3" id="wrapper_reorder" style="display: none;">
-                                            <input class="custom-control-input" type="radio" id="type_reorder" name="job_type" value="RE-ORDER">
-                                            <label for="type_reorder" class="custom-control-label">RE-ORDER</label>
-                                        </div>
-
-                                        {{-- Running Specific --}}
-                                        <div class="custom-control custom-radio" id="wrapper_replate" style="display: none;">
-                                            <input class="custom-control-input" type="radio" id="type_replate" name="job_type" value="REPLATE">
-                                            <label for="type_replate" class="custom-control-label">REPLATE</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Replate Reason --}}
-                                <div id="replate_reason_container" class="form-group mt-2" style="display: none;">
-                                    <label class="mb-1 text-sm">Replate Reason <span class="text-danger">*</span></label>
-                                    <select id="replate_reason" class="form-control form-control-sm select2bs4">
-                                        <option value="">Select Reason for Replating...</option>
-                                        @foreach($replate_reasons ?? [] as $item)
-                                            <option value="{{ $item->name }}">{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <!-- ========================================== -->
-                                <!-- END NEW CONFIGURATION CONTAINER            -->
-                                <!-- ========================================== -->
+                                        <a href="{{ $artwork->file_link }}" class="btn btn-sm btn-grad-info btn-modern py-1 px-3 flex-shrink-0 file-link" data-id="{{ $artwork->item_code }}" target="_blank">
+                                            <i class="fas fa-external-link-alt mr-1"></i> View Link
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
-                        <hr class="my-3">
-
-                        <!-- Bottom Row: MO Selection & Start -->
-          
-                    </form>
+                        <!-- ACTIVITY LOGS CARD -->
+                        <div class="modern-card">
+                            <div class="card-accent-bar accent-purple"></div>
+                            <div class="modern-card-header">
+                                <h3 class="modern-card-title">
+                                    <span class="header-icon-pill icon-grad-purple">
+                                        <i class="fas fa-history"></i>
+                                    </span>
+                                    <span>Activity Logs</span>
+                                </h3>
+                                <span id="activity-log-count" class="event-count-pill">0 events</span>
+                            </div>
+                            <div class="modern-card-body activity-scroll-area">
+                                <div id="activity-logs-container">
+                                    <p class="text-muted text-center my-4">
+                                        <i class="fas fa-spinner fa-spin mr-1 text-primary"></i> Loading activity logs...
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-        <div class="row justify-content-center">
-        <!-- Left Side: Profile Summary Card -->
-        <div class="col-md-4 mt-5">
-            <div class="card card-primary card-outline">
-                <div class="card-body box-profile">
-                   <form action="" method="POST">
-    @csrf
-    
-    <div class="form-group">
-        <label for="select-tag">Select Item:</label>
-        <select id="select-tag" name="tag_id" class="form-control select2 @error('tag_id') is-invalid @enderror" style="width: 100%;">
-            <option value="">-- Choose an option --</option>
-            {{-- @foreach($availableItemsForSelect as $list)
-                <option value="{{ $list->item_code }}" {{ old('tag_id') == $list->item_code ? 'selected' : '' }}>
-                    {{ $list->item_code }}
-                </option>
-            @endforeach --}}
-        </select>
-        
-        @error('tag_id')
-            {{-- <span class="error invalid-feedback">{{ $message }}</span> --}}
-        @enderror
-    </div>
-</form>
-
-                    <button id="btn_start_time"class="btn btn-secondary btn-success" tabindex="0" aria-controls="UsersTable" type="button" title="New" >
-                <span>
-                    <i class="fas fa-start"></i>
-                    Start
-                </span>
-            </button>
-            <button class="btn btn-secondary btn-warning" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Pause
-                </span>
-            </button>
-            <button id="btn_stop_time" class="btn btn-secondary btn-danger" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Stop
-                </span>
-            </button>
-                </div>
             </div>
         </div>
+    </section>
 
-        <!-- Right Side: Detailed Profile Information -->
-        <div class="col-md-6 mt-5">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-user-circle mr-1"></i> Account Details
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <strong><i class="fas fa-id-card mr-1 text-secondary"></i> Full Name</strong>
-                    <p class="text-muted">Aljay F. Ramile</p>
-                    <hr>
-
-                    <strong><i class="fas fa-envelope mr-1 text-secondary"></i> Email Address</strong>
-                    <p class="text-muted">aframile@ugecorp.com</p>
-                    <hr>
-
-                    <strong><i class="fas fa-user-shield mr-1 text-secondary"></i> Account Status</strong>
-                    <p class="text-muted">
-                                                    <span class="badge badge-warning">Unverified</span>
-                                            </p>
-                </div>
-                <div class="card-footer text-right">
-                    <a href="http://localhost:9000/users/1/edit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-edit mr-1"></i> Edit Profile
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<form action="" method="POST">
-    @csrf
-    
-    <div class="form-group">
-        <label for="select-tag">Select Item:</label>
-        <select id="select-tag" name="tag_id" class="form-control select2 @error('tag_id') is-invalid @enderror" style="width: 100%;">
-            <option value="">-- Choose an option --</option>
-            @foreach($availableItemsForSelect as $list)
-                <option value="{{ $list->item_code }}" {{ old('tag_id') == $list->item_code ? 'selected' : '' }}>
-                    {{ $list->item_code }}
-                </option>
-            @endforeach
-        </select>
-        
-        @error('tag_id')
-            <span class="error invalid-feedback">{{ $message }}</span>
-        @enderror
-    </div>
-</form>
-
-                    <button id="btn_start_time"class="btn btn-secondary btn-success" tabindex="0" aria-controls="UsersTable" type="button" title="New" >
-                <span>
-                    <i class="fas fa-start"></i>
-                    Start
-                </span>
-            </button>
-            <button class="btn btn-secondary btn-warning" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Pause
-                </span>
-            </button>
-            <button id="btn_stop_time" class="btn btn-secondary btn-danger" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Stop
-                </span>
-            </button>
-
-
-    @can('is-readonly')
-    <div class="row  mr-4">
-    <div class="col-12 mt-4 ">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-solid fa-users"> </i> List of Users</h3>
-            </div>
-              <!-- /.card-header -->
-            <div class="card-body">
-                
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table id="UsersTable" class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User_id</th>
-                                    <th>Item Code</th>
-                                    <th>Start_time</th>
-                                    <th>Stop_time</th>
-                                    <th>Status</th>
-                                
-                                    <!--<th>Actions</th>-->
-                                    
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>           
-    </div>
-</div> 
-@endcan
-
-
-<!-- Modern Tracking Grid Wrapper --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row line --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll step track container -->
-                    </div> <!-- End lane right node container track row -->
-                </div> <!-- End global item tracking block wrapper line -->
-            @endif
-
-            {{-- 1. CLEAN MODERN BLOCK ROW COMPONENT CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white rounded-2xl p-4 shadow-sm border border-slate-100 w-100 d-block mb-4" style="border-radius: 16px;">
-                
-                <!-- Minimal Row Header Title Line Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-xl d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #eff6ff; color: #2563eb; border-radius: 12px;">
-                            <i class="fas fa-cube" style="font-size: 16px;"></i>
-                        </div>
-                        <div>
-                            <h5 class="m-0 font-weight-bold tracking-tight text-slate-900" style="font-size: 16px; color: #0f172a;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h5>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 12px; color: #64748b;">Code Reference: {{ $row->item_code }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Process Flow Stream -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-2 pt-3 align-items-start" style="position: relative; gap: 40px;">
-                        
-                        <!-- Minimal background connect rail line -->
-                        <div class="process-rail-line" style="position: absolute; top: 18px; left: 24px; right: 24px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. MINIMALIST PLAY / START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #bbf7d0; color: #15803d; border: 4px solid #fff;">
-                        <i class="fas fa-play" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #f0fdf4; color: #16a34a; font-size: 11px; border-radius: 6px;">STARTED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. MINIMALIST STOP / PAUSE EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #fecaca; color: #b91c1c; border: 4px solid #fff;">
-                        <i class="fas fa-stop" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #fef2f2; color: #dc2626; font-size: 11px; border-radius: 6px;">STOPPED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs mb-2" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-
-                    @if($row->start_time)
-                        <div class="d-flex align-items-center justify-content-between px-1 py-1 rounded" style="background: #f1f5f9;">
-                            <span class="text-uppercase tracking-wider font-weight-bold text-slate-400" style="font-size: 9px; color: #64748b;">Duration Tracked</span>
-                            <span class="font-weight-bold text-slate-700" style="font-size: 11px; color: #334155;">
-                                {{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endif
-
-        {{-- Tie together all row markup layout segments at loop termination --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal step track container -->
-                </div> <!-- End lane right node container track row -->
-            </div> <!-- End global item tracking block wrapper line -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border rounded-2xl shadow-xs" style="border-radius: 16px;">
-            <div class="text-slate-300 mb-3"><i class="fas fa-inbox fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
+    {{-- Modals --}}
+    @include('partials.modal.supplied_file_verification')
+    @include('partials.modal.specifications')
 </div>
-
-
-{{-- ------------------------------------------ --}}
-
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-
-
-@endcan
-
-
-    </div>
-</div> 
-
 @endsection
-    
-@section('js')
 
+@section('js')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    const ARTWORK_ITEM_CODE = "{{ $artwork->item_code ?? request()->route('id') }}";
+
+    // Time Breakdown Processor (Calculates exact millisecond intervals via custom layout patterns)
+    function getTimeSpentDuration() {
+        const currentUserId = "{{ auth()->id() }}";
+
+        // High-precision millisecond string renderer output pattern: "HH:MM:SS.mmm"
+        function formatMilliseconds(totalMs) {
+            if (!totalMs || totalMs < 0) return "00:00:00.000";
+
+            const hours = String(Math.floor(totalMs / 3600000)).padStart(2, '0');
+            const minutes = String(Math.floor((totalMs % 3600000) / 60000)).padStart(2, '0');
+            const seconds = String(Math.floor((totalMs % 60000) / 1000)).padStart(2, '0');
+            const ms = String(totalMs % 1000).padStart(3, '0');
+
+            return `${hours}:${minutes}:${seconds}.${ms}`;
+        }
+
+        $.ajax({
+            url: `/getTimeShareDuration/${encodeURIComponent(ARTWORK_ITEM_CODE)}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                let rowsHtml = '';
+
+                if (!response || response.length === 0) {
+                    rowsHtml = `<tr><td colspan="4" class="text-center text-muted py-3">No tracking logs found.</td></tr>`;
+                } else {
+                    response.forEach(function(item) {
+                        const isYou = String(item.user_id) === String(currentUserId) ? ' <small class="text-primary">(You)</small>' : '';
+
+                        const formattedTime = formatMilliseconds(item.time_spent_milliseconds);
+                        const share = item.duration_share_percentage || 0;
+
+                        let userRole = item.role;
+                        if (userRole == 4) userRole = 'Artist';
+
+                        rowsHtml += `
+                            <tr class="${isYou ? 'bg-light' : ''}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <strong class="text-dark">${item.user_name ?? 'Unknown User'}${isYou}</strong>
+                                    </div>
+                                </td>
+                                <td class="text-muted">${userRole ?? '-'}</td>
+                                <td><span class="timer-display text-primary font-mono font-weight-bold">${formattedTime}</span></td>
+                                <td>
+                                    <div class="progress progress-xs mb-1" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${share}%" aria-valuenow="${share}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted font-mono">${share}%</small>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                $('#timeSpentDuration').html(rowsHtml);
+            },
+            error: function(xhr, status, error) {
+                console.error("Failed to fetch time consumption logs:", error);
+                $('#timeSpentDuration').html(`<tr><td colspan="4" class="text-center text-danger py-3">Error fetching duration statistics.</td></tr>`);
+            }
+        });
+    }
+
+    // Activity Logs Loader
+    function loadActivityLogs(itemCode = ARTWORK_ITEM_CODE) {
+        const container = document.getElementById('activity-logs-container');
+        const countBadge = document.getElementById('activity-log-count');
+
+        if (!container || !countBadge) return;
+
+        fetch(`{{ route('artwork.activity_logs') }}?id=${encodeURIComponent(itemCode)}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 300)}`);
+            }
+            return res.json();
+        })
+        .then(logs => {
+            countBadge.textContent = `${logs.length} event${logs.length === 1 ? '' : 's'}`;
+
+            if (!logs.length) {
+                container.innerHTML = `<p class="text-muted text-center my-3">No activity recorded for this artwork yet.</p>`;
+                return;
+            }
+
+            // AdminLTE 3 native timeline icons & background classes
+            const eventStyles = {
+                'timer_start':       { icon: 'fas fa-play',         bg: 'bg-success' },
+                'timer_resume':      { icon: 'fas fa-redo',         bg: 'bg-success' },
+                'timer_pause':       { icon: 'fas fa-pause',        bg: 'bg-warning' },
+                'timer_finish':      { icon: 'fas fa-check',        bg: 'bg-danger'  },
+                'artist_assigned':   { icon: 'fas fa-user-plus',    bg: 'bg-primary' },
+                'artist_reassigned': { icon: 'fas fa-exchange-alt', bg: 'bg-info'    },
+            };
+
+            // Color-coded pill styles for action_taken
+            const actionBadges = {
+                'Re-touching':      'background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;',
+                'Revision':         'background:#fef3c7; color:#92400e; border:1px solid #fde68a;',
+                'Redesign':         'background:#fce7f3; color:#9d174d; border:1px solid #fbcfe8;',
+                'For Profreading':  'background:#dcfce7; color:#166534; border:1px solid #bbf7d0;',
+                'For Proofreading': 'background:#dcfce7; color:#166534; border:1px solid #bbf7d0;',
+            };
+
+            const timelineItems = logs.map(log => {
+                const style = eventStyles[log.event] || { icon: 'fas fa-info', bg: 'bg-secondary' };
+                const badgeStyle = actionBadges[log.action_taken] || 'background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;';
+                const actionLabel = log.action_taken === 'For Profreading' ? 'For Proofreading' : log.action_taken;
+
+                const actionBadge = log.action_taken
+                    ? `<span class="badge ml-1" style="${badgeStyle} font-size:0.72rem; padding:4px 8px; border-radius:6px;">
+                           <i class="fas fa-tag mr-1"></i>${actionLabel}
+                       </span>`
+                    : '';
+
+                return `
+                    <div>
+                        <i class="${style.icon} ${style.bg}"></i>
+                        <div class="timeline-item shadow-none border">
+                            <span class="time">
+                                <i class="far fa-clock"></i> ${log.time}
+                            </span>
+                            <h3 class="timeline-header border-0 pb-1" style="font-size: 0.9rem;">
+                                ${log.description} ${actionBadge}
+                            </h3>
+                            <div class="timeline-footer pt-0 text-muted" style="font-size: 0.8rem;">
+                                By <strong>${log.actor_name}</strong> &bull; ${log.date}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="timeline timeline-inverse mb-0">
+                    ${timelineItems}
+                    <div>
+                        <i class="far fa-clock bg-gray"></i>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(err => {
+            console.error('Failed to load activity logs:', err);
+            container.innerHTML = `<div class="alert alert-danger small mb-0">${err.message}</div>`;
+        });
+    }
+
+    // Notifications Loader
+    function fetchNotifications() {
+        $.ajax({
+            url: "{{ route('Notifications') }}",
+            type: "GET",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (response) {
+                if (response.html) {
+                    $('#activityFeedList').html(response.html);
+                }
+                if (response.unreadCount !== undefined) {
+                    const badge = $('#fbNotificationBadge');
+                    badge.text(response.unreadCount > 99 ? '99+' : response.unreadCount);
+                    if (response.unreadCount === 0) {
+                        badge.addClass('d-none');
+                    } else {
+                        badge.removeClass('d-none');
+                    }
+                }
+            },
+            error: function (xhr) {
+                console.error('Error fetching notifications:', xhr);
+            }
+        });
+    }
+
     $(document).ready(function () {
-        
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
+
         // ---------------------------------------------------------
         // SWEETALERT SUCCESS TOAST
         // ---------------------------------------------------------
@@ -1480,187 +995,32 @@
 
         @if (\Session::has('success'))
             Toast.fire({
-                icon:'success',
-                title:"{{ \Session::get('success') }}"
+                icon: 'success',
+                title: "{{ \Session::get('success') }}"
             });
         @endif
 
         window.addEventListener('load', function() {
-            // This runs only after jQuery, Select2, and all assets are 100% loaded
             $('#select-tag').select2({
                 placeholder: 'Search for a Item...',
                 allowClear: true
             });
         });
-       
 
-$('#FileSendTable').on('click', '.btn-verify', function () {
-    var recordId = $(this).data('id');
-  
-    console.log($(this).data());
-
-    $.ajax({
-        url: "/suppliedVerified/" + recordId, // Replace with your Laravel route URL
-        type: "GET",
-        dataType: "json",
-        success: function (response) {
-            console.log(response.data);
-            // Populate all modal fields using response data
-            // console.log(response.data.item_code)
-           $('#item_code_label').text(response.data.item_code);
-           $('#verify_file_id').val(recordId);
-             $('#item_code').val(response.data.item_code);
-              $('#client').val(response.data.id);
-              $('#spread_h').val(response.data.spread_h);
-              $('#spread_w').val(response.data.spread_w);
-              $('#spread_l').val(response.data.spread_l);
-              $('#folded_h').val(response.data.spread_h);
-              $('#folded_w').val(response.data.spread_w);
-              $('#folded_l').val(response.data.spread_l);
-               $('#default_color_text').val(response.data.colors);
-               $('#text_specs').val(response.data.text_specs);
-              $('#item_description').val(response.data.file_info);
-       
-      
-            // $('#item_description').val(item_description);
-            
-            // Handle links or custom elements
-            if (response.file_link) {
-                $('#modal_file_link').attr('href', response.file_link).removeClass('d-none');
-            } else {
-                $('#modal_file_link').addClass('d-none');
-            }
-
-            // If you have nested relations, access them directly:
-            // $('#modal_client_address').val(response.client ? response.client.address : '');
-        },
-        error: function (xhr, status, error) {
-            console.error("Failed to fetch full record:", error);
-            alert("Could not load details. Please try again.");
-        }
-    });
-    // Populate data inside the modal form
-    
-
-    // Show the modal
-    $('#verificationModal').modal('show');
-});
-
-
-$('#btn_start_time').on('click', function() {
-        // 1. Get the selected ID value from your Select2 input
-        
-        let selectedId = $('#select-tag').val();
-        // 2. Alert the user if they haven't selected an option yet
-        if (!selectedId) {
-            Toast.fire({ icon: 'error', title: 'Please select a Item first!' });
-            return;
-        }
-
-        Swal.fire({  
-            title: 'Are you sure you want to Start this?', 
-            icon: 'warning', 
-            showCancelButton: true,  
-            confirmButtonText: 'Yes',  
-            cancelButtonText: 'No',
-        }).then((result) => {  
-            if (result.isConfirmed || result.value) { 
-                $.ajax({
-                    url: '/timeStart', 
-                    type: 'post',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        id: selectedId 
-                    },
-                    success: function(response){
-                        if (response.success){
-                            Toast.fire({ icon: 'success', title: response.success });
-                            
-                            let currentCount = parseInt($('#total-start-count').text()) || 0;
-                            if (currentCount > 0) {
-                                $('#total-start-count').text(currentCount - 1);
-                            }
-                        } else if(response.error){
-                            Toast.fire({ icon: 'error', title: response.error });
-                        }
-                    }
-                }); 
-            }
-        });
-    });
-//stoptime
-       // ==========================================
-        // 3. MO SEARCH MODAL & DATATABLE
-        // ==========================================
-        window.showMOSearch = function() {
-            // if (!validatePrestartSetup('searching for an MO')) return;
-            
-            $('#SearchMOModal').modal('show');
-        }
-
-$('#btn_stop_time').on('click', function() {
-        // 1. Get the selected ID value from your Select2 input
-        
-        let selectedId = $('#select-tag').val();
-        // 2. Alert the user if they haven't selected an option yet
-        if (!selectedId) {
-            Toast.fire({ icon: 'error', title: 'Please select a Item first!' });
-            return;
-        }
-
-        Swal.fire({  
-            title: 'Are you sure you want to Stop this?', 
-            icon: 'warning', 
-            showCancelButton: true,  
-            confirmButtonText: 'Yes',  
-            cancelButtonText: 'No',
-        }).then((result) => {  
-            if (result.isConfirmed || result.value) { 
-                $.ajax({
-                    url: '/timeStop', 
-                    type: 'post',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        id: selectedId 
-                    },
-                    success: function(response){
-                        if (response.success){
-                            Toast.fire({ icon: 'success', title: response.success });
-                            
-                            let currentCount = parseInt($('#total-start-count').text()) || 0;
-                            if (currentCount > 0) {
-                                $('#total-start-count').text(currentCount - 1);
-                            }
-                        } else if(response.error){
-                            Toast.fire({ icon: 'error', title: response.error });
-                        }
-                    }
-                }); 
-            }
-        });
-    });
-
-    });
-</script>
-
-<script>
-    //Clock
-    $(function() {
+        // ---------------------------------------------------------
+        // LIVE CLOCK
+        // ---------------------------------------------------------
         const $timeEl = $('#live-time');
         const $dateEl = $('#live-date');
 
         function updateClock() {
             const now = new Date();
-            
-            // Format time: hh:mm:ss AM/PM
             const timeString = now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: true
             });
-
-            // Format date: Day, Month Date, Year
             const dateString = now.toLocaleDateString('en-US', {
                 weekday: 'long',
                 month: 'long',
@@ -1668,325 +1028,258 @@ $('#btn_stop_time').on('click', function() {
                 year: 'numeric'
             });
 
-            // Inject into elements using jQuery .text() for security
             $timeEl.text(timeString);
             $dateEl.text(dateString);
         }
 
-        updateClock(); // Execute immediately on page load
-        setInterval(updateClock, 1000); // Tick every second
-    });
-</script>
+        updateClock();
+        setInterval(updateClock, 1000);
 
-
-
-<script>
- function fetchNotifications() {
-    $.ajax({
-        url: "{{ route('Notifications') }}",
-        type: "GET",
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function (response) {
-            // Logs the complete response object (success, html, unreadCount, logs array)
-            console.log('Full Response:', response);
-
-            // Logs only the array of ArtworkLog models
-            if (response.logs) {
-                console.log('All Notification Records:', response.logs);
-            }
-
-            if (response.html) {
-                $('#activityFeedList').html(response.html);
-            }
-            if (response.unreadCount !== undefined) {
-                const badge = $('#fbNotificationBadge');
-                badge.text(response.unreadCount > 99 ? '99+' : response.unreadCount);
-                if (response.unreadCount === 0) {
-                    badge.addClass('d-none');
-                } else {
-                    badge.removeClass('d-none');
-                }
-            }
-        },
-        error: function (xhr) {
-            console.error('Error fetching notifications:', xhr);
-        }
-    });
-}
-
-    $(document).ready(function () {
-        // Run once when page loads
+        // Initial Data Loads
         fetchNotifications();
-    });
+        getTimeSpentDuration();
+        loadActivityLogs(ARTWORK_ITEM_CODE);
 
+        // ---------------------------------------------------------
+        // TIMER & ACTION STATUS WORKFLOW
+        // ---------------------------------------------------------
+        let timerInterval = null;
+        const $wrap = $('#live-counter');
+        const $timer = $('#sessionTimerDisplay');
+        const $badge = $('#taskStatusBadge');
+        const $actionSelect = $('#action_taken');
+        const $indicator = $('#currentActionIndicator');
+        const timerUrl = "{{ url('artwork') }}/" + encodeURIComponent($('#artwork-code').val()) + "/timer";
 
+        // 1. Check Working Hours (Mon-Fri, 8 AM to 6 PM, excluding holidays)
+        function isWorkingHours() {
+            const now = new Date();
+            const day = now.getDay(), hour = now.getHours();
+            const today = now.toISOString().split('T')[0];
+            const holidays = ['2026-11-05', '2026-12-25'];
 
-    //for timer
-
-$(document).ready(function() {
-    let timerInterval = null;
-    const $wrap = $('#live-counter');
-    const $timer = $('#sessionTimerDisplay');
-    const $badge = $('#taskStatusBadge');
-    // const timerUrl = "{{ route('artwork.timer', $artwork->item_code) }}";
-const timerUrl = "{{ url('artwork') }}/" + encodeURIComponent($('#artwork-code').val()) + "/timer";
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-
-    // Initial load framework call to populate grid items immediately
-    getTimeSpentDuration();
-
-    // 1. Check Working Hours (Mon-Fri, 8 AM to 6 PM, excluding holidays)
-    function isWorkingHours() {
-        const now = new Date();
-        const day = now.getDay(), hour = now.getHours();
-        const today = now.toISOString().split('T')[0];
-        const holidays = ['2026-11-05', '2026-12-25'];
-
-        if (day === 0 || day === 6 || holidays.includes(today)) return false;
-        return hour >= 8 && hour < 18;
-    }
-
-    // 2. Format Seconds -> HH:MM:SS (Main Top Running Session Display UI Element Only)
-    function formatTime(s) {
-        return new Date(Math.max(0, s) * 1000).toISOString().substr(11, 8);
-    }
-
-    //  UI Badge Helper
-    function setBadge(type, text, icon) {
-        $badge.attr('class', `badge badge-${type}`).html(`<i class="fas fa-${icon} mr-1"></i> ${text}`);
-    }
-
-    //  Update Header UI Controls Display values
-    function renderUI() {
-        const isRunning = $wrap.data('running') == true;
-        const state = $wrap.data('action-state');
-        const accumulated = parseInt($wrap.data('accumulated')) || 0;
-        const isOpen = isWorkingHours();
-
-        $('#btnStart, #btnPause, #btnResume, #btnFinish').addClass('d-none').prop('disabled', !isOpen);
-        if (accumulated > 0 || isRunning) $('#btnFinish').removeClass('d-none');
-
-        if (isRunning) {
-            if (!isOpen) return sendTimerAction('auto-shift-end');
-            $('#btnPause').removeClass('d-none');
-            setBadge('success pulse-live', 'Running', 'play-circle');
-            startTimer();
-        } else {
-            $timer.text(formatTime(accumulated));
-            
-            if (accumulated === 0 && !state) {
-                $('#btnStart').removeClass('d-none');
-                $('#btnFinish').addClass('d-none');
-                setBadge('warning', 'Ready', 'clock');
-            } else {
-                $('#btnResume').removeClass('d-none');
-                if (state === 'finish') setBadge('secondary', 'Stopped', 'check-circle');
-                else if (state === 'auto-shift-end') setBadge('danger', 'Shift Ended', 'history');
-                else setBadge('warning', 'Paused', 'pause-circle');
-            }
-
-            startMonitoring();
+            if (day === 0 || day === 6 || holidays.includes(today)) return false;
+            return hour >= 8 && hour < 18;
         }
 
-        if (!isOpen) {
-            if (state !== 'finish' && state !== 'auto-shift-end') {
-                setBadge('danger', 'Locked (Off-hours)', 'lock');
-            }
+        // 2. Format Seconds -> HH:MM:SS
+        function formatTime(s) {
+            return new Date(Math.max(0, s) * 1000).toISOString().substr(11, 8);
         }
-    }
 
-    // Running Session Clock Live Loop
-    function startTimer() {
-        clearInterval(timerInterval);
-        const startTime = new Date($wrap.data('start')).getTime();
-        const baseSeconds = parseInt($wrap.data('accumulated')) || 0;
+        // 3. Safe Timestamp Parser (Handles ISO & SQL Server formats)
+        function parseSafeTimestamp(raw) {
+            if (!raw) return NaN;
+            const normalized = typeof raw === 'string' && raw.includes(' ') && !raw.includes('T')
+                ? raw.replace(' ', 'T')
+                : raw;
+            return new Date(normalized).getTime();
+        }
 
-        timerInterval = setInterval(() => {
-            if (!isWorkingHours()) return sendTimerAction('auto-shift-end');
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            $timer.text(formatTime(baseSeconds + Math.max(0, elapsed)));
-        }, 1000);
-    }
+        // 4. UI Badge Helper
+        function setBadge(type, text, icon) {
+            $badge.attr('class', `badge badge-${type} status-pill`).html(`<i class="fas fa-${icon}"></i> ${text}`);
+        }
 
-    //Background Off-hours Monitor 
-    function startMonitoring() {
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            const state = $wrap.data('action-state');
-            if (state === 'pause' || state === 'finish') return clearInterval(timerInterval);
-            if (state === 'auto-shift-end' && isWorkingHours()) {
-                clearInterval(timerInterval);
-                sendTimerAction('resume');
-            }
-        }, 5000);
-    }
+        // 5. Update Action Indicator & Validate Status Selection
+        function updateActionRequirementIndicator() {
+            const selectedAction = $actionSelect.val();
+            const hasAction = selectedAction && selectedAction.trim() !== '';
 
-    // function sendTimerAction(action, $btn = null) {
-    //     if ($btn) $btn.prop('disabled', true);
-
-    //     $.post(timerUrl, { action: action, item_code: $('#artwork-code').val() }, function(res) {
-    //         if (res.status === 'success' || action === 'auto-shift-end') {
-    //             $wrap.data({
-    //                 running: action === 'auto-shift-end' ? false : res.is_running,
-    //                 start: action === 'auto-shift-end' ? null : res.started_at,
-    //                 accumulated: res.total_seconds,
-    //                 'action-state': action
-    //             });
-    //             renderUI();
-    //             if (action === 'auto-shift-end') alert('Tracking shift ended. Progress saved.');
-    //         }
-    //     }).fail(xhr => {
-    //         alert(xhr.status === 403 ? xhr.responseJSON.message : 'Error updating timer.');
-    //     }).always(() => {
-    //         if ($btn) $btn.prop('disabled', false);
-            
-    //         // 🔴 Auto-update dynamic millisecond breakdown grid when actions finish executing
-    //         getTimeSpentDuration();
-    //     });
-    // }
-
-        function sendTimerAction(action, $btn = null) {
-        if ($btn) $btn.prop('disabled', true);
-
-        // 💡 Ensure we read the fresh live value from the element field
-        const currentItemCode = $('#artwork-code').val();
-
-        $.post(timerUrl, { 
-            action: action, 
-            item_code: currentItemCode 
-        }, function(res) {
-            // Check for success responses back from ArtistController
-            if (res.status === 'success' || action === 'auto-shift-end') {
-                $wrap.data({
-                    running: action === 'auto-shift-end' ? false : res.is_running,
-                    start: action === 'auto-shift-end' ? null : res.started_at,
-                    accumulated: res.total_seconds,
-                    'action-state': action
-                });
-                
-                // Re-render the play/pause/resume control buttons based on state rules
-                renderUI();
-                
-                if (action === 'auto-shift-end') {
-                    alert('Tracking shift ended. Progress saved.');
+            if ($indicator.length) {
+                if (hasAction) {
+                    const displayLabel = selectedAction === 'For Profreading' ? 'For Proofreading' : selectedAction;
+                    $indicator.html(
+                        `<i class="fas fa-check-circle text-success mr-1"></i> Ready for: <span class="text-dark">${displayLabel}</span>`
+                    );
+                } else {
+                    $indicator.html(
+                        `<i class="fas fa-info-circle text-warning mr-1"></i> Please select a status above to unlock timer actions`
+                    );
                 }
             }
-        }).fail(xhr => {
-            // Give specific error reporting if a validation lock fails
-            let errorMsg = 'Error updating timer.';
-            if (xhr.status === 403 || xhr.status === 422) {
-                errorMsg = xhr.responseJSON.message || errorMsg;
-            }
-            alert(errorMsg);
-        }).always(() => {
-            if ($btn) $btn.prop('disabled', false);
-            
-            // 🔴 Updates the grid metrics logs instantly
-            if (typeof getTimeSpentDuration === "function") {
-                getTimeSpentDuration();
+
+            return hasAction;
+        }
+
+        // 6. Start Live Ticker (With fallback if backend omits start_time on start/resume)
+        function startTimer() {
+            clearInterval(timerInterval);
+
+            let startIso = $wrap.data('start');
+            const accumulated = parseInt($wrap.data('accumulated')) || 0;
+
+            if (!startIso) {
+                startIso = new Date().toISOString();
+                $wrap.data('start', startIso);
             }
 
-            // 🔄 NEW AUTOMATION: Instantly reloads the AdminLTE timeline card wrapper 
-            // so supervisors and artists see the activity logs pop up without hitting refresh!
-            if ($('#timeline-container-box').length > 0) {
-                $('#timeline-container-box').load(window.location.href + ' #timeline-container-box > *');
+            let startMs = parseSafeTimestamp(startIso);
+            if (isNaN(startMs)) {
+                startMs = Date.now();
+            }
+
+            function tick() {
+                if (!isWorkingHours()) {
+                    clearInterval(timerInterval);
+                    return sendTimerAction('auto-shift-end');
+                }
+                const elapsed = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+                $timer.text(formatTime(accumulated + elapsed));
+            }
+
+            tick();
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        // 7. Stop Live Ticker
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // 8. Update Header UI Controls Display Values
+        function renderUI() {
+            const isRunning = $wrap.data('running') == true || $wrap.data('running') === 'true';
+            const state = $wrap.data('action-state');
+            const accumulated = parseInt($wrap.data('accumulated')) || 0;
+            const isOpen = isWorkingHours();
+            const hasAction = updateActionRequirementIndicator();
+
+            // Unlock timer controls ONLY during working hours AND once an action status is selected
+            const canUseButtons = isOpen && hasAction;
+
+            $('#btnStart, #btnPause, #btnResume, #btnFinish').addClass('d-none').prop('disabled', !canUseButtons);
+            if (accumulated > 0 || isRunning) $('#btnFinish').removeClass('d-none');
+
+            if (isRunning) {
+                if (!isOpen) return sendTimerAction('auto-shift-end');
+                $('#btnPause').removeClass('d-none');
+                setBadge('success pulse-live', 'Running', 'play-circle');
+                startTimer();
+            } else {
+                stopTimer();
+                $timer.text(formatTime(accumulated));
+
+                if (accumulated === 0 && !state) {
+                    $('#btnStart').removeClass('d-none');
+                    $('#btnFinish').addClass('d-none');
+                    setBadge('warning', 'Ready', 'clock');
+                } else {
+                    $('#btnResume').removeClass('d-none');
+                    if (state === 'finish') {
+                        setBadge('secondary', 'Stopped', 'check-circle');
+                    } else {
+                        setBadge('warning', 'Paused', 'pause-circle');
+                    }
+                }
+            }
+        }
+
+        // 9. Send Timer Action + Selected Status (action_taken) to Backend
+        function sendTimerAction(action) {
+            const selectedAction = $actionSelect.val();
+
+            if (action !== 'auto-shift-end' && !selectedAction) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Action Required',
+                    text: 'Please select a status (Re-touching, Revision, Redesign, or For Proofreading) before starting, pausing, resuming, or finishing the timer.'
+                });
+                return;
+            }
+
+            $('.action-btn').prop('disabled', true);
+
+            $.ajax({
+                url: timerUrl,
+                type: 'POST',
+                data: {
+                    action: action,
+                    action_taken: selectedAction
+                },
+                success: function(res) {
+                    const isStartingOrResuming = (action === 'start' || action === 'resume');
+
+                    // Support multiple possible JSON keys from backend or fallback immediately
+                    const serverStart = res.start_time ?? res.startTime ?? res.recorded_at;
+                    if (serverStart) {
+                        $wrap.data('start', serverStart);
+                    } else if (isStartingOrResuming) {
+                        $wrap.data('start', new Date().toISOString());
+                    } else {
+                        $wrap.data('start', '');
+                    }
+
+                    // Update accumulated seconds (or snapshot displayed time when pausing/finishing)
+                    const serverAcc = res.accumulated ?? res.total_seconds ?? res.totalSeconds;
+                    if (serverAcc !== undefined && serverAcc !== null) {
+                        $wrap.data('accumulated', parseInt(serverAcc) || 0);
+                    } else if (!isStartingOrResuming) {
+                        const parts = $timer.text().split(':').map(Number);
+                        if (parts.length === 3 && !parts.some(isNaN)) {
+                            $wrap.data('accumulated', parts[0] * 3600 + parts[1] * 60 + parts[2]);
+                        }
+                    }
+
+                    // Explicitly update running state so startTimer() ticks immediately
+                    $wrap.data('running', res.is_running !== undefined ? Boolean(res.is_running) : isStartingOrResuming);
+                    $wrap.data('action-state', action);
+
+                    renderUI();
+                    getTimeSpentDuration();
+                    loadActivityLogs(ARTWORK_ITEM_CODE);
+                },
+                error: function(xhr) {
+                    renderUI();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Timer Error',
+                        text: xhr.responseJSON?.message || 'Unable to process timer action.'
+                    });
+                }
+            });
+        }
+
+        $actionSelect.on('change', function () {
+            renderUI();
+        });
+
+        $('.action-btn').on('click', function (e) {
+            e.preventDefault();
+            const action = $(this).data('action');
+
+            if ($actionSelect.length && !$actionSelect.val()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Action Required',
+                    text: 'Please select a status (Re-touching, Revision, Redesign, or For Proofreading) before starting, pausing, resuming, or finishing the timer.'
+                });
+                return false;
+            }
+
+            if (action === 'finish') {
+                const displayLabel = $actionSelect.val() === 'For Profreading' ? 'For Proofreading' : $actionSelect.val();
+                Swal.fire({
+                    title: 'Finish Task?',
+                    text: `This will complete the task under "${displayLabel}" and stop the timer.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    confirmButtonText: 'Yes, Finish Task'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        sendTimerAction('finish');
+                    }
+                });
+            } else {
+                sendTimerAction(action);
             }
         });
-    }
 
-
-    // 8. Action Button Click Event Router
-    $('.action-btn').on('click', function() {
-        const action = $(this).data('action');
-        if (!isWorkingHours() && (action === 'start' || action === 'resume')) {
-            return alert('Operation locked. Outside tracking frame parameters.');
-        }
-        sendTimerAction(action, $(this));
+        // Initialize UI on page load
+        renderUI();
     });
-
-    @if($artwork->timeLogs->last() && $artwork->timeLogs->last()->action === 'auto-shift-end')
-        $wrap.data('action-state', 'auto-shift-end');
-    @endif
-
-    renderUI();
-});
-
-
-// Time Breakdown Processor (Calculates exact millisecond intervals via custom layout patterns)
-function getTimeSpentDuration() {
-    const artworkId = "{{ $artwork->item_code }}"; 
-    const currentUserId = "{{ auth()->id() }}"; 
-
-    // High-precision millisecond string renderer output pattern: "HH:MM:SS.mmm"
-    function formatMilliseconds(totalMs) {
-        if (!totalMs || totalMs < 0) return "00:00:00.000";
-        
-        const hours = String(Math.floor(totalMs / 3600000)).padStart(2, '0');
-        const minutes = String(Math.floor((totalMs % 3600000) / 60000)).padStart(2, '0');
-        const seconds = String(Math.floor((totalMs % 60000) / 1000)).padStart(2, '0');
-        const ms = String(totalMs % 1000).padStart(3, '0');
-        
-        return `${hours}:${minutes}:${seconds}.${ms}`;
-    }
-
-    $.ajax({
-        url: `/getTimeShareDuration/${artworkId}`,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            let rowsHtml = '';
-            
-            if (!response || response.length === 0) {
-                rowsHtml = `<tr><td colspan="4" class="text-center text-muted py-3">No tracking logs found.</td></tr>`;
-            } else {
-                response.forEach(function(item) {
-                    const isYou = String(item.user_id) === String(currentUserId) ? ' <small class="text-primary">(You)</small>' : '';
-                    
-                    // Extracts the high precision millisecond column value parsed via the controller endpoint
-                    const formattedTime = formatMilliseconds(item.time_spent_milliseconds);
-                    const share = item.duration_share_percentage || 0;
-                    
-                    let userRole = item.role;
-                    if (userRole == 4) userRole = 'Artist';
-
-                    rowsHtml += `
-                        <tr class="${isYou ? 'bg-light' : ''}">
-                            <td>
-                                                <div class="d-flex align-items-center">
-                                                
-                                                    <strong class="text-dark">{{ $artwork->artist_name }} <small class="text-primary">(You)</small></strong>
-                                                </div>
-                                            </td>
- <td class="text-muted">{{ $artwork->artist_role_id == 4 ? 'Artist' : $artwork->artist_role_id }}</td>
-
-
-                        
-                            <td><span class="timer-display text-primary font-mono font-weight-bold">${formattedTime}</span></td>
-                            <td>
-                                <div class="progress progress-xs mb-1" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: ${share}%" aria-valuenow="${share}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <small class="text-muted font-mono">${share}%</small>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-            $('#timeSpentDuration').html(rowsHtml);
-        },
-
-        error: function(xhr, status, error) {
-            console.error("Failed to fetch time consumption logs:", error);
-            $('#timeSpentDuration').html(`<tr><td colspan="4" class="text-center text-danger py-3">Error fetching duration statistics.</td></tr>`);
-        }
-    });
-}
-</script>
-
-</script>
 </script>
 
 @endsection

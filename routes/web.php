@@ -76,7 +76,7 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
 
         // assign to artist
          Route::post('/assignToArtist', [GdController::class, 'assignToArtist'])->name('assignToArtist.save');
-        
+        Route::post('/reassign-artist', [GdController::class, 'reassignArtist'])->name('reassignArtist.save');
         
         // save supplied verify
 
@@ -94,6 +94,8 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
 
           Route::get('/trafficFileRecievedLink',[\App\Http\Controllers\TrafficController::class,'trafficFileRecievedLink'])->name('trafficFileRecievedLink');
     Route::post('/traffic_update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('update-supplied-status'); //update file status if opened
+   
+   Route::get('/getNotif', [App\Http\Controllers\NotificationController::class, 'getNotificationPerUser'])->name('Notifications');
     });
     
       Route::middleware('can:password-change')->group(function () {
@@ -137,7 +139,7 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
        
        
     });
-   
+    Route::get('/artwork/activity-logs', [ArtistController::class, 'getActivityLogs'])->name('artwork.activity_logs');//display activitylogs in artwork page
     Route::get('/getActivityLogs', [ActivityLogController::class, 'getActivityLogs'])->name('getActivityLogs');
     Route::get('/getHistoryLogs', [HistoryLogController::class, 'getHistoryLogs'])->name('getHistoryLogs');
     Route::get('/artwork/{id}', [ArtistController::class, 'getViewArtworkById'])->name('artwork');
@@ -145,6 +147,9 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
     Route::get('/getTimeShareDuration/{id}', [ArtistController::class, 'getShareTimeDuration'])->name('getShareTimeDuration');
 
     Route::get('/timeline/{item_code}', [AoFormController::class, 'timeline'])->name('timeline');
+
+
+   
     Route::get('/', function () {
         return redirect('/dashboard');
     });

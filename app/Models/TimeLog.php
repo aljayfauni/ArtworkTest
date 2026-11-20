@@ -19,6 +19,7 @@ class TimeLog extends Model
         'user_id',
         'action',
         'recorded_at',
+        'action_taken',  // 'Re-touching', 'Revision', 'Redesign', 'For Profreading'
     ];
 
     protected $casts = [
