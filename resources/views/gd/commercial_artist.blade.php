@@ -7,69 +7,213 @@
 @section('plugins.DatatablesPlugins', true)
 
 @section('content_header')
-    {{-- <h1><i class="fas fa-solid fa-chart-line"></i> Dashboard</h1> --}}
-    @can('is-admin')
-    <style>
-        /* .main-sidebar {  }
-        .content-wrapper, .main-header { margin-left: 0 !important; } */
-    </style>
-    <!-- Custom CSS for Horizontal Scrolling Timeline Layout -->
-    {{-- <style>
-    .horizontal-timeline-wrapper {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 20px 10px;
+<style>
+    /* Modern Workbench Styling matching Timeline View */
+    .workbench-wrapper {
+        background: #f8fafc;
+        padding: 24px;
+        border-radius: 16px;
+        min-height: calc(100vh - 120px);
+    }
+
+    .modern-banner {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #16a34a;
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
         display: flex;
-        align-items: flex-start;
-        gap: 25px;
-        scroll-behavior: smooth;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
     }
-    .timeline-node {
-        min-width: 320px;
-        max-width: 320px;
-        display: inline-block;
-        vertical-align: top;
-        white-space: normal; /* Allows text to wrap normally inside the card */
-        position: relative;
-    }
-    /* Horizontal connector line linking the cards */
-    .timeline-node:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 25px;
-        left: 100%;
-        width: 25px;
-        height: 4px;
-        background-color: #dee2e6;
-        z-index: 1;
-    }
-    .node-icon-badge {
+
+    .banner-icon-box {
         width: 50px;
         height: 50px;
-        border-radius: 50%;
+        border-radius: 14px;
+        background: #dcfce7;
+        color: #16a34a;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px auto;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        color: #fff;
-        font-size: 1.2rem;
+        font-size: 20px;
+        flex-shrink: 0;
     }
-</style> --}}
 
+    .modern-user-pill {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modern-user-pill .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #16a34a;
+    }
+
+    /* Modern Cards */
+    .modern-work-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+
+    .modern-card-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #ffffff;
+    }
+
+    .card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-header-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .card-header-icon.primary-green {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .card-header-icon.companion-indigo {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .modern-card-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .modern-card-subtitle {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    /* Clean Table Styling */
+    .modern-table-wrapper {
+        padding: 16px 24px 24px;
+    }
+
+    table.modern-datatable {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    table.modern-datatable thead th {
+        background: #f8fafc !important;
+        color: #475569 !important;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px 16px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-top: none !important;
+    }
+
+    table.modern-datatable tbody td {
+        padding: 14px 16px !important;
+        vertical-align: middle !important;
+        color: #334155;
+        font-size: 13.5px;
+        border-bottom: 1px solid #f1f5f9 !important;
+        background: #ffffff;
+        transition: background-color 0.15s ease;
+    }
+
+    table.modern-datatable tbody tr:hover td {
+        background: #f8fafc !important;
+    }
+
+    table.modern-datatable tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* DataTables Search & Pagination Polish */
+    .modern-table-wrapper .dataTables_filter input {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: 13px;
+        color: #1e293b;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .modern-table-wrapper .dataTables_filter input:focus {
+        border-color: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+    }
+
+    .modern-table-wrapper .dataTables_length select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+
+    @media (max-width: 576px) {
+        .workbench-wrapper {
+            padding: 14px;
+        }
+        .modern-card-header, .modern-table-wrapper {
+            padding: 14px;
+        }
+    }
+</style>
+
+@can('is-admin')
+{{-- Preserved Admin Timeline CSS --}}
 <style>
     .horizontal-timeline-wrapper {
         background: #f8fafc;
         padding: 24px;
         border-radius: 16px;
     }
-
     .item-timeline-lane + .item-timeline-lane {
         border-top: 1px solid #e2e8f0;
         padding-top: 24px;
         margin-top: 12px;
     }
-
     .item-lane-header {
         display: flex;
         align-items: center;
@@ -78,13 +222,11 @@
         gap: 12px;
         margin-bottom: 18px;
     }
-
     .item-title-area {
         display: flex;
         align-items: center;
         gap: 12px;
     }
-
     .item-title-icon {
         width: 46px;
         height: 46px;
@@ -96,7 +238,6 @@
         color: #4338ca;
         font-size: 19px;
     }
-
     .item-code-badge {
         background: #e2e8f0;
         color: #475569;
@@ -105,7 +246,6 @@
         font-size: 12px;
         font-weight: 600;
     }
-
     .horizontal-scroll-lane {
         display: flex;
         flex-wrap: nowrap;
@@ -116,7 +256,6 @@
         scrollbar-width: thin;
         scrollbar-color: #cbd5e1 transparent;
     }
-
     .timeline-node {
         width: 275px;
         min-width: 275px;
@@ -124,7 +263,6 @@
         position: relative;
         padding-top: 17px;
     }
-
     .timeline-node::before {
         content: "";
         position: absolute;
@@ -134,11 +272,9 @@
         height: 2px;
         background: #cbd5e1;
     }
-
     .timeline-node:last-child::before {
         right: 50%;
     }
-
     .node-icon-badge {
         position: absolute;
         z-index: 2;
@@ -150,15 +286,8 @@
         box-sizing: content-box;
         border-radius: 50%;
     }
-
-    .node-icon-badge.bg-success {
-        background: #16a34a !important;
-    }
-
-    .node-icon-badge.bg-danger {
-        background: #dc2626 !important;
-    }
-
+    .node-icon-badge.bg-success { background: #16a34a !important; }
+    .node-icon-badge.bg-danger { background: #dc2626 !important; }
     .timeline-modern-card {
         height: 100%;
         overflow: hidden;
@@ -168,12 +297,10 @@
         box-shadow: 0 3px 12px rgba(15, 23, 42, .05);
         transition: transform .2s ease, box-shadow .2s ease;
     }
-
     .timeline-modern-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 25px rgba(15, 23, 42, .09);
     }
-
     .timeline-card-header {
         display: flex;
         justify-content: space-between;
@@ -182,7 +309,6 @@
         padding: 15px;
         border-bottom: 1px solid #f1f5f9;
     }
-
     .timeline-status {
         display: inline-flex;
         align-items: center;
@@ -193,28 +319,15 @@
         font-weight: 800;
         letter-spacing: .4px;
     }
-
-    .timeline-status.started {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .timeline-status.stopped {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
+    .timeline-status.started { background: #dcfce7; color: #166534; }
+    .timeline-status.stopped { background: #fee2e2; color: #991b1b; }
     .timeline-clock {
         color: #475569;
         font-size: 12px;
         font-weight: 700;
         white-space: nowrap;
     }
-
-    .timeline-card-body {
-        padding: 15px;
-    }
-
+    .timeline-card-body { padding: 15px; }
     .timeline-user-box {
         display: flex;
         align-items: center;
@@ -225,7 +338,6 @@
         background: #f8fafc;
         border: 1px solid #f1f5f9;
     }
-
     .timeline-user-avatar {
         display: flex;
         align-items: center;
@@ -237,30 +349,20 @@
         background: #e2e8f0;
         color: #475569;
     }
-
     .timeline-user-name {
         color: #1e293b;
         font-size: 13px;
         font-weight: 700;
         overflow-wrap: anywhere;
     }
-
     .timeline-user-id {
         display: block;
         margin-top: 3px;
         color: #94a3b8;
         font-size: 11px;
     }
-
-    .timeline-date {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .timeline-date strong {
-        color: #334155;
-    }
-
+    .timeline-date { color: #64748b; font-size: 12px; }
+    .timeline-date strong { color: #334155; }
     .timeline-duration {
         display: flex;
         align-items: center;
@@ -273,130 +375,125 @@
         font-size: 12px;
         font-weight: 600;
     }
-
     .timeline-empty {
         text-align: center;
         padding: 50px 15px;
         color: #94a3b8;
     }
-
     .timeline-empty i {
         display: block;
         font-size: 34px;
         margin-bottom: 12px;
     }
-
-    @media (max-width: 576px) {
-        .horizontal-timeline-wrapper {
-            padding: 15px;
-        }
-
-        .timeline-node {
-            width: 255px;
-            min-width: 255px;
-            flex-basis: 255px;
-        }
-
-        .item-title-area h5 {
-            font-size: 16px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .timeline-modern-card {
-            transition: none;
-        }
-    }
-    .clock-widget{
-        float: right;
-    }
+    .clock-widget { float: right; }
 </style>
 @endcan
 @stop
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <section class="content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center justify-content-between">
+<div class="container-fluid pt-3 pb-4">
+    <div class="workbench-wrapper">
 
-            {{-- Page Title --}}
-        
+        <!-- Modern Header Banner -->
+        <div class="modern-banner">
+            <div class="d-flex align-items-center" style="gap: 16px;">
+                <div class="banner-icon-box">
+                    <i class="fas fa-paint-brush"></i>
+                </div>
+                <div>
+                    <h4 class="mb-1 font-weight-bold" style="color: #0f172a; font-size: 19px;">
+                        Graphic Artist Workbench & Time Tracker
+                    </h4>
+                    <p class="mb-0" style="color: #64748b; font-size: 13.5px;">
+                        Receive assigned artwork &bull; Click tracked file links to alert Supervisors and update live status
+                    </p>
+                </div>
+            </div>
 
+            <div class="modern-user-pill">
+                <span class="status-dot"></span>
+                <span style="color: #64748b; font-weight: 500;">Artist:</span>
+                <span>{{ Auth::user()->name }}</span>
+            </div>
         </div>
-    </div>
-</section>
+
+        <!-- Primary Artwork Card -->
+        <div class="modern-work-card">
+            <div class="modern-card-header">
+                <div class="card-title-group">
+                    <div class="card-header-icon primary-green">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h3 class="modern-card-title">My Assigned Artwork</h3>
+                        <p class="modern-card-subtitle">Primary tasks directly assigned to your queue</p>
+                    </div>
+                </div>
+                <span class="badge" style="background: #dcfce7; color: #166534; padding: 7px 12px; border-radius: 8px; font-weight: 700; font-size: 11px;">
+                    <i class="fas fa-user-check mr-1"></i> LEAD ARTIST
+                </span>
+            </div>
+
+            <div class="modern-table-wrapper table-responsive">
+                <table id="MyArtworkList" class="table modern-datatable align-middle">
+                    <thead>
+                        <tr>
+                            <th>Item Code #</th>
+                            <th>Client Name</th>
+                            <th>Sender (AO)</th>
+                            <th>File Info & Brief</th>
+                            <th>File Access Link</th>
+                            <th>Status</th>
+                            <th style="min-width: 240px;">View Artwork</th>
+                        </tr>
+                    </thead>
+                    <tbody id="artistTaskTableBody">
+                        <!-- Dynamic Artist Work Table -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Companion Artwork Card -->
+        <div class="modern-work-card mb-0">
+            <div class="modern-card-header">
+                <div class="card-title-group">
+                    <div class="card-header-icon companion-indigo">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="modern-card-title">Companion Artwork</h3>
+                        <p class="modern-card-subtitle">Collaborative tasks where you are assisting as a companion artist</p>
+                    </div>
+                </div>
+                <span class="badge" style="background: #e0e7ff; color: #4338ca; padding: 7px 12px; border-radius: 8px; font-weight: 700; font-size: 11px;">
+                    <i class="fas fa-hands-helping mr-1"></i> COMPANION
+                </span>
+            </div>
+
+            <div class="modern-table-wrapper table-responsive">
+                <table id="MyArtworkListCompanion" class="table modern-datatable align-middle">
+                    <thead>
+                        <tr>
+                            <th>Item Code #</th>
+                            <th>Client Name</th>
+                            <th>Sender (AO)</th>
+                            <th>File Info & Brief</th>
+                            <th>File Access Link</th>
+                            <th>Status</th>
+                            <th style="min-width: 240px;">View Artwork</th>
+                        </tr>
+                    </thead>
+                    <tbody id="artistTaskTableBody2">
+                        <!-- Dynamic Artist Work Table -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
-<div class="row mr-4">
-    
-    
 
-    <div class="col-12">
-    
-        <div class="container-fluid">
-       
-       <div class="row">
-    <div class="col-md-12">
-       
-     
-            <!-- /.card-header -->
-        
-
-                 <!-- ========================================== -->
-                    <!-- 4. GRAPHIC ARTIST PAGE                     -->
-                    <!-- ========================================== -->
-                   
-                        <div class="alert role-highlight-banner border-success shadow-sm mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-paint-brush fa-2x text-success mr-3"></i>
-                                <div>
-                                    <h5 class="mb-0 font-weight-bold text-dark">Graphic Artist Workbench & Time Tracker</h5>
-                                    <p class="mb-0 text-muted">Receive assigned artwork  Click tracked File Link (alerts Supervisor & updates status of artwork) </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card card-success card-outline shadow-sm">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h3 class="card-title font-weight-bold text-success">
-                                    <i class="fas fa-list-alt mr-2"></i> My Artwork
-                                </h3>
-                            <span class="badge badge-success p-2">Logged in as: {{ Auth::user()->name }} </span>
-                            </div>
-                            <div class="card-body table-responsive p-0">
-                                <table id="MyArtworkList" class=" table table-bordered table-hover align-middle">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th>Item Code #</th>
-                                            <th>Client Name</th>
-                                            <th>Sender (AO)</th>
-                                            <th>File Info & Brief</th>
-                                            <th>File Access Link</th>
-                                            <th>Status</th>
-                                            {{-- <th>Live Clock</th> --}}
-                                            <th style="min-width: 240px;">View Artwork</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="artistTaskTableBody">
-                                        <!-- Dynamic Artist Work Table -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-
-
-                        {{-- timer clock --}}
-                        
-                   
-
-            <!-- /.card-body -->
-        
-    </div>
-</div>
-    </div>     
 
         {{-- end --}}
 
@@ -410,776 +507,7 @@
 
             @can('read-only')
           <!-- A. CONTROL PANEL (Start a new task) -->
-   
-  
 
-<form action="" method="POST">
-    @csrf
-    
-    <div class="form-group">
-        <label for="select-tag">Select Item:</label>
-        <select id="select-tag" name="tag_id" class="form-control select2 @error('tag_id') is-invalid @enderror" style="width: 100%;">
-            <option value="">-- Choose an option --</option>
-            @foreach($availableItemsForSelect as $list)
-                <option value="{{ $list->item_code }}" {{ old('tag_id') == $list->item_code ? 'selected' : '' }}>
-                    {{ $list->item_code }}
-                </option>
-            @endforeach
-        </select>
-        
-        @error('tag_id')
-            <span class="error invalid-feedback">{{ $message }}</span>
-        @enderror
-    </div>
-</form>
-
-                    <button id="btn_start_time"class="btn btn-secondary btn-success" tabindex="0" aria-controls="UsersTable" type="button" title="New" >
-                <span>
-                    <i class="fas fa-start"></i>
-                    Start
-                </span>
-            </button>
-            <button class="btn btn-secondary btn-warning" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Pause
-                </span>
-            </button>
-            <button id="btn_stop_time" class="btn btn-secondary btn-danger" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Stop
-                </span>
-            </button>
-
-
-    @can('is-readonly')
-    <div class="row  mr-4">
-    <div class="col-12 mt-4 ">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-solid fa-users"> </i> List of Users</h3>
-            </div>
-              <!-- /.card-header -->
-            <div class="card-body">
-                
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table id="UsersTable" class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User_id</th>
-                                    <th>Item Code</th>
-                                    <th>Start_time</th>
-                                    <th>Stop_time</th>
-                                    <th>Status</th>
-                                
-                                    <!--<th>Actions</th>-->
-                                    
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>           
-    </div>
-</div> 
-@endcan
-{{-- vectical timeline design --}}
-
-<!-- AdminLTE Timeline Container -->
-{{-- <div id="timelineContainer" class="timeline timeline-inverse">
-    @forelse($timeLineList as $row)
-         --}}
-        {{-- 1. DYNAMIC START BLOCK --}}
-        {{-- @if($row->start_time)
-            <div>
-                <i class="fas fa-play bg-success"></i>
-                <div class="timeline-item shadow-sm mb-3">
-                    <span class="time text-muted">
-                        <i class="far fa-clock"></i> 
-                        {{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}
-                    </span>
-                    <h3 class="timeline-header font-weight-bold border-0">
-                        <span class="badge badge-primary mr-2">Code: {{ $row->item_code }}</span> 
-                        <strong>{{ $row->item_name ?? 'Unknown Item' }}</strong> 
-                        <span class="text-success ml-2">Started</span>
-                    </h3>
-                    <div class="timeline-body pt-1 text-muted small">
-                        Tracking cycle initialized on <strong>{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</strong>
-                    </div>
-                </div>
-            </div>
-        @endif --}}
-
-        {{-- 2. DYNAMIC STOP BLOCK --}}
-        {{-- @if($row->stop_time)
-            <div>
-                <i class="fas fa-stop bg-danger"></i>
-                <div class="timeline-item shadow-sm mb-3">
-                    <span class="time text-muted">
-                        <i class="far fa-clock"></i> 
-                        {{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}
-                    </span>
-                    <h3 class="timeline-header font-weight-bold border-0">
-                        <span class="badge badge-primary mr-2">Code: {{ $row->item_code }}</span> 
-                        <strong>{{ $row->item_name ?? 'Unknown Item' }}</strong> 
-                        <span class="text-danger ml-2">Stopped</span>
-                    </h3>
-                    <div class="timeline-body pt-1 text-muted small">
-                        Process completed on <strong>{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</strong>
-                        @if($row->start_time)
-                            <span class="badge badge-secondary ml-2 py-1 px-2 font-weight-normal">
-                                <i class="fas fa-hourglass-half mr-1"></i>
-                                Duration: {{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        @endif
-                    </div>
-                </div>
-            </div> --}}
-        {{-- @endif
-
-    @empty
-        <div class="text-center p-4 text-muted">
-            <i class="fas fa-history fa-2x mb-2 text-gray"></i>
-            <p class="m-0">No continuous timeline records found.</p>
-        </div>
-    @endforelse --}}
-
-    <!-- Final endpoint marker -->
-    {{-- <div>
-        <i class="fas fa-clock bg-gray text-white"></i>
-    </div>
-</div> --}}
-
-{{-- <div class="horizontal-timeline-wrapper card-body border-top">
-
-    @php
-        $groupedTimeline = collect($timeLineList)->groupBy('item_code');
-    @endphp
-
-    @forelse($groupedTimeline as $itemCode => $events)
-
-        @php
-            $firstRow = $events->first();
-        @endphp
-
-        <div class="item-timeline-lane w-100"> --}}
-
-            {{-- ITEM HEADER --}}
-            {{-- <div class="item-lane-header">
-
-                <div class="item-title-area">
-                    <div class="item-title-icon">
-                        <i class="fas fa-box-open"></i>
-                    </div>
-
-                    <div>
-                        <h5 class="font-weight-bold text-dark mb-1">
-                            {{ $firstRow->item_name ?? 'Unknown Item' }}
-                        </h5>
-
-                        <small class="text-muted">
-                            Activity timeline
-                        </small>
-                    </div>
-                </div>
-
-                <span class="item-code-badge">
-                    <i class="fas fa-hashtag mr-1"></i>
-                    {{ $itemCode ?? 'N/A' }}
-                </span>
-
-            </div> --}}
-
-            {{-- HORIZONTAL TIMELINE --}}
-            {{-- <div class="horizontal-scroll-lane">
-
-                @foreach($events as $row) --}}
-
-                    {{-- START EVENT --}}
-                    {{-- @if($row->start_time)
-
-                        <div class="timeline-node">
-
-                            <div class="node-icon-badge bg-success"></div>
-
-                            <div class="timeline-modern-card">
-
-                                <div class="timeline-card-header">
-
-                                    <span class="timeline-status started">
-                                        <i class="fas fa-play-circle"></i>
-                                        STARTED
-                                    </span>
-
-                                    <span class="timeline-clock">
-                                        <i class="far fa-clock mr-1"></i>
-                                        {{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}
-                                    </span>
-
-                                </div>
-
-                                <div class="timeline-card-body">
-
-                                    <div class="timeline-user-box">
-                                        <div class="timeline-user-avatar">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-
-                                        <div>
-                                            <div class="timeline-user-name">
-                                                {{ $row->user_name ?? 'Unknown User' }}
-                                            </div>
-
-                                            <span class="timeline-user-id">
-                                                User ID: {{ $row->user_id ?? 'N/A' }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="timeline-date">
-                                        <i class="far fa-calendar-alt mr-1"></i>
-                                        Date:
-                                        <strong>
-                                            {{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}
-                                        </strong>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                    @endif --}}
-
-                    {{-- STOP EVENT --}}
-                    {{-- @if($row->stop_time)
-
-                        <div class="timeline-node">
-
-                            <div class="node-icon-badge bg-danger"></div>
-
-                            <div class="timeline-modern-card">
-
-                                <div class="timeline-card-header">
-
-                                    <span class="timeline-status stopped">
-                                        <i class="fas fa-stop-circle"></i>
-                                        STOPPED
-                                    </span>
-
-                                    <span class="timeline-clock">
-                                        <i class="far fa-clock mr-1"></i>
-                                        {{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}
-                                    </span>
-
-                                </div>
-
-                                <div class="timeline-card-body">
-
-                                    <div class="timeline-user-box">
-                                        <div class="timeline-user-avatar">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-
-                                        <div>
-                                            <div class="timeline-user-name">
-                                                {{ $row->user_name ?? 'Unknown User' }}
-                                            </div>
-
-                                            <span class="timeline-user-id">
-                                                User ID: {{ $row->user_id ?? 'N/A' }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="timeline-date">
-                                        <i class="far fa-calendar-alt mr-1"></i>
-                                        Date:
-                                        <strong>
-                                            {{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}
-                                        </strong>
-                                    </div>
-
-                                    @if($row->start_time)
-                                        <div class="timeline-duration">
-                                            <i class="fas fa-hourglass-half"></i>
-
-                                            <span>
-                                                Duration:
-                                                {{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(
-                                                    \Carbon\Carbon::parse($row->stop_time),
-                                                    true
-                                                ) }}
-                                            </span>
-                                        </div>
-                                    @endif
-
-                                </div>
-                            </div>
-                        </div>
-
-                    @endif
-
-                @endforeach
-
-            </div>
-        </div>
-
-    @empty
-
-        <div class="timeline-empty w-100">
-            <i class="fas fa-history"></i>
-
-            <h6 class="font-weight-bold text-secondary">
-                No timeline activity yet
-            </h6>
-
-            <p class="small mb-0">
-                Activity records will appear here when available.
-            </p>
-        </div>
-
-    @endforelse
-
-</div> --}}
-
-<!-- Modern Tracking Grid Wrapper --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row line --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll step track container -->
-                    </div> <!-- End lane right node container track row -->
-                </div> <!-- End global item tracking block wrapper line -->
-            @endif
-
-            {{-- 1. CLEAN MODERN BLOCK ROW COMPONENT CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white rounded-2xl p-4 shadow-sm border border-slate-100 w-100 d-block mb-4" style="border-radius: 16px;">
-                
-                <!-- Minimal Row Header Title Line Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-xl d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #eff6ff; color: #2563eb; border-radius: 12px;">
-                            <i class="fas fa-cube" style="font-size: 16px;"></i>
-                        </div>
-                        <div>
-                            <h5 class="m-0 font-weight-bold tracking-tight text-slate-900" style="font-size: 16px; color: #0f172a;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h5>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 12px; color: #64748b;">Code Reference: {{ $row->item_code }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Process Flow Stream -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-2 pt-3 align-items-start" style="position: relative; gap: 40px;">
-                        
-                        <!-- Minimal background connect rail line -->
-                        <div class="process-rail-line" style="position: absolute; top: 18px; left: 24px; right: 24px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. MINIMALIST PLAY / START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #bbf7d0; color: #15803d; border: 4px solid #fff;">
-                        <i class="fas fa-play" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #f0fdf4; color: #16a34a; font-size: 11px; border-radius: 6px;">STARTED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. MINIMALIST STOP / PAUSE EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-left" style="width: 240px; position: relative; z-index: 2;">
-                <!-- Modern Interactive Mini Circle Node Pin -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 36px; height: 36px; background: #fecaca; color: #b91c1c; border: 4px solid #fff;">
-                        <i class="fas fa-stop" style="font-size: 10px;"></i>
-                    </div>
-                    <div>
-                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #fef2f2; color: #dc2626; font-size: 11px; border-radius: 6px;">STOPPED</span>
-                    </div>
-                </div>
-
-                <!-- Translucent Modern Data Card Capsule -->
-                <div class="p-3 border border-slate-100 shadow-sm transition-all" style="background: #fafafa; border-radius: 12px;">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-slate-500 font-weight-semibold" style="font-size: 11px; color: #64748b;"><i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</small>
-                        <small class="text-slate-400" style="font-size: 11px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</small>
-                    </div>
-                    
-                    <div class="bg-white p-2 rounded border border-slate-100 d-flex align-items-center shadow-2xs mb-2" style="border-radius: 8px;">
-                        <div class="bg-slate-50 text-slate-400 rounded p-1 mr-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 6px;">
-                            <i class="fas fa-user-check" style="font-size: 11px;"></i>
-                        </div>
-                        <div style="line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <span class="d-block font-weight-bold text-slate-800" style="font-size: 12px; color: #334155;">{{ $row->user_name ?? 'System' }}</span>
-                            <span class="text-slate-400 font-weight-medium" style="font-size: 10px; color: #94a3b8;">ID: {{ $row->user_id }}</span>
-                        </div>
-                    </div>
-
-                    @if($row->start_time)
-                        <div class="d-flex align-items-center justify-content-between px-1 py-1 rounded" style="background: #f1f5f9;">
-                            <span class="text-uppercase tracking-wider font-weight-bold text-slate-400" style="font-size: 9px; color: #64748b;">Duration Tracked</span>
-                            <span class="font-weight-bold text-slate-700" style="font-size: 11px; color: #334155;">
-                                {{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endif
-
-        {{-- Tie together all row markup layout segments at loop termination --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal step track container -->
-                </div> <!-- End lane right node container track row -->
-            </div> <!-- End global item tracking block wrapper line -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border rounded-2xl shadow-xs" style="border-radius: 16px;">
-            <div class="text-slate-300 mb-3"><i class="fas fa-inbox fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-
-
-{{-- ------------------------------------------ --}}
-
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-<!-- Modern Circular Timeline Track Grid --> 
-<div class="timeline-tracking-grid d-flex flex-column gap-5 p-4" style="background: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
-    @php $currentGroupCode = null; @endphp
-
-    @forelse($timeLineList as $row)
-        {{-- Every unique item code drops down neatly to its own full width row lane --}}
-        @if($currentGroupCode !== $row->item_code)
-            @if(!$loop->first)
-                        </div> <!-- End horizontal scroll track -->
-                    </div> <!-- End lane container -->
-                </div> <!-- End global item tracking block -->
-            @endif
-
-            {{-- 1. STREAMLINED ROW CONTAINER --}}
-            <div class="asset-tracking-row-block bg-white p-4 shadow-sm border border-slate-100 w-100 d-block mb-5" style="border-radius: 24px;">
-                
-                <!-- Modern Row Header Title Layout -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-slate-100 w-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="d-flex align-items-center justify-content-center shadow-xs" style="width: 54px; height: 54px; background: #f1f5f9; color: #475569; border-radius: 50%;">
-                            <i class="fas fa-layer-group" style="font-size: 22px;"></i>
-                        </div>
-                        <div>
-                            <!-- Increased Main Title to h4 and font-size: 20px -->
-                            <h4 class="m-0 font-weight-bold tracking-tight" style="font-size: 20px; color: #0f172a; letter-spacing: -0.3px;">
-                                {{ $row->item_name ?? 'Item Tracking Log' }}
-                            </h4>
-                            <!-- Increased Reference Subtitle to font-size: 14px -->
-                            <span class="font-weight-medium" style="font-size: 14px; color: #64748b;">Identifier: <strong class="text-primary">{{ $row->item_code }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Horizontal Flow Lane Track -->
-                <div class="item-process-lane-track w-100">
-                    <div class="horizontal-step-track d-flex flex-nowrap overflow-auto pb-4 pt-4 align-items-start" style="position: relative; gap: 56px;">
-                        
-                        <!-- Smooth underlying tracking connection rail line (adjusted top alignment for larger circles) -->
-                        <div class="process-rail-line" style="position: absolute; top: 80px; left: 60px; right: 60px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 10px;"></div>
-            
-            @php $currentGroupCode = $row->item_code; @endphp
-        @endif
-
-        {{-- 2. ULTRA-MODERN CIRCULAR START EVENT NODE --}}
-        @if($row->start_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #f0fdf4; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-success" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #bbf7d0;">
-                            <i class="fas fa-play mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">START</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->start_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->start_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 3. ULTRA-MODERN CIRCULAR STOP EVENT NODE --}}
-        @if($row->stop_time)
-            <div class="process-node-card flex-shrink-0 text-center" style="width: 170px; position: relative; z-index: 2;">
-                <!-- Main Concentric Status Circle Ring Container (Scaled up to 120px) -->
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow" 
-                         style="width: 120px; height: 120px; background: #fef2f2; border: 4px solid #fff; transition: transform 0.2s ease;">
-                        <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-danger" 
-                             style="width: 100px; height: 100px; background: #ffffff; border: 2px dashed #fecaca;">
-                            <i class="fas fa-stop mb-1" style="font-size: 14px;"></i>
-                            <!-- Increased Badge text inside circle to font-size: 12px -->
-                            <span class="font-weight-bold tracking-wider" style="font-size: 12px; letter-spacing: 0.5px;">STOP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Circular Meta Information Block Details -->
-                <div class="text-center px-1">
-                    <!-- Increased Time font to font-size: 16px -->
-                    <div class="font-weight-bold text-slate-800 mb-1" style="font-size: 16px; color: #1e293b;">{{ \Carbon\Carbon::parse($row->stop_time)->format('h:i A') }}</div>
-                    <!-- Increased Date font to font-size: 13px -->
-                    <div class="text-slate-400 mb-2 font-weight-medium" style="font-size: 13px; color: #94a3b8;">{{ \Carbon\Carbon::parse($row->stop_time)->format('M d, Y') }}</div>
-                    
-                    <!-- Duration Badge Bubble Pill (Increased padding and font-size: 12px) -->
-                    @if($row->start_time)
-                        <div class="mb-2">
-                            <span class="badge text-white font-weight-bold px-3 py-1" style="background: #475569; font-size: 12px; border-radius: 12px;">
-                                <i class="fas fa-hourglass-half mr-1"></i>{{ \Carbon\Carbon::parse($row->start_time)->diffForHumans(\Carbon\Carbon::parse($row->stop_time), true) }}
-                            </span>
-                        </div>
-                    @endif
-
-                    <!-- Increased User capsule sizing and font-size: 13px -->
-                    <div class="inline-flex align-items-center bg-light px-3 py-2 border text-truncate w-100" style="border-radius: 20px; font-size: 13px; background: #f8fafc;" title="{{ $row->user_name ?? 'System' }}">
-                        <i class="fas fa-user-circle text-muted mr-1" style="font-size: 14px;"></i>
-                        <span class="text-slate-600 font-weight-bold text-truncate d-inline-block" style="max-width: 110px;">{{ $row->user_name ?? 'System' }}</span>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Final closure tags structure generation validation check --}}
-        @if($loop->last)
-                    </div> <!-- End horizontal scroll track -->
-                </div> <!-- End lane container -->
-            </div> <!-- End global item tracking block -->
-        @endif
-
-    @empty
-        <div class="w-100 text-center p-5 bg-white border shadow-xs" style="border-radius: 24px;">
-            <div class="text-slate-300 mb-2"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #cbd5e1;"></i></div>
-            <p class="m-0 font-weight-bold text-slate-500" style="color: #64748b; font-size: 16px;">No horizontal timeline activity metrics captured.</p>
-        </div>
-    @endforelse
-</div>
-
-{{-- horizontal timeline Design --}}
-
-{{-- <div class="row mr-4">
-    <div class="col-12 mt-4">
-        <div class="card card-primary card-outline">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">
-                    <i class="fas fa-stream mr-1"></i> Item Activity Timelines
-                </h3>
-                <div>
-                    <a href="{{ route('users.create') }}" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus"></i> Add User
-                    </a>
-                </div>
-            </div>
-            
-            <div class="card-body">
-                <!-- Hidden DataTables instance for AJAX server-side fetching -->
-                <table id="UsersTable" class="d-none">
-                    <thead><tr><th>Data</th></tr></thead>
-                </table>
-
-                <!-- Main container for Item Cards -->
-                <div id="itemTimelinesContainer">
-                    <div class="text-center p-4 text-muted">
-                        <i class="fas fa-spinner fa-spin fa-2x"></i>
-                        <p class="mt-2">Loading item timelines...</p>
-                    </div>
-                </div>
-            </div>
-        </div>          
-    </div>
-</div> --}}
 @endcan
 
 @include('partials.modal.item_search')
@@ -1538,6 +866,85 @@ var FileSendLinkTable = $('#MyArtworkList').DataTable({
     ]
 });
 
+var FileSendLinkTableCompanion = $('#MyArtworkListCompanion').DataTable({
+    responsive: true,
+    lengthChange: true,
+    autoWidth: false,
+    serverSide: true,
+    processing: true,
+    order: [[4, 'desc']],
+    // Custom DOM layout: places length menu & search on top, table in middle, info & pagination at bottom
+    dom: '<"row p-3 align-items-center"<"col-md-6"l><"col-md-6"f>>' +
+         '<"row"<"col-md-12"tr>>' +
+         '<"row p-3 align-items-center"<"col-md-5"i><"col-md-7"p>>',
+         
+    language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search records...",
+        lengthMenu: "Show _MENU_ entries",
+        processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
+    },
+    ajax: {
+        url: "{{ route('getAllMyArtworkCompanion') }}",
+        type: 'GET'
+    },
+    columns: [
+        { data: 'item_code' },
+        { data: 'client_name' },
+         { data: 'ao_name' },
+        { data:'item_description' },
+        // { data: 'ao_name' },
+
+        // Shared File / Link Column (Styled as Inspect Link Button)
+        {
+            data: 'file_link',
+            render: function(data, type, row) {
+                if (!data) return '<span class="text-muted">N/A</span>';
+
+                return `
+                    <a href="${data}" 
+                       class="btn btn-xs btn-outline-info file-link" 
+                       data-id="${row.id}" 
+                       target="_blank">
+                        <i class="fas fa-external-link-alt mr-1"></i> Inspect Link
+                    </a>
+                `;
+            }
+        },
+
+         { data: 'status' },
+
+
+        //view artwork 
+        {
+            data: null,
+            orderable: false,
+            searchable: false,
+
+            render: function(data, type, row) {
+                // If an artist is assigned, show their name inside a badge/text
+               
+            return `
+                <a href="${"{{ route('artwork', ':id') }}".replace(':id', row.item_code)}" 
+                    class="btn btn-xs btn-outline-info " 
+                    data-id="${row.item_code}" 
+                    target="_blank">
+                    <i class="fas fa-eye mr-1"></i> View Artwork
+                </a>
+                
+                <a href="${"{{ route('timeline', ':id') }}".replace(':id', row.item_code)}" 
+                class="btn btn-xs btn-outline-info " 
+                data-id="${row.item_code}" 
+                target="_blank">
+                    <i class="fas fa-eye mr-1"></i> View TimeLine
+                </a>
+                `;
+            
+            }
+        },
+        
+    ]
+});
 
 // Row selection & Data extraction event listener
 $('#FileSendTable tbody').on('click', 'tr', function (e) {
@@ -1597,6 +1004,31 @@ $('#FileSendTable').on('click', '.file-link', function(e) {
     });
 });
 
+
+$('#FileSendTableCompanion').on('click', '.file-link', function(e) {
+    e.preventDefault();
+
+    const fileUrl = $(this).attr('href');
+    const fileId = $(this).data('id');
+
+    $.ajax({
+        url: '/update-file-status',
+        type: 'POST',
+        data: {
+            id: fileId,
+            status: 'Opened'
+        },
+        success: function(response) {
+            // Open file after database update succeeds
+            window.open(fileUrl, '_blank');
+            console.log('Status updated successfully');
+        },
+        error: function(xhr) {
+            console.error(xhr.responseJSON || xhr.responseText);
+            alert('Failed to update status.');
+        }
+    });
+});
     //vertical timeline
     var UsersTable1 = $('#UsersTable1').DataTable({
         "responsive": true,

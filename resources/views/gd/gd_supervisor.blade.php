@@ -1087,7 +1087,7 @@ var FileSendLinkTable = $('#FileSendTable_NoItemCode').DataTable({
             <button type="button" class="btn ${specClass} btn-specifications" data-id="${row.id}" data-itemcode="${row.item_code ?? ''}" title="${specText}"> 
                 <i class="fas ${specIcon} mr-1"></i> ${specText} 
             </button>  -->
-        </div>
+        </div> 
     `;
 }
         },

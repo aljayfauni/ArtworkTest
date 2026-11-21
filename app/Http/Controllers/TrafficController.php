@@ -351,7 +351,7 @@ class TrafficController extends Controller
     $record->save();
 
     return response()->json([
-        'success' => true
+        'success' => true  
     ]);
 }
 

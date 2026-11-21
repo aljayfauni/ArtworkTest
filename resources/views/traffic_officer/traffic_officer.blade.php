@@ -7,69 +7,216 @@
 @section('plugins.DatatablesPlugins', true)
 
 @section('content_header')
-    {{-- <h1><i class="fas fa-solid fa-chart-line"></i> Dashboard</h1> --}}
-    @can('is-admin')
-    <style>
-        /* .main-sidebar {  }
-        .content-wrapper, .main-header { margin-left: 0 !important; } */
-    </style>
-    <!-- Custom CSS for Horizontal Scrolling Timeline Layout -->
-    {{-- <style>
-    .horizontal-timeline-wrapper {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 20px 10px;
+<style>
+    /* Modern Workbench Styling matching Timeline View */
+    .workbench-wrapper {
+        background: #f8fafc;
+        padding: 24px;
+        border-radius: 16px;
+        min-height: calc(100vh - 120px);
+    }
+
+    .modern-banner {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #4338ca; /* Indigo accent for Traffic Control */
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
         display: flex;
-        align-items: flex-start;
-        gap: 25px;
-        scroll-behavior: smooth;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
     }
-    .timeline-node {
-        min-width: 320px;
-        max-width: 320px;
-        display: inline-block;
-        vertical-align: top;
-        white-space: normal; /* Allows text to wrap normally inside the card */
-        position: relative;
-    }
-    /* Horizontal connector line linking the cards */
-    .timeline-node:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 25px;
-        left: 100%;
-        width: 25px;
-        height: 4px;
-        background-color: #dee2e6;
-        z-index: 1;
-    }
-    .node-icon-badge {
+
+    .banner-icon-box {
         width: 50px;
         height: 50px;
-        border-radius: 50%;
+        border-radius: 14px;
+        background: #e0e7ff;
+        color: #4338ca;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px auto;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        color: #fff;
-        font-size: 1.2rem;
+        font-size: 20px;
+        flex-shrink: 0;
     }
-</style> --}}
 
+    .modern-user-pill {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modern-user-pill .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4338ca;
+    }
+
+    /* Modern Card */
+    .modern-work-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .modern-card-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #ffffff;
+    }
+
+    .card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-header-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .modern-card-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .modern-card-subtitle {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    /* Clean Table Styling */
+    .modern-table-wrapper {
+        padding: 16px 24px 24px;
+    }
+
+    .modern-scroll-container {
+        max-height: 520px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    table.modern-datatable {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0 !important;
+    }
+
+    table.modern-datatable thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8fafc !important;
+        color: #475569 !important;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px 16px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-top: none !important;
+        white-space: nowrap;
+    }
+
+    table.modern-datatable tbody td {
+        padding: 14px 16px !important;
+        vertical-align: middle !important;
+        color: #334155;
+        font-size: 13.5px;
+        border-bottom: 1px solid #f1f5f9 !important;
+        background: #ffffff;
+        transition: background-color 0.15s ease;
+    }
+
+    table.modern-datatable tbody tr:hover td {
+        background: #f8fafc !important;
+    }
+
+    table.modern-datatable tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* DataTables Search & Pagination Polish */
+    .modern-table-wrapper .dataTables_filter input {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: 13px;
+        color: #1e293b;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .modern-table-wrapper .dataTables_filter input:focus {
+        border-color: #4338ca;
+        box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
+    }
+
+    .modern-table-wrapper .dataTables_length select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+
+    @media (max-width: 576px) {
+        .workbench-wrapper {
+            padding: 14px;
+        }
+        .modern-card-header, .modern-table-wrapper {
+            padding: 14px;
+        }
+    }
+</style>
+
+@can('is-admin')
+{{-- Preserved Admin Timeline CSS --}}
 <style>
     .horizontal-timeline-wrapper {
         background: #f8fafc;
         padding: 24px;
         border-radius: 16px;
     }
-
     .item-timeline-lane + .item-timeline-lane {
         border-top: 1px solid #e2e8f0;
         padding-top: 24px;
         margin-top: 12px;
     }
-
     .item-lane-header {
         display: flex;
         align-items: center;
@@ -78,13 +225,11 @@
         gap: 12px;
         margin-bottom: 18px;
     }
-
     .item-title-area {
         display: flex;
         align-items: center;
         gap: 12px;
     }
-
     .item-title-icon {
         width: 46px;
         height: 46px;
@@ -96,7 +241,6 @@
         color: #4338ca;
         font-size: 19px;
     }
-
     .item-code-badge {
         background: #e2e8f0;
         color: #475569;
@@ -105,7 +249,6 @@
         font-size: 12px;
         font-weight: 600;
     }
-
     .horizontal-scroll-lane {
         display: flex;
         flex-wrap: nowrap;
@@ -116,7 +259,6 @@
         scrollbar-width: thin;
         scrollbar-color: #cbd5e1 transparent;
     }
-
     .timeline-node {
         width: 275px;
         min-width: 275px;
@@ -124,7 +266,6 @@
         position: relative;
         padding-top: 17px;
     }
-
     .timeline-node::before {
         content: "";
         position: absolute;
@@ -134,11 +275,9 @@
         height: 2px;
         background: #cbd5e1;
     }
-
     .timeline-node:last-child::before {
         right: 50%;
     }
-
     .node-icon-badge {
         position: absolute;
         z-index: 2;
@@ -150,15 +289,8 @@
         box-sizing: content-box;
         border-radius: 50%;
     }
-
-    .node-icon-badge.bg-success {
-        background: #16a34a !important;
-    }
-
-    .node-icon-badge.bg-danger {
-        background: #dc2626 !important;
-    }
-
+    .node-icon-badge.bg-success { background: #16a34a !important; }
+    .node-icon-badge.bg-danger { background: #dc2626 !important; }
     .timeline-modern-card {
         height: 100%;
         overflow: hidden;
@@ -168,12 +300,10 @@
         box-shadow: 0 3px 12px rgba(15, 23, 42, .05);
         transition: transform .2s ease, box-shadow .2s ease;
     }
-
     .timeline-modern-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 25px rgba(15, 23, 42, .09);
     }
-
     .timeline-card-header {
         display: flex;
         justify-content: space-between;
@@ -182,7 +312,6 @@
         padding: 15px;
         border-bottom: 1px solid #f1f5f9;
     }
-
     .timeline-status {
         display: inline-flex;
         align-items: center;
@@ -193,28 +322,15 @@
         font-weight: 800;
         letter-spacing: .4px;
     }
-
-    .timeline-status.started {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .timeline-status.stopped {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
+    .timeline-status.started { background: #dcfce7; color: #166534; }
+    .timeline-status.stopped { background: #fee2e2; color: #991b1b; }
     .timeline-clock {
         color: #475569;
         font-size: 12px;
         font-weight: 700;
         white-space: nowrap;
     }
-
-    .timeline-card-body {
-        padding: 15px;
-    }
-
+    .timeline-card-body { padding: 15px; }
     .timeline-user-box {
         display: flex;
         align-items: center;
@@ -225,7 +341,6 @@
         background: #f8fafc;
         border: 1px solid #f1f5f9;
     }
-
     .timeline-user-avatar {
         display: flex;
         align-items: center;
@@ -237,30 +352,20 @@
         background: #e2e8f0;
         color: #475569;
     }
-
     .timeline-user-name {
         color: #1e293b;
         font-size: 13px;
         font-weight: 700;
         overflow-wrap: anywhere;
     }
-
     .timeline-user-id {
         display: block;
         margin-top: 3px;
         color: #94a3b8;
         font-size: 11px;
     }
-
-    .timeline-date {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .timeline-date strong {
-        color: #334155;
-    }
-
+    .timeline-date { color: #64748b; font-size: 12px; }
+    .timeline-date strong { color: #334155; }
     .timeline-duration {
         display: flex;
         align-items: center;
@@ -273,166 +378,92 @@
         font-size: 12px;
         font-weight: 600;
     }
-
     .timeline-empty {
         text-align: center;
         padding: 50px 15px;
         color: #94a3b8;
     }
-
     .timeline-empty i {
         display: block;
         font-size: 34px;
         margin-bottom: 12px;
     }
-
-    @media (max-width: 576px) {
-        .horizontal-timeline-wrapper {
-            padding: 15px;
-        }
-
-        .timeline-node {
-            width: 255px;
-            min-width: 255px;
-            flex-basis: 255px;
-        }
-
-        .item-title-area h5 {
-            font-size: 16px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .timeline-modern-card {
-            transition: none;
-        }
-    }
-    .clock-widget{
-        float: right;
-    }
+    .clock-widget { float: right; }
 </style>
 @endcan
 @stop
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <section class="content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center justify-content-between">
+<div class="container-fluid pt-3 pb-4">
+    <div class="workbench-wrapper">
 
-            {{-- Page Title --}}
-        
+        <!-- Modern Header Banner -->
+        <div class="modern-banner">
+            <div class="d-flex align-items-center" style="gap: 16px;">
+                <div class="banner-icon-box">
+                    <i class="fas fa-user-gear"></i>
+                </div>
+                <div>
+                    <h4 class="mb-1 font-weight-bold" style="color: #0f172a; font-size: 19px;">
+                        Traffic Controller
+                    </h4>
+                    <p class="mb-0" style="color: #64748b; font-size: 13.5px;">
+                        Receives file links from Account Officers (AO) and verifies artwork requirements
+                    </p>
+                </div>
+            </div>
 
+            <div class="modern-user-pill">
+                <span class="status-dot"></span>
+                <span style="color: #64748b; font-weight: 500;">Controller:</span>
+                <span>{{ Auth::user()->name }}</span>
+            </div>
         </div>
-    </div>
-</section>
+
+        <!-- Incoming Request Queue Card -->
+        <div class="modern-work-card mb-0">
+            <div class="modern-card-header">
+                <div class="card-title-group">
+                    <div class="card-header-icon">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div>
+                        <h3 class="modern-card-title">1. Incoming Request Item</h3>
+                        <p class="modern-card-subtitle">Supplied file verification &amp; routing queue</p>
+                    </div>
+                </div>
+                <span class="badge" style="background: #e0e7ff; color: #4338ca; padding: 7px 12px; border-radius: 8px; font-weight: 700; font-size: 11px;">
+                    <i class="fas fa-inbox mr-1"></i> VERIFICATION QUEUE
+                </span>
+            </div>
+
+            <div class="modern-table-wrapper">
+                <div class="modern-scroll-container table-responsive">
+                    <table id="FileSendTable" class="table modern-datatable align-middle">
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Client Name</th>
+                                <th>Sender Name</th>
+                                <th>RFA Reference</th>
+                                <th>Shared File/Link</th>
+                                <th>Date Sent</th>
+                                <th>Status</th>
+                                <th>View</th>
+                                <th>Action</th>
+                                <th>Check ArtWork</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic Incoming Request Table -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
-<div class="row mr-4">
-    
-    
-
-    <div class="col-12">
-    
-        <div class="container-fluid">
-           <div class="alert role-highlight-banner border-secondary shadow-sm bg-white" style="border-left:5px solid;" >
-                            <div class="d-flex align-items-center">
-                                {{-- <i class="fas fa-solid fa-traffic-light fa-2x text-secondary mr-3"></i> --}}
-                                <i class="fas fa-solid fa-user-gear fa-2x text-secondary mr-3"></i>
-                                <div>
-                                    <h5 class="mb-0 font-weight-bold text-dark">Traffic Controller</h5>
-                                    <p class="mb-0 text-muted">Recieves file links from AO, and Check the requierments.</p>
-                                </div>
-                            </div>
-                        </div>
-       <div class="row">
-    <div class="col-md-12">
-        <div class="card card-secondary card-outline shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold text-dark">
-                    <i class="fas fa-file-signature text-secondary mr-2"></i>1. Incoming Request Item
-                     {{-- <i class="fas fa-file-signature text-warning mr-2"></i>1. Incoming Request &amp; Supplied File Verification Queue --}}
-                </h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0 " style="max-height: 400px;">
-                <table id="FileSendTable" class="table table-bordered table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>Item Code</th>
-                            <th>Client Name</th>
-                            <th>Sender Name</th>
-                            <th>RFA Reference</th>
-
-                            {{-- <th>Sender Email</th> --}}
-                            {{-- <th>Recipient Email</th> --}}
-                            <th>Shared File/Link</th>
-                            <th>Date Sent</th>
-                            <th>Status</th>
-                              <th>View</th>
-                            <th>Action</th>
-                            <th>Check ArtWork</th>
-                           
-                            <!--<th>Actions</th>-->
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-            <!-- /.card-body -->
-        </div>
-    </div>
-        <div class="col-md-12">
-        {{-- <div class="card card-secondary card-outline shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold text-dark">
-                    <i class="fas fa-hourglass-end text-warning mr-2"></i>1. Incoming Request Item No Item Code
-                     {{-- <i class="fas fa-file-signature text-warning mr-2"></i>1. Incoming Request &amp; Supplied File Verification Queue --}}
-                {{-- </h3>
-            </div> --}}
-            <!-- /.card-header -->
-            {{-- <div class="card-body table-responsive p-0 " style="max-height: 400px;">
-                <table id="FileSendTable_NoItemCode" class="table table-bordered table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>Item Code</th>
-                            <th>Client Name</th>
-                            <th>Item Description</th>
-                            <th>Sender Name</th> --}}
-                            {{-- <th>Sender Email</th> --}}
-                            {{-- <th>Recipient Email</th> --}}
-                            {{-- <th>Shared File/Link</th>
-                            <th>Date Sent</th>
-                            <th>Status</th>
-                            <th>Forms</th> --}}
-                             {{-- <th>To Assign</th>
-                             <th>View</th> --}}
-                            <!--<th>Actions</th>-->
-                        {{-- </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div> --}}
-            <!-- /.card-body -->
-        {{-- </div> --}} 
-    </div>
-</div>
-    </div>     
-
-        {{-- end --}}
-
-        {{-- request form   {{ route('artwork-request.store') }} --}}
-
-        {{-- checklist form test --}}
-
-    </div>
-</div> 
-
 @endsection
     
 @section('js')

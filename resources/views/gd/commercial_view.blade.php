@@ -727,6 +727,38 @@
                                 </table>
                             </div>
                         </div>
+
+                         <div class="modern-card">
+                            <div class="card-accent-bar accent-emerald"></div>
+                            <div class="modern-card-header">
+                                <h3 class="modern-card-title">
+                                    <span class="header-icon-pill icon-grad-emerald">
+                                        <i class="fas fa-users"></i>
+                                    </span>
+                                    <span>Companions</span>
+                                </h3>
+                                <span id="sharedTaskIdLabel" class="code-pill">{{ $artwork->item_code }}</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table modern-table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Companion User</th>
+                                            <th>Role</th>
+                                            <th>Time Spent</th>
+                                            <th>Duration Share</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timeSpentDuration_companion">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">
+                                                <i class="fas fa-spinner fa-spin mr-1 text-primary"></i> Loading breakdown records...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- RIGHT COLUMN: ASSETS & ACTIVITY LOGS -->
@@ -859,6 +891,77 @@
                 $('#timeSpentDuration').html(`<tr><td colspan="4" class="text-center text-danger py-3">Error fetching duration statistics.</td></tr>`);
             }
         });
+
+      
+        
+
+    }
+
+//companion
+    function getTimeSpentDurationCompanions() {
+        const currentUserId = "{{ auth()->id() }}";
+
+        // High-precision millisecond string renderer output pattern: "HH:MM:SS.mmm"
+        function formatMilliseconds(totalMs) {
+            if (!totalMs || totalMs < 0) return "00:00:00.000";
+
+            const hours = String(Math.floor(totalMs / 3600000)).padStart(2, '0');
+            const minutes = String(Math.floor((totalMs % 3600000) / 60000)).padStart(2, '0');
+            const seconds = String(Math.floor((totalMs % 60000) / 1000)).padStart(2, '0');
+            const ms = String(totalMs % 1000).padStart(3, '0');
+
+            return `${hours}:${minutes}:${seconds}.${ms}`;
+        }
+
+        $.ajax({
+            url: `/getTimeShareDurationCompanion/${encodeURIComponent(ARTWORK_ITEM_CODE)}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                let rowsHtml = '';
+
+                if (!response || response.length === 0) {
+                    rowsHtml = `<tr><td colspan="4" class="text-center text-muted py-3">No tracking logs found.</td></tr>`;
+                } else {
+                    response.forEach(function(item) {
+                        const isYou = String(item.user_id) === String(currentUserId) ? ' <small class="text-primary">(You)</small>' : '';
+
+                        const formattedTime = formatMilliseconds(item.time_spent_milliseconds);
+                        const share = item.duration_share_percentage || 0;
+
+                        let userRole = item.role;
+                        if (userRole == 4) userRole = 'Artist';
+
+                        rowsHtml += `
+                            <tr class="${isYou ? 'bg-light' : ''}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <strong class="text-dark">${item.user_name ?? 'Unknown User'}${isYou}</strong>
+                                    </div>
+                                </td>
+                                <td class="text-muted">${userRole ?? '-'}</td>
+                                <td><span class="timer-display text-primary font-mono font-weight-bold">${formattedTime}</span></td>
+                                <td>
+                                    <div class="progress progress-xs mb-1" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${share}%" aria-valuenow="${share}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted font-mono">${share}%</small>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                $('#timeSpentDuration_companion').html(rowsHtml);
+            },
+            error: function(xhr, status, error) {
+                console.error("Failed to fetch time consumption logs:", error);
+                $('#timeSpentDuration_companion').html(`<tr><td colspan="4" class="text-center text-danger py-3">Error fetching duration statistics.</td></tr>`);
+            }
+        });
+
+      
+        
+
     }
 
     // Activity Logs Loader
@@ -1038,6 +1141,7 @@
         // Initial Data Loads
         fetchNotifications();
         getTimeSpentDuration();
+          getTimeSpentDurationCompanions();
         loadActivityLogs(ARTWORK_ITEM_CODE);
 
         // ---------------------------------------------------------
@@ -1058,8 +1162,8 @@
             const today = now.toISOString().split('T')[0];
             const holidays = ['2026-11-05', '2026-12-25'];
 
-            if (day === 0 || day === 6 || holidays.includes(today)) return false;
-            return hour >= 8 && hour < 18;
+            if (day === 1 || day === 5 || holidays.includes(today)) return false;
+            return hour >= 0 && hour < 24;
         }
 
         // 2. Format Seconds -> HH:MM:SS

@@ -109,6 +109,71 @@ class ArtistController extends Controller
         }
     }
 
+        public function getAllMyArtworkCompanion()
+{
+    try {
+        // Fetch AoModel records via your helper function
+        // $fileRecieved = geFileRecievedLinkById() 
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+
+      $companionArtwork = CommercialArtist::join('companion', 'companion.item_code', '=', 'commercial_artist.item_code')
+    ->leftJoin('ao_file_links', 'ao_file_links.item_code', '=', 'commercial_artist.item_code')
+    ->leftJoin('users as lead_artist', 'lead_artist.emp_id', '=', 'commercial_artist.user_id')
+    ->where('companion.user_id', Auth::user()->emp_id)
+    // ->where('companion.status', '!=', 'Reassigned') // optional: remove if you want all statuses
+    // ->where('commercial_artist.status', '!=', 'Reassigned')
+    ->select(
+        'commercial_artist.*',
+        'ao_file_links.file_link',
+        'ao_file_links.item_code as ao_item_code',
+        'ao_file_links.ao_name',
+        'ao_file_links.file_info',
+        'ao_file_links.client_name',
+        'ao_file_links.status as ao_status',
+        'lead_artist.name as lead_artist_name',
+        'lead_artist.email as lead_artist_email',
+        'lead_artist.emp_id as lead_artist_emp_id',
+        'companion.id as companion_id',
+        'companion.item_code as companion_item_code',
+        'companion.rfa_reference as companion_rfa_reference',
+        'companion.user_id as companion_user_id',
+        'companion.status as companion_status',
+        'companion.added_by as companion_added_by'
+    )
+            // ->where('users.emp_id','commercial_artist.user_id')
+            
+            ->get();
+        
+            return datatables()->of($companionArtwork)
+           
+                ->addColumn('item_code', function($data) {
+                    return strtoupper($data->item_code);
+                })
+                ->addColumn('client_name', function($data) {
+                    return strtoupper($data->client_name);
+                })
+                ->addColumn('ao_name', function($data) {
+                    return $data->ao_name;
+                })  
+                ->addColumn('file_link', function($data) {
+                    return $data->file_link;
+                })    
+                ->addColumn('item_description', function($data) {
+                    return $data->file_info;
+                })   
+                ->addColumn('status', function($data) {
+                    return strtoupper($data->status);
+                })   
+                // ->addColumn('created_at', function($data) {
+                //     return strtoupper($data->created_at);
+                // })
+                ->make(true);
+        } catch(Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
+
     public function getAllArtist()
     {
         $artistLists = User::where('role_id', 4)->get();
@@ -243,6 +308,85 @@ public function getShareTimeDuration(Request $request)
                         ->join('users', 'users.emp_id', '=', 'commercial_artist.user_id')
                         ->select('users.id as uid')
                         ->where('commercial_artist.item_code', $artwork_id)
+                )
+                // Companions (convert emp_id -> users.id)
+                ->union(
+                    DB::table('companion')
+                        ->join('users', 'users.emp_id', '=', 'companion.user_id')
+                        ->select('users.id as uid')
+                        ->where('companion.item_code', $artwork_id)
+                );
+        }, 'u')
+        ->distinct()
+        ->pluck('uid');
+
+    // 2. Query users once by primary key and join their time logs
+    $userTimeConsumption = DB::table('users')
+        ->whereIn('users.id', $participantIds)
+        ->leftJoinSub(function ($query) use ($artwork_id, $timeLogTable) {
+            $query->from($timeLogTable)
+                ->select('user_id', 'action', 'recorded_at')
+                ->selectRaw("LEAD(recorded_at) OVER (PARTITION BY ao_file_link_id ORDER BY recorded_at) as next_recorded_at")
+                ->where('item_code', $artwork_id);
+        }, 'sub', 'sub.user_id', '=', 'users.id')
+        ->select(
+            'users.id as user_id',
+            'users.name as user_name',
+            'users.role_id as role'
+        )
+        ->selectRaw("
+            COALESCE(SUM(
+                CASE 
+                    WHEN sub.action IN ('start', 'resume') 
+                    THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
+                    ELSE 0 
+                END
+            ), 0) as time_spent_milliseconds
+        ")
+        ->selectRaw("
+            COALESCE(ROUND(
+                (CAST(SUM(
+                    CASE 
+                        WHEN sub.action IN ('start', 'resume') 
+                        THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
+                        ELSE 0 
+                    END
+                ) AS FLOAT) / 
+                NULLIF(SUM(SUM(
+                    CASE 
+                        WHEN sub.action IN ('start', 'resume') 
+                        THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
+                        ELSE 0 
+                    END
+                )) OVER(), 0)) * 100, 
+                2
+            ), 0) as duration_share_percentage
+        ")
+        ->groupBy('users.id', 'users.name', 'users.role_id')
+        ->get();
+
+    return response()->json($userTimeConsumption);
+}
+
+public function getShareTimeDurationCompanion(Request $request)
+{
+    $artwork_id = $request->id;
+    $timeLogTable = (new TimeLog)->getTable();
+
+    // 1. Collect distinct users.id across time_logs, commercial_artist, and companion
+    $participantIds = DB::query()
+        ->fromSub(function ($query) use ($artwork_id, $timeLogTable) {
+            // Users from time_logs (already stores users.id)
+            $query->from($timeLogTable)
+                ->select('user_id as uid')
+                ->where('item_code', $artwork_id)
+                ->whereNotNull('user_id')
+                // Main artists (convert emp_id -> users.id)
+                ->union(
+                    DB::table('companion')
+                        ->join('users', 'users.emp_id', '=', 'companion.user_id')
+                        ->select('users.id as uid')
+                        ->where('companion.item_code', $artwork_id)
                 )
                 // Companions (convert emp_id -> users.id)
                 ->union(
@@ -619,7 +763,7 @@ public function getActivityLogs(Request $request)
 
     // 2. Filter: ONLY show artist timer actions, reassignments, or added companions
  $query
-    ->where('log_type', '!=', 'history')
+    // ->where('log_type', '!=', 'history')
     ->where(function ($q) {
         $q->whereIn('activity_logs.event', [
             'timer_start',

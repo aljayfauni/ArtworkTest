@@ -131,11 +131,13 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
       Route::middleware('can:is-artist')->group(function () {
         Route::get('/artistPage', [ArtistController::class, 'gdArtistPage'])->name('artist');
         Route::get('/getAllMyArtworkList', [ArtistController::class,  'getAllMyArtworkList'])->name('getAllMyArtworkList');
+        Route::get('/getAllMyArtworkCompanion', [ArtistController::class,  'getAllMyArtworkCompanion'])->name('getAllMyArtworkCompanion');
        
             //for gd timer
     Route::post('/artwork/{id}/timer', [ArtistController::class, 'toggleTimer'])->name('artwork.timer');
     Route::get('/getTimeShareDuration/{id}', [ArtistController::class, 'getShareTimeDuration'])->name('getShareTimeDuration');
-    
+    Route::get('/getTimeShareDurationCompanion/{id}', [ArtistController::class, 'getShareTimeDurationCompanion'])->name('getShareTimeDuration');
+
        
        
     });

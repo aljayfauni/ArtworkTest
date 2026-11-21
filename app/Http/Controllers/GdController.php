@@ -709,6 +709,213 @@ class GdController extends Controller
 
 // }
 
+// public function assignToArtist(Request $request)
+// {
+//     $validated = $request->validate([
+//         'item_code'       => 'required|string',
+//         'assigned_artist' => 'nullable|string',
+//         'companions'      => 'nullable|array',
+//         'companions.*'    => 'string',
+//     ]);
+
+//     $item = null;
+
+//     DB::transaction(function () use ($validated, &$item) {
+//         $itemCode       = $validated['item_code'];
+//         $assignedArtist = $validated['assigned_artist'] ?? null;
+//         $companions     = $validated['companions'] ?? [];
+
+//         // 1. Update existing assignment or create a new one
+//         $item = CommercialArtist::firstOrNew(['item_code' => $itemCode]);
+//         $item->user_id = $assignedArtist;
+//         $item->save();
+
+//         // 2. If the new main artist was previously a companion, remove them from companions
+//         if ($assignedArtist) {
+//             Companion::where('item_code', $itemCode)
+//                 ->where('user_id', $assignedArtist)
+//                 ->delete();
+//         }
+
+//         // 3. Insert or update companions (excluding duplicates and the main artist)
+//         foreach (array_unique($companions) as $companionEmpId) {
+//             if ($companionEmpId != $assignedArtist) {
+//                 $companion = Companion::where('item_code', $itemCode)
+//                     ->where('user_id', $companionEmpId)
+//                     ->first();
+
+//                 if (!$companion) {
+//                     $companion = new Companion();
+//                 }
+
+//                 $companion->item_code = $itemCode;
+//                 $companion->user_id   = $companionEmpId;
+//                 $companion->save();
+//             }
+//         }
+
+//         // 4. Update FileVerification status
+//         $fileVerification = FileVerification::where('item_code', $itemCode)->first();
+//         if ($fileVerification) {
+//             $fileVerification->status = 'Assigned To Artist';
+//             $fileVerification->save();
+//         }
+
+//         // 5. Update Artwork & log activity
+//         $artwork       = AoModel::where('item_code', $itemCode)->first();
+//         $recipientUser = $assignedArtist ? User::where('emp_id', $assignedArtist)->first() : null;
+
+//         if ($artwork) {
+//             $artwork->status = 'Assigned To Artist';
+//             $artwork->save();
+
+//             $assignerName     = auth()->user()?->name ?? 'Supervisor';
+//             $artistName       = $recipientUser->name ?? ($assignedArtist ?? 'Unassigned');
+//             $activeCompanions = Companion::where('item_code', $itemCode)->pluck('user_id')->toArray();
+
+//             $artwork->activityLogs()->create([
+//                 'user_id'     => auth()->id(),
+//                 'log_type'    => 'history',
+//                 'event'       => 'artist_assigned',
+//                 'description' => "{$assignerName} assigned artist [{$artistName}] to Item Code [{$itemCode}].",
+//                 'properties'  => [
+//                     'artist_user_id' => $item->user_id,
+//                     'artist_name'    => $recipientUser->name ?? 'Unknown Artist',
+//                     'companions'     => $activeCompanions,
+//                 ],
+//             ]);
+//         }
+
+//         // 6. Send notification
+//         if ($recipientUser) {
+//             $recipientUser->notify(new ArtWorkNotification($item, 'gd_to_artist'));
+//         }
+//     });
+
+//     if ($request->ajax() || $request->wantsJson()) {
+//         return response()->json([
+//             'status'  => 'success',
+//             'message' => 'Item Assigned To Artist!',
+//         ]);
+//     }
+
+//     return redirect()->route('gd_supervisor')->with('success', 'Item Assigned To Artist!');
+// }
+
+
+// public function reassignArtist(Request $request)
+// {
+//     $validated = $request->validate([
+//         'item_code'       => 'required|string',
+//         'assigned_artist' => 'required|string',
+//         'companions'      => 'nullable|array',
+//         'companions.*'    => 'string',
+//         'remarks'         => 'nullable|string|max:500',
+//     ]);
+
+//     // Find the currently active assignment
+//     $previousAssignment = CommercialArtist::where('item_code', $validated['item_code'])
+//         ->whereNull('unassigned_at')
+//         ->latest('id')
+//         ->first();
+
+//     if (!$previousAssignment) {
+//         return response()->json([
+//             'message' => 'Item code has not been assigned yet. Please use Assign first.'
+//         ], 422);
+//     }
+
+//     if ($previousAssignment->user_id == $validated['assigned_artist']) {
+//         return response()->json([
+//             'message' => 'This artist is already the current assigned artist.'
+//         ], 422);
+//     }
+
+//     DB::transaction(function () use ($validated, $previousAssignment) {
+//         $itemCode    = $validated['item_code'];
+//         $newArtistId = $validated['assigned_artist'];
+//         $oldArtistId = $previousAssignment->user_id;
+//         $companions  = $validated['companions'] ?? [];
+//         $now         = now();
+
+//         // 1. Close the previous artist's session & calculate time spent as an integer
+//         $startTime = \Carbon\Carbon::parse($previousAssignment->assigned_at ?? $previousAssignment->created_at);
+//         $previousAssignment->unassigned_at    = $now;
+//         $previousAssignment->duration_minutes = (int) round($startTime->diffInMinutes($now));
+//         $previousAssignment->status           = 'Reassigned';
+//         $previousAssignment->save();
+
+//         // 2. Create a NEW row for the new artist with a fresh start timestamp
+//         $newAssignment = new CommercialArtist();
+//         $newAssignment->item_code   = $itemCode;
+//         $newAssignment->user_id     = $newArtistId;
+//         $newAssignment->assigned_at = $now;
+//         $newAssignment->status      = 'Active';
+//         $newAssignment->save();
+
+//         // 3. Remove new main artist from companions if they were previously one
+//         Companion::where('item_code', $itemCode)
+//             ->where('user_id', $newArtistId)
+//             ->delete();
+
+//         // 4. Keep existing companions & insert any new ones without duplicates
+//         foreach (array_unique($companions) as $companionEmpId) {
+//             if ($companionEmpId != $newArtistId) {
+//                 $companion = Companion::where('item_code', $itemCode)
+//                     ->where('user_id', $companionEmpId)
+//                     ->first();
+
+//                 if (!$companion) {
+//                     $companion = new Companion();
+//                 }
+
+//                 $companion->item_code = $itemCode;
+//                 $companion->user_id   = $companionEmpId;
+//                 $companion->save();
+//             }
+//         }
+
+//         // 5. Log activity & notify new artist
+//         $artwork       = AoModel::where('item_code', $itemCode)->first();
+//         $recipientUser = User::where('emp_id', $newArtistId)->first();
+
+//         if ($artwork) {
+//             $assignerName     = auth()->user()?->name ?? 'Supervisor';
+//             $artistName       = $recipientUser->name ?? $newArtistId;
+//             $remarkText       = !empty($validated['remarks']) ? " Remarks: {$validated['remarks']}" : '';
+//             $activeCompanions = Companion::where('item_code', $itemCode)->pluck('user_id')->toArray();
+
+//             $artwork->activityLogs()->create([
+//                 'user_id'     => auth()->id(),
+//                 'log_type'    => 'history',
+//                 'event'       => 'artist_reassigned',
+//                 'description' => "{$assignerName} re-assigned item [{$itemCode}] to [{$artistName}].{$remarkText}",
+//                 'properties'  => [
+//                     'old_artist_id'      => $oldArtistId,
+//                     'old_artist_minutes' => $previousAssignment->duration_minutes,
+//                     'new_artist_id'      => $newArtistId,
+//                     'companions'         => $activeCompanions,
+//                     'remarks'            => $validated['remarks'] ?? null,
+//                 ]
+//             ]);
+//         }
+
+//         if ($recipientUser) {
+//             $recipientUser->notify(new ArtWorkNotification($newAssignment, 'gd_to_artist'));
+//         }
+//     });
+
+//     return response()->json([
+//         'status'  => 'success',
+//         'message' => 'Item successfully re-assigned!'
+//     ]);
+// }
+// public function gdArtist(){
+    
+// return view('gd.commercial.artist');
+// }
+
+
 public function assignToArtist(Request $request)
 {
     $validated = $request->validate([
@@ -718,79 +925,16 @@ public function assignToArtist(Request $request)
         'companions.*'    => 'string',
     ]);
 
-    $item = null;
+    $artwork = AoModel::where('item_code', $validated['item_code'])->firstOrFail();
+    $artist  = !empty($validated['assigned_artist'])
+        ? User::where('emp_id', $validated['assigned_artist'])->firstOrFail()
+        : null;
 
-    DB::transaction(function () use ($validated, &$item) {
-        $itemCode       = $validated['item_code'];
-        $assignedArtist = $validated['assigned_artist'] ?? null;
-        $companions     = $validated['companions'] ?? [];
-
-        // 1. Update existing assignment or create a new one
-        $item = CommercialArtist::firstOrNew(['item_code' => $itemCode]);
-        $item->user_id = $assignedArtist;
-        $item->save();
-
-        // 2. If the new main artist was previously a companion, remove them from companions
-        if ($assignedArtist) {
-            Companion::where('item_code', $itemCode)
-                ->where('user_id', $assignedArtist)
-                ->delete();
-        }
-
-        // 3. Insert or update companions (excluding duplicates and the main artist)
-        foreach (array_unique($companions) as $companionEmpId) {
-            if ($companionEmpId != $assignedArtist) {
-                $companion = Companion::where('item_code', $itemCode)
-                    ->where('user_id', $companionEmpId)
-                    ->first();
-
-                if (!$companion) {
-                    $companion = new Companion();
-                }
-
-                $companion->item_code = $itemCode;
-                $companion->user_id   = $companionEmpId;
-                $companion->save();
-            }
-        }
-
-        // 4. Update FileVerification status
-        $fileVerification = FileVerification::where('item_code', $itemCode)->first();
-        if ($fileVerification) {
-            $fileVerification->status = 'Assigned To Artist';
-            $fileVerification->save();
-        }
-
-        // 5. Update Artwork & log activity
-        $artwork       = AoModel::where('item_code', $itemCode)->first();
-        $recipientUser = $assignedArtist ? User::where('emp_id', $assignedArtist)->first() : null;
-
-        if ($artwork) {
-            $artwork->status = 'Assigned To Artist';
-            $artwork->save();
-
-            $assignerName     = auth()->user()?->name ?? 'Supervisor';
-            $artistName       = $recipientUser->name ?? ($assignedArtist ?? 'Unassigned');
-            $activeCompanions = Companion::where('item_code', $itemCode)->pluck('user_id')->toArray();
-
-            $artwork->activityLogs()->create([
-                'user_id'     => auth()->id(),
-                'log_type'    => 'history',
-                'event'       => 'artist_assigned',
-                'description' => "{$assignerName} assigned artist [{$artistName}] to Item Code [{$itemCode}].",
-                'properties'  => [
-                    'artist_user_id' => $item->user_id,
-                    'artist_name'    => $recipientUser->name ?? 'Unknown Artist',
-                    'companions'     => $activeCompanions,
-                ],
-            ]);
-        }
-
-        // 6. Send notification
-        if ($recipientUser) {
-            $recipientUser->notify(new ArtWorkNotification($item, 'gd_to_artist'));
-        }
-    });
+    $artwork->assignTo(
+        $artist,
+        $validated['companions'] ?? [],
+        auth()->user()
+    );
 
     if ($request->ajax() || $request->wantsJson()) {
         return response()->json([
@@ -802,7 +946,6 @@ public function assignToArtist(Request $request)
     return redirect()->route('gd_supervisor')->with('success', 'Item Assigned To Artist!');
 }
 
-
 public function reassignArtist(Request $request)
 {
     $validated = $request->validate([
@@ -813,107 +956,40 @@ public function reassignArtist(Request $request)
         'remarks'         => 'nullable|string|max:500',
     ]);
 
-    // Find the currently active assignment
-    $previousAssignment = CommercialArtist::where('item_code', $validated['item_code'])
-        ->whereNull('unassigned_at')
-        ->latest('id')
-        ->first();
+    $artwork = AoModel::with('activeAssignment.user')
+        ->where('item_code', $validated['item_code'])
+        ->firstOrFail();
 
-    if (!$previousAssignment) {
+    if (!$artwork->activeAssignment) {
         return response()->json([
-            'message' => 'Item code has not been assigned yet. Please use Assign first.'
+            'message' => 'Item code has not been assigned yet. Please use Assign first.',
         ], 422);
     }
 
-    if ($previousAssignment->user_id == $validated['assigned_artist']) {
+    if ($artwork->activeAssignment->user_id === $validated['assigned_artist']) {
         return response()->json([
-            'message' => 'This artist is already the current assigned artist.'
+            'message' => 'This artist is already the current assigned artist.',
         ], 422);
     }
 
-    DB::transaction(function () use ($validated, $previousAssignment) {
-        $itemCode    = $validated['item_code'];
-        $newArtistId = $validated['assigned_artist'];
-        $oldArtistId = $previousAssignment->user_id;
-        $companions  = $validated['companions'] ?? [];
-        $now         = now();
+    $newArtist = User::where('emp_id', $validated['assigned_artist'])->firstOrFail();
 
-        // 1. Close the previous artist's session & calculate time spent as an integer
-        $startTime = \Carbon\Carbon::parse($previousAssignment->assigned_at ?? $previousAssignment->created_at);
-        $previousAssignment->unassigned_at    = $now;
-        $previousAssignment->duration_minutes = (int) round($startTime->diffInMinutes($now));
-        $previousAssignment->status           = 'Reassigned';
-        $previousAssignment->save();
-
-        // 2. Create a NEW row for the new artist with a fresh start timestamp
-        $newAssignment = new CommercialArtist();
-        $newAssignment->item_code   = $itemCode;
-        $newAssignment->user_id     = $newArtistId;
-        $newAssignment->assigned_at = $now;
-        $newAssignment->status      = 'Active';
-        $newAssignment->save();
-
-        // 3. Remove new main artist from companions if they were previously one
-        Companion::where('item_code', $itemCode)
-            ->where('user_id', $newArtistId)
-            ->delete();
-
-        // 4. Keep existing companions & insert any new ones without duplicates
-        foreach (array_unique($companions) as $companionEmpId) {
-            if ($companionEmpId != $newArtistId) {
-                $companion = Companion::where('item_code', $itemCode)
-                    ->where('user_id', $companionEmpId)
-                    ->first();
-
-                if (!$companion) {
-                    $companion = new Companion();
-                }
-
-                $companion->item_code = $itemCode;
-                $companion->user_id   = $companionEmpId;
-                $companion->save();
-            }
-        }
-
-        // 5. Log activity & notify new artist
-        $artwork       = AoModel::where('item_code', $itemCode)->first();
-        $recipientUser = User::where('emp_id', $newArtistId)->first();
-
-        if ($artwork) {
-            $assignerName     = auth()->user()?->name ?? 'Supervisor';
-            $artistName       = $recipientUser->name ?? $newArtistId;
-            $remarkText       = !empty($validated['remarks']) ? " Remarks: {$validated['remarks']}" : '';
-            $activeCompanions = Companion::where('item_code', $itemCode)->pluck('user_id')->toArray();
-
-            $artwork->activityLogs()->create([
-                'user_id'     => auth()->id(),
-                'log_type'    => 'history',
-                'event'       => 'artist_reassigned',
-                'description' => "{$assignerName} re-assigned item [{$itemCode}] to [{$artistName}].{$remarkText}",
-                'properties'  => [
-                    'old_artist_id'      => $oldArtistId,
-                    'old_artist_minutes' => $previousAssignment->duration_minutes,
-                    'new_artist_id'      => $newArtistId,
-                    'companions'         => $activeCompanions,
-                    'remarks'            => $validated['remarks'] ?? null,
-                ]
-            ]);
-        }
-
-        if ($recipientUser) {
-            $recipientUser->notify(new ArtWorkNotification($newAssignment, 'gd_to_artist'));
-        }
-    });
+    $artwork->reassignTo(
+        $newArtist,
+        $validated['companions'] ?? [],
+        auth()->user(),
+        $validated['remarks'] ?? null
+    );
 
     return response()->json([
         'status'  => 'success',
-        'message' => 'Item successfully re-assigned!'
+        'message' => 'Item successfully re-assigned!',
     ]);
 }
-public function gdArtist(){
-    
-return view('gd.commercial.artist');
-}
 
+public function gdArtist()
+{
+    return view('gd.commercial_artist');
+}
         
 }
