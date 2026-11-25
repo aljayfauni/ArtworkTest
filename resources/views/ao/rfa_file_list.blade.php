@@ -504,7 +504,7 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
                 editUrl = editUrl.replace(':item_id', data);
 
                 return '<button type="button" class="btn btn-xs btn-info edit-btn" data-url="' + editUrl + '">' +
-                            '<i class="fas fa-edit mr-1"></i> Edit' +
+                            '<i class="fas fa-edit mr-1"></i> Editss' +
                        '</button>';
             }
         }
@@ -598,14 +598,17 @@ var FileSendLinkTable = $('#ReadyForItemCodeTable').DataTable({
             data: 'rfa_reference', 
             orderable: false, 
             searchable: false, 
-            render: function (data) {
+            render: function (data,type,row) {
                
-                var editUrl = "{{ route('getArtworkFileDetail', ':item_id') }}";
+                var editUrl = "{{ route('toAddItemCode', ':item_id') }}";
                 editUrl = editUrl.replace(':item_id', data);
 
-                return '<button type="button" class="btn btn-xs btn-info edit-btn" data-url="' + editUrl + '">' +
-                            '<i class="fas fa-edit mr-1"></i> Edit' +
-                       '</button>';
+                  return '<button type="button" ' +
+               'class="btn btn-xs btn-info btn-add-itemcode" ' +
+               'data-url="' + editUrl + '" ' +
+               'data-rfa="' + row.rfa_reference + '">' +
+               '<i class="fas fa-edit mr-1"></i> To Add Item Code' +
+               '</button>';
             }
         }
     ]
@@ -733,13 +736,13 @@ $('#FileSendTable').on('click', '.edit-btn', function() {
         }
     });
 });
-$('#ReadyForItemCodeTable').on('click', '.edit-btn', function() {
+$('#ReadyForItemCodeTable').on('click', '.btn-add-itemcode', function() {
     var targetUrl = $(this).data('url'); // Grab the dynamic URL from the clicked button
-
+    var rfa_ref = $(this).data('rfa');
     // Step 1: Show confirmation choice prompt
     Swal.fire({
         title: 'Are you sure?',
-        text: "Do you want to open and view this artwork file record?",
+        text: "Do you want to open and Add Item Code? to "+ rfa_ref,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',

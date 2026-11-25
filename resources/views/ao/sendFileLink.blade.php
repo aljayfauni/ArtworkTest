@@ -348,7 +348,10 @@
                     <div>
                         <h3 class="card-title text-bold text-dark m-0">
                             <i class="fas fa-file-invoice text-primary mr-2"></i> AO RFA Link Submission Form To GD
+                               {{-- hidden rfa-reference --}}
+                             <input type="text" id="ref_reference_input" name="ref_reference_input" class="form-control" value="" readonly>
                         </h3>
+                              
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-danger btn-remove-form d-none">
                         <i class="fas fa-trash-alt mr-1"></i> Remove Form
@@ -367,6 +370,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
+                   
                             <!-- Client Name Field -->
                             <div class="form-group col-md-6">
                                 <label class="text-uppercase text-xs text-muted font-weight-bold">Client Name <span class="text-danger">*</span></label>
@@ -440,6 +444,8 @@
                 <h3 class="card-title text-bold text-dark m-0">
                     <i class="fas fa-file-invoice text-primary mr-2"></i> AO RFA Link Submission Form To GD
                 </h3>
+                    {{-- hidden rfa-reference --}}
+                             <input type="text" name="rfa_reference[]" class="form-control" value="" readonly>
             </div>
             <button type="button" class="btn btn-sm btn-outline-danger btn-remove-form d-none">
                 <i class="fas fa-trash-alt mr-1"></i> Remove Form
@@ -1419,15 +1425,169 @@ $(document).ready(function () {
     $(document).ready(function () {
 
         //
-        $('#btn-new-item').on('click', function() {
-            $('#aoRfaFormNew').css('display', 'block');
-             $('#aoRfaFormExisting').css('display', 'none');
-        });
+        // $('#btn-new-item').on('click', function() {
+        //     $('#aoRfaFormNew').css('display', 'block');
+        //      $('#aoRfaFormExisting').css('display', 'none');
+        // });
 
-           $('#btn-existing-item').on('click', function() {
-            $('#aoRfaFormExisting').css('display', 'block');
-            $('#aoRfaFormNew').css('display', 'none');
+$('#btn-new-item').on('click', function() {
+    Swal.fire({
+        title: 'Create New Item?',
+        text: 'Are you sure you want to create a new item?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, create it',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        $('#aoRfaFormNew').css('display', 'block');
+        $('#aoRfaFormExisting').css('display', 'none');
+
+        $.ajax({
+            url: '/getNewReferenceNum',
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: function() {
+                $('#ref_reference_input').val('Generating...');
+            },
+            success: function(response) {
+                if (response.new_ref) {
+                    $('#ref_reference_input').val(response.new_ref);
+                } else {
+                    Swal.fire('Error', 'Could not generate reference number.', 'error');
+                    $('#aoRfaFormNew').css('display', 'none');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                Swal.fire('Error', 'Something went wrong while generating the reference number.', 'error');
+                $('#aoRfaFormNew').css('display', 'none');
+            }
         });
+    });
+});
+
+
+
+     
+    //   $('#btn-existing-item').on('click', function() {
+    //         $('#aoRfaFormExisting').css('display', 'block');
+    //         $('#aoRfaFormNew').css('display', 'none');
+    //     });
+
+    // 1. EXISTING ITEM BUTTON (Generates initial reference for the first card)
+$('#btn-existing-item').on('click', function() {
+    Swal.fire({
+        title: 'Create Existing Item?',
+        text: 'Are you sure you want to proceed with an existing item?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, proceed',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        $('#aoRfaFormExisting').css('display', 'block');
+        $('#aoRfaFormNew').css('display', 'none');
+
+        let firstRefInput = $('#form-items-wrapper2 .form-item-card:first input[name="rfa_reference[]"]');
+
+        $.ajax({
+            url: '/getExistingReferenceNum',
+            type: 'GET',
+            dataType: 'json',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            beforeSend: function() {
+                firstRefInput.val('Generating...');
+            },
+            success: function(response) {
+                if (response.new_ref) {
+                    $('#form-items-wrapper2 input[name="rfa_reference[]"]').each(function() {
+                        if (!$(this).val() || $(this).val() === 'Generating...') {
+                            $(this).val(response.new_ref);
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', 'Could not generate reference number.', 'error');
+                    $('#aoRfaFormExisting').css('display', 'none');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Something went wrong while generating the reference number.', 'error');
+                $('#aoRfaFormExisting').css('display', 'none');
+            }
+        });
+    });
+});
+
+// 3. ADD FORM BUTTON (.off('click') prevents duplicate listeners from firing twice)
+$('#btn-add-form').off('click').on('click', function () {
+    Swal.fire({
+        title: 'Add Another Item Form?',
+        text: 'Are you sure you want to add another form? This will generate and log a new RFA reference number.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, add form',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        formIndex++;
+
+        let firstCard = $('#form-items-wrapper2 .form-item-card:first');
+
+        // Temporarily destroy Select2 on template source before cloning
+        firstCard.find('.select2-hidden-accessible').select2('destroy');
+
+        // Clone template card
+        let newCard = firstCard.clone();
+
+        // Reset inputs and selections on new clone
+        newCard.find('input, textarea').val('');
+        newCard.find('select').val(null).trigger('change');
+
+        // Adjust email select name array key
+        newCard.find('.select2-email').attr('name', `employee_email[${formIndex}][]`);
+
+        // Reveal the remove button on new clone
+        newCard.find('.btn-remove-form').removeClass('d-none');
+
+        // Append to wrapper
+        $('#form-items-wrapper2').append(newCard);
+
+        // Re-initialize Select2 on both template card and new clone
+        // initCardSelect2(firstCard);
+        initCardSelect2(newCard);
+
+        // Fetch next reference from getAddFormReferenceNum
+        let newRefInput = newCard.find('input[name="rfa_reference[]"]');
+        $.ajax({
+            url: '/getAddFormReferenceNum',
+            type: 'GET', // Note: use POST if your route in web.php is Route::post(...)
+            dataType: 'json',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            beforeSend: function() {
+                newRefInput.val('Generating...');
+            },
+            success: function(response) {
+                if (response.new_ref) {
+                    newRefInput.val(response.new_ref);
+                } else {
+                    Swal.fire('Error', 'Could not generate reference number.', 'error');
+                    newCard.remove();
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Something went wrong while generating the reference number.', 'error');
+                newCard.remove();
+            }
+        });
+    });
+});
+
 
 
         // 1. SELECT2 INITIALIZATIONS
@@ -1485,35 +1645,35 @@ $(document).ready(function () {
         }
 
         // Add Form Event
-        $('#btn-add-form').on('click', function () {
-            formIndex++;
+        // $('#btn-add-form').on('click', function () {
+        //     formIndex++;
 
-            let firstCard = $('#form-items-wrapper2 .form-item-card:first');
+        //     let firstCard = $('#form-items-wrapper2 .form-item-card:first');
 
-            // Temporarily destroy Select2 on template source before cloning
-            firstCard.find('.select2-hidden-accessible').select2('destroy');
+        //     // Temporarily destroy Select2 on template source before cloning
+        //     firstCard.find('.select2-hidden-accessible').select2('destroy');
 
-            // Clone template card
-            let newCard = firstCard.clone();
+        //     // Clone template card
+        //     let newCard = firstCard.clone();
 
-            // Reset inputs and selections on new clone
-            newCard.find('input, textarea').val('');
-            newCard.find('select').val(null).trigger('change');
+        //     // Reset inputs and selections on new clone
+        //     newCard.find('input, textarea').val('');
+        //     newCard.find('select').val(null).trigger('change');
 
-            // Adjust email select name array key
-            newCard.find('.select2-email').attr('name', `employee_email[${formIndex}][]`);
+        //     // Adjust email select name array key
+        //     newCard.find('.select2-email').attr('name', `employee_email[${formIndex}][]`);
 
-            // Reveal the remove button on new clone
-            newCard.find('.btn-remove-form').removeClass('d-none');
+        //     // Reveal the remove button on new clone
+        //     newCard.find('.btn-remove-form').removeClass('d-none');
 
-            // Append to wrapper
-            $('#form-items-wrapper2').append(newCard);
+        //     // Append to wrapper
+        //     $('#form-items-wrapper2').append(newCard);
 
-            // Re-initialize Select2 on both template card and new clone
-            initCardSelect2(firstCard);
-            initCardSelect2(newCard);
+        //     // Re-initialize Select2 on both template card and new clone
+        //     initCardSelect2(firstCard);
+        //     initCardSelect2(newCard);
 
-        });
+        // });
 
         // Remove Form Card Event
         $(document).on('click', '.btn-remove-form', function () {

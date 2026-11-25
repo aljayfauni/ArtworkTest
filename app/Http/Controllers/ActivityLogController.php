@@ -44,14 +44,14 @@ class ActivityLogController extends Controller
         $search = $request->input('search');
 
         // 2. Start building the database query with user and artwork details
-        $query = ActivityLog::with(['user', 'loggable']);
+        $query = ActivityLog::with(['user']);
 
         // 3. Exclude supervisor 'history' logs so this page only shows live/system activity
         // (Also includes rows where log_type is NULL so SQL Server doesn't skip them)
-        $query->where(function ($q) {
-            $q->where('log_type', '!=', 'history')
-            ->orWhereNull('log_type');
-        });
+        // $query->where(function ($q) {
+        //     $q->where('log_type', '!=', 'history')
+        //     ->orWhereNull('log_type');
+        // });
 
         // 4. If the user typed something in the search box, filter the results
         if ($search) {
@@ -61,11 +61,11 @@ class ActivityLogController extends Controller
                 // OR search by the User's name
                 ->orWhereHas('user', function ($user) use ($search) {
                     $user->where('name', 'like', "%{$search}%");
-                })
-                // OR search by the Artwork's item code
-                ->orWhereHas('loggable', function ($artwork) use ($search) {
-                    $artwork->where('item_code', 'like', "%{$search}%");
                 });
+                // OR search by the Artwork's item code
+                // ->orWhereHas('loggable', function ($artwork) use ($search) {
+                //     $artwork->where('item_code', 'like', "%{$search}%");
+                // });
             });
         }
 

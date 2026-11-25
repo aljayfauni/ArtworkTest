@@ -55,6 +55,7 @@
                             <tr>
                                 <th style="width: 20%;">Timestamp</th>
                                 <th style="width: 15%;">Item Code</th>
+                                <th style="width: 15%;">Reference Number</th>
                                 <th style="width: 20%;">Triggered By</th>
                                 <th style="width: 45%;">Description</th>
                             </tr>
@@ -73,6 +74,13 @@
                                     <td class="align-middle">
                                         <span class="badge badge-info p-2 font-weight-bold">
                                             <i class="fas fa-barcode mr-1"></i>{{ $log->loggable->item_code ?? 'N/A' }}
+                                        </span>
+                                    </td>
+
+                                        <!-- rfa reference -->
+                                    <td class="align-middle">
+                                        <span class="badge  p-2 font-weight-bold">
+                                            <i class="fas fa- mr-1"></i>{{ $log->rfa_reference ?? 'N/A' }}
                                         </span>
                                     </td>
                                     

@@ -50,6 +50,29 @@ class ArtworkController extends Controller
         
     }
 
+         public function toAddItemCode(Request $request) // index
+    {
+
+
+    // Fetch the target submission
+    $rfa = AoModel::where('rfa_reference', $request->item_id)->first();
+ 
+    $users= User::whereNotNull('email')->get();
+   
+    // Fetch all recipient emails linked to this submission batch
+    $selectedEmails = AoModel::
+
+        where('rfa_reference', $rfa)
+        ->pluck('to_email')
+        ->toArray();
+    
+    // Fetch all available system users to populate options
+   // $users = User::all();
+    $item_detail = $rfa;
+    return view('ao.add_item_code', compact('item_detail', 'selectedEmails', 'users'));
+        
+    }
+
 
 
 

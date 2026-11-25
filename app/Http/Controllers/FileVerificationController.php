@@ -803,7 +803,8 @@ public function suppliedVerified_no_item_code(Request $request)
             $artwork_filelink_temp->status         = "For Item Code Creation";
             // application 
              $artwork_filelink_temp->application         = $request->input('application_no_item_code');
-          
+          //text specs
+             $artwork_filelink_temp->text_specs         = $request->input('text_specs_no_item_code');
             // Save updates to AoModel table
             $artwork_filelink_temp->save();
         }

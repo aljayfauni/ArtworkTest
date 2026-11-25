@@ -121,17 +121,55 @@
                                 <!-- Spread size -->
                                 <div class="col-md-4 mb-3">
                                     <div class="p-3 border rounded-lg h-100">
-                                        <label for="spread_size" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Spread Size</label>
+                                        <label for="spread_h" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Spread Size H</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-light border-right-0"><i class="fas fa-ruler text-secondary" style="font-size: 0.85rem;"></i></span>
                                             </div>
                                             <input type="text" 
-                                                name="spread_size" 
-                                                id="spread_size" 
+                                                name="spread_h" 
+                                                id="spread_h" 
+                                                class="form-control border-left-0 bg-light" 
+                                                placeholder="Enter Spread Size H" 
+                                                value="  {{ $item_detail->spread_h ?? ''}}" 
+                                                style="font-size: 0.9rem;">
+                                            <span class="invalid-feedback" id="error-spread_h"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border rounded-lg h-100">
+                                        <label for="spread_w" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Spread Size W</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-ruler text-secondary" style="font-size: 0.85rem;"></i></span>
+                                            </div>
+                                            <input type="text" 
+                                                name="spread_w" 
+                                                id="spread_w" 
+                                                class="form-control border-left-0 bg-light" 
+                                                placeholder="Enter Spread Size W" 
+                                                value="  {{ $item_detail->spread_w ?? ''}}" 
+                                                style="font-size: 0.9rem;">
+                                            <span class="invalid-feedback" id="error-spread_w"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border rounded-lg h-100">
+                                        <label for="spread_l" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Spread Size L</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-ruler text-secondary" style="font-size: 0.85rem;"></i></span>
+                                            </div>
+                                            <input type="text" 
+                                                name="spread_l" 
+                                                id="spread_l" 
                                                 class="form-control border-left-0 bg-light" 
                                                 placeholder="Enter Spread Size" 
-                                                value="  {{ $item_detail->spread_size ?? ''}}" 
+                                                value="  {{ $item_detail->spread_l ?? ''}}" 
                                                 style="font-size: 0.9rem;">
                                             <span class="invalid-feedback" id="error-spread_size"></span>
                                         </div>
@@ -139,7 +177,7 @@
                                 </div>
 
                                 <!-- Folded size -->
-                                <div class="col-md-4 mb-3">
+                                {{-- <div class="col-md-4 mb-3">
                                     <div class="p-3 border rounded-lg h-100">
                                         <label for="folded_size" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Folded Size</label>
                                         <div class="input-group">
@@ -154,6 +192,61 @@
                                                 value="  {{ $item_detail->folded_size ?? ''}}" 
                                                 style="font-size: 0.9rem;">
                                             <span class="invalid-feedback" id="error-folded_size"></span>
+                                        </div>
+                                    </div>
+                                </div> --}}
+
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border rounded-lg h-100">
+                                        <label for="folded_h" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Folded Size H</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-map text-secondary" style="font-size: 0.85rem;"></i></span>
+                                            </div>
+                                            <input type="text" 
+                                                name="folded_h" 
+                                                id="folded_h" 
+                                                class="form-control border-left-0 bg-light" 
+                                                placeholder="Enter Folded Size" 
+                                                value="  {{ $item_detail->folded_h ?? ''}}" 
+                                                style="font-size: 0.9rem;">
+                                            <span class="invalid-feedback" id="error-folded_h"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                     <div class="col-md-4 mb-3">
+                                    <div class="p-3 border rounded-lg h-100">
+                                        <label for="folded_w" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Folded Size W</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-map text-secondary" style="font-size: 0.85rem;"></i></span>
+                                            </div>
+                                            <input type="text" 
+                                                name="folded_w" 
+                                                id="folded_w" 
+                                                class="form-control border-left-0 bg-light" 
+                                                placeholder="Enter Folded Size" 
+                                                value="  {{ $item_detail->folded_w ?? ''}}" 
+                                                style="font-size: 0.9rem;">
+                                            <span class="invalid-feedback" id="error-folded_w"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                     <div class="col-md-4 mb-3">
+                                    <div class="p-3 border rounded-lg h-100">
+                                        <label for="folded_l" class="text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem; font-weight: 600;">Folded Size L</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-map text-secondary" style="font-size: 0.85rem;"></i></span>
+                                            </div>
+                                            <input type="text" 
+                                                name="folded_l" 
+                                                id="folded_l" 
+                                                class="form-control border-left-0 bg-light" 
+                                                placeholder="Enter Folded Size" 
+                                                value="  {{ $item_detail->folded_l ?? ''}}" 
+                                                style="font-size: 0.9rem;">
+                                            <span class="invalid-feedback" id="error-folded_h"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -220,7 +313,7 @@
                             </div>
 
                             <!-- Section 3: Recipients (GD) -->
-                            <h6 class="text-uppercase text-secondary font-weight-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Recipients (GD)</h6>
+                            {{-- <h6 class="text-uppercase text-secondary font-weight-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Recipients (GD)</h6>
                             <div class="mb-4 p-3 bg-light rounded-lg">
                                 <label for="employee_email" class="text-uppercase text-muted d-block mb-2" style="font-size: 0.7rem; font-weight: 600;">
                                     Assigned Emails <span class="text-danger">*</span>
@@ -228,7 +321,7 @@
                                 <div class="input-group flex-nowrap">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-white border-right-0"><i class="fas fa-envelope text-success" style="font-size: 0.85rem;"></i></span>
-                                    </div>
+                                    </div> --}}
 
                                     @php
                                 // Determine selected values: priority to old input, fallback to DB selected emails
@@ -242,7 +335,7 @@
                                     // Track user emails already listed to render non-user emails seamlessly
                                     $renderedEmails = [];
                                  @endphp
-                                <select id="employee_email" 
+                                {{-- <select id="employee_email" 
                                 name="employee_email[]" 
                                 class="form-control select2 border-left-0 bg-white" 
                                 multiple="multiple"
@@ -261,14 +354,14 @@
                                 @endforeach
 
                             {{-- Render saved emails that are NOT in the User table --}}
-                            @foreach($selectedList as $customEmail)
+                            {{-- @foreach($selectedList as $customEmail)
                                 @if(!in_array($customEmail, $renderedEmails) && !empty($customEmail))
                                     <option value="{{ $customEmail }}" selected>
                                         {{ $customEmail }}
                                     </option>
                                 @endif
                             @endforeach
-                            </select>
+                            </select> --}}
                                 </div>
                                 <span class="invalid-feedback d-block" id="error-employee_email"></span>
                             </div>

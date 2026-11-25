@@ -39,7 +39,9 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
         Route::get('/bom-creations/fact-item/search',[\App\Http\Controllers\HomeController::class,'searchFACTItem'])->name('bom-creations.item-search');
     
         //ao 
+        Route::middleware([\App\Http\Middleware\CancelAbandonedRfa::class])->group(function () {
         Route::get('/ao-records', [App\Http\Controllers\AoFormController::class, 'ao_page'])->name('ao.sendFileLink');
+     
         // Route::get('/ao-records', [App\Http\Controllers\AoFormController::class, 'index'])->name('ao.sendFileLink');
         Route::get('/getAllFileSend',[\App\Http\Controllers\AoFormController::class,'FileSendLinkShowAll'])->name('FileSendShowAll');
         Route::get('/showAllReadyForItemCode',[\App\Http\Controllers\AoFormController::class,'showAllReadyForItemCode'])->name('showAllReadyForItemCode');
@@ -52,11 +54,11 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
         Route::get('/getListRfaFile', [App\Http\Controllers\AoFormController::class, 'getRfaFileList'])->name('rfa_file_list');
         Route::post('/update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('update-supplied-status'); //update file status if opened
         
-       
+        
         Route::get('/gd_sv_supplied_list', [App\Http\Controllers\AoFormController::class, 'gd_supervisor_supplied_file'])->name('gd_sv_supplied_list');
 
          Route::post('/aoCreateItemCode', [AoFormController::class,'aoAddedItemCode'])->name('aoCreateItemCode'); //update file status if opened
-        
+        }); 
         //ao end
     });
 
@@ -82,7 +84,9 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
 
         //update supplied status
         Route::post('/gd_update-supplied-status', [FileVerificationController::class,'updateStatus'])->name('gd_update-supplied-status'); //update file status if opened
-       
+      
+        Route::post('/gd-action-taken', [GdController::class,'gdActionTaken'])->name('gd-action-taken');
+
     });
 
     // traffic
@@ -147,12 +151,23 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
     Route::get('/artwork/{id}', [ArtistController::class, 'getViewArtworkById'])->name('artwork');
     Route::post('/artwork/{item_code}/timer', [ArtistController::class, 'toggleTimer'])->name('artwork.timer');//start resume pause stop
     Route::get('/getTimeShareDuration/{id}', [ArtistController::class, 'getShareTimeDuration'])->name('getShareTimeDuration');
+     Route::get('/getTimeShareDurationCompanion/{id}', [ArtistController::class, 'getShareTimeDurationCompanion'])->name('getShareTimeDuration');
+
 
     Route::get('/timeline/{item_code}', [AoFormController::class, 'timeline'])->name('timeline');
 
-
+Route::get('/getArtworkFileDetail/{item_id}',[\App\Http\Controllers\ArtworkController::class,'getArtworkFileDetail'])->name('getArtworkFileDetail');
+  Route::get('/toAddItemCode/{item_id}',[\App\Http\Controllers\ArtworkController::class,'toAddItemCode'])->name('toAddItemCode'); 
    
-    Route::get('/', function () {
+   Route::get('/getNewReferenceNum',[\App\Http\Controllers\AoFormController::class,'getNewLatestReference'])->name('getNewReferenceNum');
+
+   Route::get('/getExistingReferenceNum',[\App\Http\Controllers\AoFormController::class,'getExistingReferenceNum'])->name('getExistingReferenceNum');
+   Route::get('/getAddFormReferenceNum',[\App\Http\Controllers\AoFormController::class,'getAddFormReferenceNum'])->name('getAddFormReferenceNum');
+ 
+
+ 
+ 
+   Route::get('/', function () {
         return redirect('/dashboard');
     });
 });

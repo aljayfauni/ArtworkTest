@@ -7,422 +7,371 @@
 @section('plugins.DatatablesPlugins', true)
 
 @section('content_header')
-    {{-- <h1><i class="fas fa-solid fa-chart-line"></i> Dashboard</h1> --}}
-    @can('is-admin')
-    <style>
-        /* .main-sidebar {  }
-        .content-wrapper, .main-header { margin-left: 0 !important; } */
-    </style>
-    <!-- Custom CSS for Horizontal Scrolling Timeline Layout -->
-    {{-- <style>
-    .horizontal-timeline-wrapper {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 20px 10px;
-        display: flex;
-        align-items: flex-start;
-        gap: 25px;
-        scroll-behavior: smooth;
-    }
-    .timeline-node {
-        min-width: 320px;
-        max-width: 320px;
-        display: inline-block;
-        vertical-align: top;
-        white-space: normal; /* Allows text to wrap normally inside the card */
-        position: relative;
-    }
-    /* Horizontal connector line linking the cards */
-    .timeline-node:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 25px;
-        left: 100%;
-        width: 25px;
-        height: 4px;
-        background-color: #dee2e6;
-        z-index: 1;
-    }
-    .node-icon-badge {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px auto;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        color: #fff;
-        font-size: 1.2rem;
-    }
-</style> --}}
-
 <style>
-
-    
-    .horizontal-timeline-wrapper {
-        background: #f8fafc;
-        padding: 24px;
-        border-radius: 16px;
+    /* Clean Neutral Canvas */
+    .content-wrapper {
+        background-color: #f8fafc !important;
     }
 
-    .item-timeline-lane + .item-timeline-lane {
-        border-top: 1px solid #e2e8f0;
-        padding-top: 24px;
-        margin-top: 12px;
-    }
-
-    .item-lane-header {
+    /* Modern Header & Role Banner */
+    .modern-supervisor-header {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #0f172a;
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02);
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 18px;
+        gap: 16px;
+        margin-bottom: 1.5rem;
     }
 
-    .item-title-area {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .item-title-icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 14px;
+    .header-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #e0e7ff;
-        color: #4338ca;
-        font-size: 19px;
+        font-size: 1.15rem;
+        flex-shrink: 0;
     }
 
-    .item-code-badge {
-        background: #e2e8f0;
-        color: #475569;
-        padding: 7px 12px;
-        border-radius: 8px;
-        font-size: 12px;
+    .user-status-pill {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        padding: 8px 14px;
+        border-radius: 9999px;
+        font-size: 0.85rem;
         font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .horizontal-scroll-lane {
+    .user-status-pill .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d97706;
+    }
+
+    /* Modern Card System */
+    .modern-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02) !important;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .modern-card > .card-header {
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.15rem 1.5rem;
         display: flex;
-        flex-wrap: nowrap;
-        align-items: stretch;
-        gap: 24px;
-        overflow-x: auto;
-        padding: 18px 5px 24px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modern-card > .card-header::after {
+        display: none; /* Override AdminLTE clearfix float */
+    }
+
+    .card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-icon-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .modern-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .modern-card-subtitle {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .queue-pill {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        border-radius: 9999px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .queue-pill.pending {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    /* Table & Scroll Area */
+    .modern-table-body {
+        padding: 1.25rem 1.5rem 1.5rem;
+    }
+
+    .modern-scroll-box {
+        max-height: 430px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
         scrollbar-width: thin;
         scrollbar-color: #cbd5e1 transparent;
     }
 
-    .timeline-node {
-        width: 275px;
-        min-width: 275px;
-        flex: 0 0 275px;
-        position: relative;
-        padding-top: 17px;
+    .modern-scroll-box::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
     }
 
-    .timeline-node::before {
-        content: "";
-        position: absolute;
-        top: 7px;
-        left: 0;
-        right: -24px;
-        height: 2px;
-        background: #cbd5e1;
+    .modern-scroll-box::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 9999px;
     }
 
-    .timeline-node:last-child::before {
-        right: 50%;
+    .modern-table {
+        margin-bottom: 0 !important;
     }
 
-    .node-icon-badge {
-        position: absolute;
-        z-index: 2;
+    .modern-table thead th {
+        position: sticky;
         top: 0;
-        left: 16px;
-        width: 16px;
-        height: 16px;
-        border: 4px solid #f8fafc;
-        box-sizing: content-box;
-        border-radius: 50%;
-    }
-
-    .node-icon-badge.bg-success {
-        background: #16a34a !important;
-    }
-
-    .node-icon-badge.bg-danger {
-        background: #dc2626 !important;
-    }
-
-    .timeline-modern-card {
-        height: 100%;
-        overflow: hidden;
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 3px 12px rgba(15, 23, 42, .05);
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-    .timeline-modern-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, .09);
-    }
-
-    .timeline-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        padding: 15px;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .timeline-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 9px;
-        border-radius: 7px;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: .4px;
-    }
-
-    .timeline-status.started {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .timeline-status.stopped {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .timeline-clock {
-        color: #475569;
-        font-size: 12px;
+        z-index: 2;
+        background: #f8fafc !important;
+        color: #64748b !important;
+        font-size: 0.72rem;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-top: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 0.85rem 1.15rem !important;
         white-space: nowrap;
     }
 
-    .timeline-card-body {
-        padding: 15px;
-    }
-
-    .timeline-user-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 11px;
-        margin-bottom: 14px;
-        border-radius: 10px;
-        background: #f8fafc;
-        border: 1px solid #f1f5f9;
-    }
-
-    .timeline-user-avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: #e2e8f0;
-        color: #475569;
-    }
-
-    .timeline-user-name {
+    .modern-table tbody td {
+        padding: 0.9rem 1.15rem !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #f1f5f9 !important;
         color: #1e293b;
-        font-size: 13px;
-        font-weight: 700;
-        overflow-wrap: anywhere;
+        font-size: 0.88rem;
+        background: #ffffff;
     }
 
-    .timeline-user-id {
-        display: block;
-        margin-top: 3px;
-        color: #94a3b8;
-        font-size: 11px;
+    .modern-table tbody tr:hover td {
+        background-color: #f8fafc !important;
     }
 
-    .timeline-date {
-        color: #64748b;
-        font-size: 12px;
+    .modern-table tbody tr:last-child td {
+        border-bottom: none !important;
     }
 
-    .timeline-date strong {
-        color: #334155;
+    /* DataTables Inputs Polish */
+    .modern-table-body .dataTables_filter input {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+        color: #0f172a;
+        outline: none;
     }
 
-    .timeline-duration {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 14px;
-        padding: 10px;
-        border-radius: 9px;
-        background: #eef2ff;
-        color: #4338ca;
-        font-size: 12px;
-        font-weight: 600;
+    .modern-table-body .dataTables_filter input:focus {
+        border-color: #334155;
+        box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.1);
     }
 
-    .timeline-empty {
-        text-align: center;
-        padding: 50px 15px;
-        color: #94a3b8;
+    .modern-table-body .dataTables_length select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.85rem;
     }
-
-    .timeline-empty i {
-        display: block;
-        font-size: 34px;
-        margin-bottom: 12px;
-    }
-
-    @media (max-width: 576px) {
-        .horizontal-timeline-wrapper {
-            padding: 15px;
-        }
-
-        .timeline-node {
-            width: 255px;
-            min-width: 255px;
-            flex-basis: 255px;
-        }
-
-        .item-title-area h5 {
-            font-size: 16px;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .timeline-modern-card {
-            transition: none;
-        }
-    }
-    .clock-widget{
-        float: right;
-    }
-
 </style>
-@endcan
 @stop
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <section class="content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center justify-content-between">
+<div class="container-fluid pt-3 pb-4">
 
-            {{-- Page Title --}}
-        
+    <!-- Unified Modern Header & Role Banner -->
+    <div class="modern-supervisor-header">
+        <div class="d-flex align-items-center" style="gap: 16px;">
+            <div class="header-icon-box">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <h4 class="mb-1 font-weight-bold" style="color: #0f172a; font-size: 1.2rem;">
+                    GD Supervisor Dashboard
+                </h4>
+                <p class="mb-0" style="color: #64748b; font-size: 0.88rem;">
+                    Receives file links from AO, submits Supplied Verification Form, assigns Primary &amp; Companion Graphic Artists, and monitors activity.
+                </p>
+            </div>
+        </div>
 
+        <div class="user-status-pill">
+            <span class="dot"></span>
+            <span style="color: #64748b; font-weight: 500;">Supervisor:</span>
+            <span>{{ Auth::user()->name }}</span>
         </div>
     </div>
-</section>
-    </div>
-</div>
-<div class="row mr-4">
-    
-    
-
-    <div class="col-12">
-    
-        <div class="container-fluid">
-           <div class="alert role-highlight-banner border-warning shadow-sm bg-white" style="border-left:5px solid;" >
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-user-shield fa-2x text-warning mr-3"></i>
-                                <div>
-                                    <h5 class="mb-0 font-weight-bold text-dark">GD Supervisor</h5>
-                                    <p class="mb-0 text-muted">Recieves file links from AO, Submits Supplied Verification Form, Assigns Primary & Companion Graphic Artists , Monitors activity.</p>
-                                </div>
-                            </div>
-                        </div>
-       <div class="row">
-    <div class="col-md-12">
-        <div class="card card-warning card-outline shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold text-dark">
-                    <i class="fas fa-file-signature text-warning mr-2"></i>1. Incoming Request Item
-                     {{-- <i class="fas fa-file-signature text-warning mr-2"></i>1. Incoming Request &amp; Supplied File Verification Queue --}}
-                </h3>
+<!-- Action Mode Selector -->
+        <div class="modern-card p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap" style="gap: 12px;">
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <span class="card-icon-badge"><i class="fas fa-stopwatch"></i></span>
+                <div>
+                    <h6 class="modern-card-title mb-0">Choose Action To Take</h6>
+                    <small class="modern-card-subtitle">Select an action mode to start time tracking before modifying a row</small>
+                </div>
             </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0 " style="max-height: 400px;">
-                <table id="FileSendTable" class="table table-bordered table-hover align-middle mb-0">
-                    <thead class="bg-light">
+
+            <div class="d-flex align-items-center" style="gap: 10px;" id="gd_supervisor_actions">
+                <button type="button" class="btn btn-outline-dark font-weight-bold action-mode-btn" data-action="GD ASSESS" style="border-radius: 8px;">
+                    <i class="fas fa-clipboard-check mr-1"></i> Assessment
+                </button>
+                <button type="button" class="btn btn-outline-dark font-weight-bold action-mode-btn" data-action="GD Assign to Artist" style="border-radius: 8px;">
+                    <i class="fas fa-user-plus mr-1"></i> Assigning Artwork to Artist
+                </button>
+            </div>
+        </div>
+    <br>
+
+<!-- Wrapped Tables with Bootstrap-Only Overlay -->
+<div class="position-relative">
+    <!-- Overlay using pure Bootstrap classes -->
+    {{-- <div id="table_lock_overlay" class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center rounded" style="top: 0; left: 0; background-color: rgba(255, 255, 255, 0.75); z-index: 20;">
+        <div class="bg-dark text-white px-4 py-2 rounded shadow font-weight-bold">
+            <i class="fas fa-lock mr-2"></i> Select <strong>Assessment</strong> or <strong>Assigning Artwork to Artist</strong> above to unlock tables
+        </div>
+    </div> --}}
+
+    <!-- 1. Incoming Request Item -->
+    <div class="card modern-card">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-icon-badge">
+                    <i class="fas fa-file-signature"></i>
+                </span>
+                <div>
+                    <h3 class="modern-card-title">1. Incoming Request Item</h3>
+                    <p class="modern-card-subtitle">Supplied file verification &amp; artist assignment queue</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <span class="queue-pill">Verification Queue</span>
+                <div class="card-tools m-0">
+                    <button type="button" class="btn btn-tool text-secondary" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body modern-table-body">
+            <div class="modern-scroll-box table-responsive">
+                <table id="FileSendTable" class="table modern-table table-hover text-nowrap align-middle">
+                    <thead>
                         <tr>
                             <th>Item Code</th>
                             <th>Client Name</th>
                             <th>Sender Name</th>
-                            {{-- <th>Sender Email</th> --}}
-                            {{-- <th>Recipient Email</th> --}}
                             <th>Shared File/Link</th>
                             <th>Date Sent</th>
                             <th>Status</th>
-                             <th>Action</th>
+                            <th>Action</th>
                             <th>Forms</th>
-                             <th>To Assign</th>
-                             <th>View</th>
-                            <!--<th>Actions</th>-->
+                            <th>To Assign</th>
+                            <th>View</th>
                         </tr>
                     </thead>
                     <tbody>
-
                     </tbody>
                 </table>
             </div>
-            <!-- /.card-body -->
         </div>
     </div>
-        <div class="col-md-12">
-        <div class="card card-secondary card-outline shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title font-weight-bold text-dark">
-                    <i class="fas fa-hourglass-end text-warning mr-2"></i>1. Incoming Request Item No Item Code
-                     {{-- <i class="fas fa-file-signature text-warning mr-2"></i>1. Incoming Request &amp; Supplied File Verification Queue --}}
-                </h3>
+
+    <!-- 2. Incoming Request Item (No Item Code) -->
+    <div class="card modern-card mb-0">
+        <div class="card-header">
+            <div class="card-header-left">
+                <span class="card-icon-badge">
+                    <i class="fas fa-hourglass-end"></i>
+                </span>
+                <div>
+                    <h3 class="modern-card-title">2. Incoming Request Item (No Item Code)</h3>
+                    <p class="modern-card-subtitle">Pending items awaiting item code assignment</p>
+                </div>
             </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0 " style="max-height: 400px;">
-                <table id="FileSendTable_NoItemCode" class="table table-bordered table-hover align-middle mb-0">
-                    <thead class="bg-light">
+
+            <div class="d-flex align-items-center" style="gap: 10px;">
+                <span class="queue-pill pending">Pending Code</span>
+                <div class="card-tools m-0">
+                    <button type="button" class="btn btn-tool text-secondary" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body modern-table-body">
+            <div class="modern-scroll-box table-responsive">
+                <table id="FileSendTable_NoItemCode" class="table modern-table table-hover text-nowrap align-middle">
+                    <thead>
                         <tr>
                             <th>Item Code</th>
                             <th>Client Name</th>
                             <th>Item Description</th>
                             <th>Sender Name</th>
-                            {{-- <th>Sender Email</th> --}}
-                            {{-- <th>Recipient Email</th> --}}
                             <th>Shared File/Link</th>
                             <th>Date Sent</th>
                             <th>Status</th>
                             <th>Forms</th>
-                             {{-- <th>To Assign</th>
-                             <th>View</th> --}}
-                            <!--<th>Actions</th>-->
                         </tr>
                     </thead>
                     <tbody>
-
                     </tbody>
                 </table>
             </div>
-            <!-- /.card-body -->
         </div>
     </div>
 </div>
-    </div>     
+
+</div>
+
 
         {{-- end --}}
 
@@ -436,195 +385,6 @@
 
         {{-- checklist form test --}}
 
-            @can('read-only')
-          <!-- A. CONTROL PANEL (Start a new task) -->
-            <div class="card card-primary card-outline shadow-sm">
-                <div class="card-header bg-light">
-                    <h3 class="card-title font-weight-bold"><i class="fas fa-play-circle text-success mr-2"></i> Search Item</h3>
-                </div>
-                <div class="card-body p-3">
-                    <form id="CreateForm">
-                        <div class="row">
-                            <!-- Column 1: Personnel -->
-                            <div class="col-md-6" id="operator_section">
-                                {{-- <div class="form-group mb-2">
-                                    <label class="mb-1 text-sm">Operator: <span class="text-danger">*</span></label>
-                                    <select id="operator_id" name="operator_id[]" class="form-control form-control-sm select2bs4" multiple required> --}}
-                                        {{-- <option value="">Select Operator</option> --}}
-                                    {{-- </select> --}}
-                                {{-- </div> --}}
-                                {{-- <div class="form-group mb-0">
-                                    <label class="mb-1 text-sm">Companions:</label>
-                                    <select id="asst_operator_id" name="asst_operator_id[]" class="form-control form-control-sm select2bs4" multiple>
-                                        {{-- <option value="">Select Assistant</option> --}}
-                                  
-                                {{-- </div>  --}}
-
-                            <div class="row align-items-end mb-3">
-                            <div class="col-md-12">
-                                <div class="form-group mb-0">
-                                    <label class="mb-1 text-sm" id="target_label"></label>
-                                    <div class="d-flex align-items-center">
-                                        
-                                        <!-- PRODUCTION BUTTONS -->
-                                        <div id="mo_jo_buttons">
-                                            <!-- Search MO Button -->
-                                            <button type="button" class="btn btn-secondary mr-2" onclick="showMOSearch()">
-                                                <i class="fas fa-search"></i> Search Item
-                                            </button>
-
-                                            <!-- Manual JO Button -->
-                                            {{-- @if($user->allow_manual_jo) --}}
-                                                <button type="button" class="btn btn-outline-primary" onclick="showManualJOModal()">
-                                                    <i class="fas fa-edit"></i> External / Campaign Ref
-                                                </button>
-                                            {{-- @endif --}}
-                                        </div>
-
-                                        <!-- DOWNTIME BUTTON (Hidden by default) -->
-                                        <div id="downtime_button_wrapper" class="d-none">
-                                            <button type="button" class="btn btn-danger shadow-sm font-weight-bold px-4" onclick="startDowntime()">
-                                                <i class="fas fa-power-off"></i> Start Downtime
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                            </div>
-
-                            <!-- Column 2: Action Setup -->
-                            <div class="col-md-6 border-left">
-                                <div class="form-group mb-2">
-                                    <label class="mb-1 text-sm">Action Type: <span class="text-danger">*</span></label>
-                                    <select class="form-control select2 select2-hidden-accessible" style="width: 100%;" data-select2-id="1" tabindex="-1" aria-hidden="true">
-                                        <option selected="selected" data-select2-id="3">ArtWorkFlow</option>
-                                        <option data-select2-id="35">Retouching</option>
-                                        <option data-select2-id="36">Apparel</option>
-                                        <option data-select2-id="37">Revision</option>
-                                       
-                                    </select>
-                                    {{-- <div class="d-flex action-btn-group gap-2">
-                                        <button type="button" class="btn btn-sm btn-success mr-1">DIRECT</button>
-                                        <button type="button" class="btn btn-sm btn-warning mr-1 text-dark">NON-PROD.</button>
-                                        <button type="button" class="btn btn-sm btn-danger">PROD. DOWN</button>
-                                    </div> --}}
-                                </div>
-                                <div class="form-group mb-2">
-                                    {{-- <label class="mb-1 text-sm">Action: <span class="text-danger">*</span></label>
-                                    <select id="action_id" class="form-control form-control-sm select2bs4">
-                                        <option value="">Select Action...</option>
-                                    </select> --}}
-                                </div>
-
-                                <!-- ========================================== -->
-                                <!-- INSERT NEW CONFIGURATION CONTAINER HERE    -->
-                                <!-- ========================================== -->
-                                <div id="job_type_container" class="form-group mt-3" style="display: none;">
-                                    <label class="mb-1 text-sm">Job Type <span class="text-danger">*</span></label>
-                                    <div class="d-flex align-items-center text-sm">
-                                        <div class="custom-control custom-radio mr-3">
-                                            <input class="custom-control-input" type="radio" id="type_new" name="job_type" value="NEW">
-                                            <label for="type_new" class="custom-control-label">NEW</label>
-                                        </div>
-                                        
-                                        {{-- Make Ready Specific --}}
-                                        <div class="custom-control custom-radio mr-3" id="wrapper_reorder" style="display: none;">
-                                            <input class="custom-control-input" type="radio" id="type_reorder" name="job_type" value="RE-ORDER">
-                                            <label for="type_reorder" class="custom-control-label">RE-ORDER</label>
-                                        </div>
-
-                                        {{-- Running Specific --}}
-                                        <div class="custom-control custom-radio" id="wrapper_replate" style="display: none;">
-                                            <input class="custom-control-input" type="radio" id="type_replate" name="job_type" value="REPLATE">
-                                            <label for="type_replate" class="custom-control-label">REPLATE</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Replate Reason --}}
-                                <div id="replate_reason_container" class="form-group mt-2" style="display: none;">
-                                    <label class="mb-1 text-sm">Replate Reason <span class="text-danger">*</span></label>
-                                    <select id="replate_reason" class="form-control form-control-sm select2bs4">
-                                        <option value="">Select Reason for Replating...</option>
-                                        @foreach($replate_reasons ?? [] as $item)
-                                            <option value="{{ $item->name }}">{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <!-- ========================================== -->
-                                <!-- END NEW CONFIGURATION CONTAINER            -->
-                                <!-- ========================================== -->
-                            </div>
-                        </div>
-
-                        <hr class="my-3">
-
-                        <!-- Bottom Row: MO Selection & Start -->
-          
-                    </form>
-                </div>
-            </div>
-
-        <div class="row justify-content-center">
-        <!-- Left Side: Profile Summary Card -->
-        <div class="col-md-4 mt-5">
-            <div class="card card-primary card-outline">
-                <div class="card-body box-profile">
-                   <form action="" method="POST">
-    @csrf
-    
-    <div class="form-group">
-        <label for="select-tag">Select Item:</label>
-        <select id="select-tag" name="tag_id" class="form-control select2 @error('tag_id') is-invalid @enderror" style="width: 100%;">
-            <option value="">-- Choose an option --</option>
-            @foreach($availableItemsForSelect as $list)
-                <option value="{{ $list->item_code }}" {{ old('tag_id') == $list->item_code ? 'selected' : '' }}>
-                    {{ $list->item_code }}
-                </option>
-            @endforeach
-        </select>
-        
-        @error('tag_id')
-            <span class="error invalid-feedback">{{ $message }}</span>
-        @enderror
-    </div>
-</form>
-
-                    <button id="btn_start_time"class="btn btn-secondary btn-success" tabindex="0" aria-controls="UsersTable" type="button" title="New" >
-                <span>
-                    <i class="fas fa-start"></i>
-                    Start
-                </span>
-            </button>
-            <button class="btn btn-secondary btn-warning" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Pause
-                </span>
-            </button>
-            <button id="btn_stop_time" class="btn btn-secondary btn-danger" tabindex="0" aria-controls="UsersTable" type="button" title="New">
-                <span>
-                    <i class="fas fa"></i>
-                    Stop
-                </span>
-            </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Side: Detailed Profile Information -->
-
-
-
-
-
-@endcan
-
-@include('partials.modal.item_search')
-
-    </div>
 </div> 
 
 @endsection
@@ -665,114 +425,38 @@
         });
        
 
-//fetch fileSend Table
 
-// var FileSendLinkTable = $('#FileSendTable').DataTable({
-//     responsive: true,
-//     lengthChange: true,
-//     autoWidth: false,
-//     serverSide: true,
-//     processing: true,
-//     order: [[4, 'desc']],
-//     // Custom DOM layout: places length menu & search on top, table in middle, info & pagination at bottom
-//     dom: '<"row p-3 align-items-center"<"col-md-6"l><"col-md-6"f>>' +
-//          '<"row"<"col-md-12"tr>>' +
-//          '<"row p-3 align-items-center"<"col-md-5"i><"col-md-7"p>>',
-         
-//     language: {
-//         search: "_INPUT_",
-//         searchPlaceholder: "Search records...",
-//         lengthMenu: "Show _MENU_ entries",
-//         processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>'
-//     },
-//     ajax: {
-//         url: "{{ route('FileRecievedLinkShowAll') }}",
-//         type: 'GET'
-//     },
-//     columns: [
-//         { data: 'item_code' },
-//         { data: 'client_name' },
-//         { data: 'ao_name' },
+$(document).ready(function() {
+    $('.action-mode-btn').on('click', function() {
+        let btn = $(this);
+        let actionTaken = btn.data('action');
 
-//         // Shared File / Link Column (Styled as Inspect Link Button)
-//         {
-//             data: 'file_link',
-//             render: function(data, type, row) {
-//                 if (!data) return '<span class="text-muted">N/A</span>';
+        btn.prop('disabled', true);
 
-//                 return `
-//                     <a href="${data}" 
-//                        class="btn btn-xs btn-outline-info file-link" 
-//                        data-id="${row.id}" 
-//                        target="_blank">
-//                         <i class="fas fa-external-link-alt mr-1"></i> Inspect Link
-//                     </a>
-//                 `;
-//             }
-//         },
-//         { data: 'created_at' },
+        $.ajax({
+            url: "{{ route('gd-action-taken') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                action_taken: actionTaken
+            },
+            success: function(response) {
+                $('.action-mode-btn').removeClass('btn-dark text-white').addClass('btn-outline-dark');
+                btn.removeClass('btn-outline-dark').addClass('btn-dark text-white');
 
-//         // Restored Original Status Column
-//         { data: 'status' },
-
-//         // Restored Original Action Buttons (Verify & Specs)
-//         {
-//             data: null,
-//             orderable: false,
-//             searchable: false,
-//             render: function(data, type, row) {
-//                 // 1. Verification Button logic
-//                 let isVerified = row.is_verified;
-//                 let btnClass = isVerified ? "btn-success" : "btn-secondary";
-//                 let btnText  = isVerified ? "Supplied Verified" : "Supplied File";
-//                 let btnIcon  = isVerified ? "fa-check" : "fa-file-alt";
-//                 let disabled = isVerified ? "disabled" : "";
-
-//                 if(!isVerified){
-//                     alert(row.is_verified);
-//                 }
-//                 // 2. Specifications Button logic (Dynamic check)
-//                 // ALERT: Replace 'has_specifications' with the actual variable key sent from your Laravel Controller
-//                 let is_specification_exist = row.is_specification_exist; 
-//                 // console.log("The row data: " + JSON.stringify(row, null, 2));
-//                 let specClass = is_specification_exist ? "btn-success" : "btn-success";
-//                 let specText  = is_specification_exist ? "Specifications" : "Specifications";
-//                 let specIcon  = is_specification_exist ? "fa-check" : "fa-check-alt";
-//                  let disabled2 = is_specification_exist ? "disabled" : "";
-
-//                return `
-//     <div class="d-inline-flex align-items-center" style="gap: 6px;">
-//         <!-- Verify Button -->
-//         <button type="button" 
-//             class="btn ${btnClass} btn-xs d-inline-flex align-items-center font-weight-bold" 
-//             style="padding: 2px 6px; font-size: 11px; gap: 4px; border-radius: 3px;"
-//             data-id="${row.id}" 
-//             data-client="${row.client_name ?? ''}"
-//             title="${btnText}"
-//             ${disabled}>
-//             <i class="fas ${btnIcon}" style="font-size: 10px;"></i> 
-//             <span>${btnText}</span>
-//         </button>
-        
-//         <!-- Specifications Button -->
-//         <button type="button" 
-//             class="btn ${specClass} btn-xs d-inline-flex align-items-center font-weight-bold" 
-//             style="padding: 2px 6px; font-size: 11px; gap: 4px; border-radius: 3px;"
-//             data-id="${row.id}" 
-//             data-itemcode="${row.item_code ?? ''}"
-//             title="${specText}"  
-//             ${disabled}>
-//             <i class="fas ${specIcon}" style="font-size: 10px;"></i> 
-//             <span>${specText}</span>
-//         </button>
-//     </div>
-// `;
-
-//             }
-//         }
-//     ]
-// });
-
+                // Note: remove d-flex before fading out so jQuery hide() works properly
+                $('#table_lock_overlay').removeClass('d-flex').fadeOut(200);
+            },
+            error: function(xhr) {
+                console.error('Error logging action:', xhr.responseText);
+                alert('Failed to log action. Please try again.');
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
 
 var FileSendLinkTable = $('#FileSendTable').DataTable({
     responsive: true,
@@ -821,7 +505,8 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
 
         // Restored Original Status Column
         { data: 'status' },
-        {
+
+                {
             data: null,
             orderable: false,
             searchable: false,
@@ -844,62 +529,76 @@ var FileSendLinkTable = $('#FileSendTable').DataTable({
                             </button>
                         `;
 
+                         return `
+                            <button type="button" 
+                                    class="btn btn-warning btn-sm btn-gd-assess" 
+                                    data-id="${row.rfa_reference}" 
+                                    data-item-code="${row.item_code ?? ''}"
+                                     data-rfa-reference="${row.rfa_reference}"
+                                     data-item-desc="${row.file_info}"
+                                        data-client-name="${row.client_name}"
+                                    >
+                                <i class="fas fa-edit mr-1"></i> Assess Supplied File
+                            </button>
+                        `;
+
             // If not assigned, render the "Assign To Artist" modal trigger button
             
             },
 
             
             
-        },
-        // Restored Original Action Buttons (Verify & Specs)
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
-    render: function(data, type, row) {
-    // 1. Convert values to Booleans (handles true/false, "1"/"0", 1/0)
-    let isVerified =  row.is_verified ;
-    let isAoApprove = row.is_Ao_Approve;
+            },
 
-  
+            // Restored Original Action Buttons (Verify & Specs)
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+            render: function(data, type, row) {
+            // 1. Convert values to Booleans (handles true/false, "1"/"0", 1/0)
+            let isVerified =  row.is_verified ;
+            let isAoApprove = row.is_Ao_Approve;
 
-    // 2. Default state: Supplied File
-    let btnText = "Supplied File";
-    let btnClass = "btn-secondary";
-    let btnIcon = "fa-file-alt";
-    let disabled = "";
+        
 
-    // 3. Conditional states
-    if ( isVerified) {
-        btnText = "Supplied Verified";
-        btnClass = "btn-success";
-        btnIcon = "fa-check";
-        disabled = "";
-    } else if (isAoApprove && !isVerified) {
-        btnText = "Supplied Submitted";
-        btnClass = "btn-primary";
-        btnIcon = "fa-paper-plane";
-    }
+            // 2. Default state: Supplied File
+            let btnText = "Supplied File";
+            let btnClass = "btn-secondary";
+            let btnIcon = "fa-file-alt";
+            let disabled = "";
 
-    // 4. Specifications Button logic
-    let is_specification_exist = row.is_specification_exist; 
-    let specClass = "btn-success";
-    let specText  = "Specifications";
-    let specIcon  = "fa-check";
+            // 3. Conditional states
+            if ( isVerified) {
+                btnText = "Supplied Verified";
+                btnClass = "btn-success";
+                btnIcon = "fa-check";
+                disabled = "";
+            } else if (isAoApprove && !isVerified) {
+                btnText = "Supplied Submitted";
+                btnClass = "btn-primary";
+                btnIcon = "fa-paper-plane";
+            }
 
-    return `
-        <div class="btn-group btn-group-sm" role="group"> 
-            <!-- Verify Button --> 
-            <button type="button" class="btn ${btnClass} btn-verify mr-1" data-id="${row.id}" data-client="${row.client_name ?? ''}" data-rfaReference="${row.rfa_reference}" title="${btnText}" ${disabled}> 
-                <i class="fas ${btnIcon} mr-1"></i> ${btnText} 
-            </button> 
-            <!-- Specifications Button 
-            <button type="button" class="btn ${specClass} btn-specifications" data-id="${row.id}" data-itemcode="${row.item_code ?? ''}" title="${specText}"> 
-                <i class="fas ${specIcon} mr-1"></i> ${specText} 
-            </button>  -->
-        </div>
-    `;
-}
+            // 4. Specifications Button logic
+            let is_specification_exist = row.is_specification_exist; 
+            let specClass = "btn-success";
+            let specText  = "Specifications";
+            let specIcon  = "fa-check";
+
+            return `
+                <div class="btn-group btn-group-sm" role="group"> 
+                    <!-- Verify Button --> 
+                    <button type="button" class="btn ${btnClass} btn-verify mr-1" data-id="${row.id}" data-client="${row.client_name ?? ''}" data-rfaReference="${row.rfa_reference}" title="${btnText}" ${disabled}> 
+                        <i class="fas ${btnIcon} mr-1"></i> ${btnText} 
+                    </button> 
+                    <!-- Specifications Button 
+                    <button type="button" class="btn ${specClass} btn-specifications" data-id="${row.id}" data-itemcode="${row.item_code ?? ''}" title="${specText}"> 
+                        <i class="fas ${specIcon} mr-1"></i> ${specText} 
+                    </button>  -->
+                </div>
+            `;
+        }
         },
         // NEW COLUMN: Dynamic To Assign Column
         {
@@ -1241,6 +940,26 @@ $.ajax({
         $('#file_link').val(response.data.file_link);
         $('#text_specs').val(response.data.text_specs);
         $('#item_description').val(response.data.file_info);
+        $('#number_of_colors').val(response.data.num_of_colors);
+
+
+        let imageTypes = response.data.image_type;
+
+            if (typeof imageTypes === 'string') {
+                try {
+                    imageTypes = JSON.parse(imageTypes);
+                } catch (e) {
+                    imageTypes = [];
+                }
+            }
+
+            $('input[name="image_type_no_item_code[]"]').prop('checked', false);
+
+            if (Array.isArray(imageTypes)) {
+                imageTypes.forEach((type) => {
+                    $(`input[name="image_type_no_item_code[]"][value="${type}"]`).prop('checked', true);
+                });
+            }
    
         // Handle links
         if (response.data.file_link) {
@@ -1328,12 +1047,37 @@ $('#FileSendTable_NoItemCode').on('click', '.btn-verify', function () {
             $('input[name="color_no_item_code"]').prop('checked', false);
             $(`input[name="color_no_item_code"][value="${response.data.colors}"]`).prop('checked', true);
 
+            $('#number_of_colors_no_item_code').val(response.data.num_of_colors);
+
             $('input[name="text_specs_no_item_code"]').prop('checked', false);
             $(`input[name="text_specs_no_item_code"][value="${response.data.text_specs}"]`).prop('checked', true);
 
             $('#file_link_no_item_code').val(response.data.file_link);
             $('#text_specs_no_item_code').val(response.data.text_specs);
             $('#item_description_no_item_code').val(response.data.file_info);
+
+            $('input[name="text_specs_no_item_code"]').prop('checked', false);
+            $(`input[name="text_specs_no_item_code"][value="${response.data.text_specs}"]`).prop('checked', true);
+
+           
+            let imageTypes = response.data.image_type;
+
+            if (typeof imageTypes === 'string') {
+                try {
+                    imageTypes = JSON.parse(imageTypes);
+                } catch (e) {
+                    imageTypes = [];
+                }
+            }
+
+            $('input[name="image_type_no_item_code[]"]').prop('checked', false);
+
+            if (Array.isArray(imageTypes)) {
+                imageTypes.forEach((type) => {
+                    $(`input[name="image_type_no_item_code[]"][value="${type}"]`).prop('checked', true);
+                });
+            }
+
        
             // Handle links
             const fileLink = response.data.file_link || response.file_link;

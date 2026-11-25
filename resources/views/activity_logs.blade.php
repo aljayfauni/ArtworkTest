@@ -54,8 +54,9 @@
                         <thead class="bg-light text-muted">
                             <tr>
                                 <th style="width: 15%;">Timestamp</th>
-                                <th style="width: 12%;">Log Type</th>
+                                {{-- <th style="width: 12%;">Log Type</th> --}}
                                 <th style="width: 13%;">Item Code</th>
+                                <th style="width: 13%;">Rfa Reference</th>
                                 <th style="width: 15%;">Triggered By</th>
                                 <th style="width: 45%;">Log Activity Details</th>
                             </tr>
@@ -70,14 +71,15 @@
                                         <small class="text-xs text-primary font-italic">({{ $log->created_at->diffForHumans() }})</small>
                                     </td>
 
-                                    <!-- Log Type Column -->
+                                    {{-- <!-- Log Type Column -->
                                     <td class="align-middle">
                                         @if($log->log_type === 'action_taken')
                                             <span class="badge badge-purple px-2 py-1"><i class="fas fa-palette mr-1 text-xs"></i>Action</span>
                                         @else
                                             <span class="badge badge-teal px-2 py-1"><i class="fas fa-cog mr-1 text-xs"></i>History</span>
                                         @endif
-                                    </td>
+                                    </td> --}}
+
                                     
                                     <!-- Item Code Identifier Column -->
                                     <td class="align-middle">
@@ -85,7 +87,12 @@
                                             <i class="fas fa-barcode mr-1"></i>{{ $log->loggable->item_code ?? 'N/A' }}
                                         </span>
                                     </td>
-                                    
+                                      <!-- rfa reference -->
+                                    <td class="align-middle">
+                                        <span class="badge  p-2 font-weight-bold">
+                                            <i class="fas fa- mr-1"></i>{{ $log->rfa_reference ?? 'N/A' }}
+                                        </span>
+                                    </td>
                                     <!-- Actor Column -->
                                     <td class="align-middle text-sm font-weight-bold text-secondary">
                                         <i class="fas fa-user-circle mr-1 text-muted"></i>{{ $log->user->name ?? 'System Process' }}

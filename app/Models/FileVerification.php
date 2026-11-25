@@ -93,7 +93,8 @@ class FileVerification extends Model
                 if ($artwork) {
                     $oldArtworkStatus = $artwork->status;
                     
-                    $newArtworkStatus = 'For AO Approval'; 
+                    // $newArtworkStatus = 'For AO Approval'; 
+                         $newArtworkStatus = 'Submitted'; 
                     if ($verification->status === 'Rejected') {
                         $newArtworkStatus = 'For Revision';
                     } elseif ($verification->status === 'Approved') {

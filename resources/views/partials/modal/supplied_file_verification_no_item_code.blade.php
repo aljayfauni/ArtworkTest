@@ -207,9 +207,14 @@
                                 <label class="d-block font-weight-bold">Image Type</label>
                                 <div class="row">
                                     <div class="col-6">
-                                        <div class="custom-control custom-checkbox mb-1">
+                                        {{-- <div class="custom-control custom-checkbox mb-1 mt-4">
                                             <input class="custom-control-input" type="checkbox" id="img_layered_no_item_code" name="image_type_no_item_code[]" value="Layered">
                                             <label for="img_layered" class="custom-control-label font-weight-normal">Layered</label>
+                                        </div> --}}
+
+                                        <div class="custom-control custom-checkbox mb-1">
+                                            <input class="custom-control-input" type="checkbox" id="img_layered_no_item_code" name="img_layered_no_item_code[]" value="Layered">
+                                            <label for="img_layered_no_item_code" class="custom-control-label font-weight-normal">Layered</label>
                                         </div>
                                         <div class="custom-control custom-checkbox mb-1">
                                             <input class="custom-control-input" type="checkbox" id="img_missing_no_item_code" name="image_type_no_item_code[]" value="Missing Image(s)">

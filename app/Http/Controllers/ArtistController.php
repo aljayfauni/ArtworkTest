@@ -368,84 +368,83 @@ public function getShareTimeDuration(Request $request)
     return response()->json($userTimeConsumption);
 }
 
-public function getShareTimeDurationCompanion(Request $request)
+public function getShareTimeDurationCompanion(Request $request, $id)
 {
-    $artwork_id = $request->id;
     $timeLogTable = (new TimeLog)->getTable();
 
-    // 1. Collect distinct users.id across time_logs, commercial_artist, and companion
-    $participantIds = DB::query()
-        ->fromSub(function ($query) use ($artwork_id, $timeLogTable) {
-            // Users from time_logs (already stores users.id)
-            $query->from($timeLogTable)
-                ->select('user_id as uid')
-                ->where('item_code', $artwork_id)
-                ->whereNotNull('user_id')
-                // Main artists (convert emp_id -> users.id)
-                ->union(
-                    DB::table('companion')
-                        ->join('users', 'users.emp_id', '=', 'companion.user_id')
-                        ->select('users.id as uid')
-                        ->where('companion.item_code', $artwork_id)
-                )
-                // Companions (convert emp_id -> users.id)
-                ->union(
-                    DB::table('companion')
-                        ->join('users', 'users.emp_id', '=', 'companion.user_id')
-                        ->select('users.id as uid')
-                        ->where('companion.item_code', $artwork_id)
-                );
-        }, 'u')
-        ->distinct()
-        ->pluck('uid');
+    // 1. Get companion user IDs
+    $companionUserIds = DB::table('companion')
+        ->join('users', 'users.emp_id', '=', 'companion.user_id')
+        ->where('companion.item_code', $id)
+        ->pluck('users.id');
 
-    // 2. Query users once by primary key and join their time logs
-    $userTimeConsumption = DB::table('users')
-        ->whereIn('users.id', $participantIds)
-        ->leftJoinSub(function ($query) use ($artwork_id, $timeLogTable) {
-            $query->from($timeLogTable)
-                ->select('user_id', 'action', 'recorded_at')
-                ->selectRaw("LEAD(recorded_at) OVER (PARTITION BY ao_file_link_id ORDER BY recorded_at) as next_recorded_at")
-                ->where('item_code', $artwork_id);
-        }, 'sub', 'sub.user_id', '=', 'users.id')
+    if ($companionUserIds->isEmpty()) {
+        return response()->json([]);
+    }
+
+    // 2. Pre-aggregate time per user (with proper 'join' binding)
+    $userTimesSub = DB::table(DB::raw("(
+        SELECT 
+            user_id,
+            CASE 
+                WHEN action IN ('start', 'resume') 
+                THEN DATEDIFF_BIG(ms, recorded_at, COALESCE(next_recorded_at, GETDATE()))
+                ELSE 0 
+            END AS duration_ms
+        FROM (
+            SELECT 
+                user_id,
+                action, 
+                recorded_at,
+                LEAD(recorded_at) OVER (PARTITION BY ao_file_link_id ORDER BY recorded_at) AS next_recorded_at
+            FROM {$timeLogTable}
+            WHERE item_code = ?
+        ) raw_logs
+    ) calc"))
+    ->select('user_id', DB::raw('SUM(duration_ms) as total_user_ms'))
+    ->groupBy('user_id')
+    ->setBindings([$id], 'from');
+
+    // 3. Calculate grand total across ALL participants
+    $grandTotalRow = DB::selectOne("
+        SELECT COALESCE(SUM(
+            CASE 
+                WHEN action IN ('start', 'resume') 
+                THEN DATEDIFF_BIG(ms, recorded_at, COALESCE(next_recorded_at, GETDATE()))
+                ELSE 0 
+            END
+        ), 0) AS total_ms
+        FROM (
+            SELECT action, recorded_at,
+                   LEAD(recorded_at) OVER (PARTITION BY ao_file_link_id ORDER BY recorded_at) AS next_recorded_at
+            FROM {$timeLogTable}
+            WHERE item_code = ?
+        ) sub
+    ", [$id]);
+
+    $grandTotalMs = (float) ($grandTotalRow->total_ms ?? 0);
+
+    // 4. Join pre-aggregated user totals to companions
+    $companions = DB::table('users')
+        ->whereIn('users.id', $companionUserIds)
+        ->leftJoinSub($userTimesSub, 'ut', 'ut.user_id', '=', 'users.id')
         ->select(
             'users.id as user_id',
             'users.name as user_name',
-            'users.role_id as role'
+            'users.role_id as role',
+            DB::raw('COALESCE(ut.total_user_ms, 0) as time_spent_milliseconds')
         )
-        ->selectRaw("
-            COALESCE(SUM(
-                CASE 
-                    WHEN sub.action IN ('start', 'resume') 
-                    THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
-                    ELSE 0 
-                END
-            ), 0) as time_spent_milliseconds
-        ")
-        ->selectRaw("
-            COALESCE(ROUND(
-                (CAST(SUM(
-                    CASE 
-                        WHEN sub.action IN ('start', 'resume') 
-                        THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
-                        ELSE 0 
-                    END
-                ) AS FLOAT) / 
-                NULLIF(SUM(SUM(
-                    CASE 
-                        WHEN sub.action IN ('start', 'resume') 
-                        THEN DATEDIFF_BIG(ms, sub.recorded_at, COALESCE(sub.next_recorded_at, GETDATE())) 
-                        ELSE 0 
-                    END
-                )) OVER(), 0)) * 100, 
-                2
-            ), 0) as duration_share_percentage
-        ")
-        ->groupBy('users.id', 'users.name', 'users.role_id')
-        ->get();
+        ->get()
+        ->map(function ($row) use ($grandTotalMs) {
+            $ms = (float) $row->time_spent_milliseconds;
+            $row->duration_share_percentage = $grandTotalMs > 0
+                ? round(($ms / $grandTotalMs) * 100, 2)
+                : 0;
+            return $row;
+        });
 
-    return response()->json($userTimeConsumption);
-}
+    return response()->json($companions);
+} 
 
 
 // public function toggleTimer(Request $request, $item_code)

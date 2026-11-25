@@ -99,10 +99,9 @@ class ArtWorkFileLinkTemp extends Model
 //                 ->latest();
 // }
 
-public function activityLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+public function activityLogs()
 {
-    // Native morphMany automatically tracks BOTH 'loggable_id' and 'loggable_type'
-    return $this->morphMany(ActivityLog::class, 'loggable')->latest();
+    return $this->hasMany(ActivityLog::class, 'rfa_reference', 'rfa_reference')->latest();
 }
 
 
@@ -114,6 +113,16 @@ public function artist()
     public function timeLogs(): HasMany
 {
     return $this->hasMany(TimeLog::class, 'ao_file_link_id')->orderBy('recorded_at', 'asc');
+}
+
+public function historyLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+{
+    return $this->morphMany(HistoryLog::class, 'model')->latest();
+}
+
+public function actionTakenLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+{
+    return $this->morphMany(ActionTakenLog::class, 'subject')->latest();
 }
 
 public function getIsRunningAttribute(): bool

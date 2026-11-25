@@ -897,8 +897,9 @@
 
     }
 
-//companion
+    //companion
     function getTimeSpentDurationCompanions() {
+       
         const currentUserId = "{{ auth()->id() }}";
 
         // High-precision millisecond string renderer output pattern: "HH:MM:SS.mmm"
@@ -939,7 +940,7 @@
                                         <strong class="text-dark">${item.user_name ?? 'Unknown User'}${isYou}</strong>
                                     </div>
                                 </td>
-                                <td class="text-muted">${userRole ?? '-'}</td>
+                                <td class="text-muted">Companion - ${userRole ?? '-'}</td>
                                 <td><span class="timer-display text-primary font-mono font-weight-bold">${formattedTime}</span></td>
                                 <td>
                                     <div class="progress progress-xs mb-1" style="height: 6px;">
@@ -1141,7 +1142,7 @@
         // Initial Data Loads
         fetchNotifications();
         getTimeSpentDuration();
-          getTimeSpentDurationCompanions();
+        getTimeSpentDurationCompanions();
         loadActivityLogs(ARTWORK_ITEM_CODE);
 
         // ---------------------------------------------------------
@@ -1162,8 +1163,8 @@
             const today = now.toISOString().split('T')[0];
             const holidays = ['2026-11-05', '2026-12-25'];
 
-            if (day === 1 || day === 5 || holidays.includes(today)) return false;
-            return hour >= 0 && hour < 24;
+            if (day === 0 || day === 6 || holidays.includes(today)) return false;
+            return hour >= 8 && hour < 18;
         }
 
         // 2. Format Seconds -> HH:MM:SS

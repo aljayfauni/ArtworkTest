@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActionTakenLog;
+use App\Models\ActivityLog;
 use App\Models\AoFileLink; // Your actual database model
 use App\Models\AoModel;
 use App\Models\ArtWorkFileLinkTemp;
 use App\Models\ArtworkLog;
+use App\Models\AuditLog;
 use App\Models\FileVerification;
 use App\Models\GdSupervisorCommerial;
+use App\Models\HistoryLog;
 use App\Models\Traffic;
 use App\Models\User;
 use App\Notifications\ArtWorkNotification;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -118,6 +123,47 @@ class AoFormController extends Controller
                     'unreadCount' => $unreadCount,
                 ]);
             }
+
+
+
+
+  $userId = auth()->id();
+
+    // 1. Kunin lahat ng rfa_reference ng user na hindi pa CANCEL sa history_logs
+    $activeLoggedRefs = HistoryLog::where('user_id', $userId)
+        ->whereNotNull('rfa_reference')
+        ->where(function ($q) {
+            $q->whereNull('status')->orWhere('status', '!=', 'CANCEL');
+        })
+        ->pluck('rfa_reference')
+        ->map(fn($ref) => trim($ref))
+        ->unique();
+
+    if ($activeLoggedRefs->isNotEmpty()) {
+        // 2. Tingnan kung alin ang na-save na talaga sa ao_file_links (AoModel)
+        $savedRefs = AoModel::whereIn('rfa_reference', $activeLoggedRefs)
+            ->pluck('rfa_reference')
+            ->map(fn($ref) => trim($ref))
+            ->toArray();
+
+        // 3. Kunin yung mga hindi na-save bago nag-refresh
+        $cancelledRefs = $activeLoggedRefs->diff($savedRefs)->toArray();
+
+        // 4. I-mark as 'CANCEL' sa logs imbes na i-delete
+        if (!empty($cancelledRefs)) {
+            HistoryLog::whereIn('rfa_reference', $cancelledRefs)->update([
+                'status'  => 'CANCEL',
+                'remarks' => 'Cancelled due to page refresh before submission.',
+            ]);
+
+            ActionTakenLog::whereIn('rfa_reference', $cancelledRefs)->update([
+                'status'  => 'CANCEL', // Alisin ang line na ito kung walang status column ang action_taken_logs
+                'remarks' => 'Cancelled due to page refresh before submission.',
+            ]);
+        }
+    }
+
+
 
             // Pass the records to your blade file
                 return view('ao.sendFileLink', [
@@ -301,17 +347,7 @@ class AoFormController extends Controller
             //create reference number
             $currentNumber = $latestId + $index;
             $rfaReference = 'RFA-' . date('Y') . '-' . str_pad($currentNumber, 5, '0', STR_PAD_LEFT); // e.g., RFA-2026-00001
-            // // Filter out non-email values for actual email sending
-            // $validEmails = array_values(array_filter($emails, function ($item) {
-            //     return filter_var($item, FILTER_VALIDATE_EMAIL);
-            // }));
-
-            // Aggregate unique recipient emails for batch notification
-            // $allRecipientEmails = array_unique(array_merge($allRecipientEmails, $validEmails));
-
-            // Create 1 DB record per recipient email for the current form card
-       
-            // foreach ($emails as $email) {
+   
                 $record = new AoModel();
                 $record->item_id       = $latestId;
                 $record->item_code     = $itemCode;
@@ -352,10 +388,36 @@ class AoFormController extends Controller
                 $traffic->status = $record->status ?? "";
                 $traffic->save();
                
-                $this->logActivity($record, 'File Link Sent', $record->created_at);
+                // $this->logActivity($record, 'File Link Sent', $record->created_at);
 
                 $savedRecords[] = $record;
             // }
+              AuditLogger::action(
+                subject: $record,
+                action: 'AO sent a new RFA file link without item code',
+                remarks: "AO {$user->name} submitted file link for verification without an item code."
+            );
+
+            AuditLogger::history(
+                model: $record,
+                oldValues: null,
+                newValues: $record->toArray(),
+                remarks: 'Artwork record created.'
+            );
+
+            // 3. Activity Log (User Interaction)
+            AuditLogger::activity(
+                event: 'submitted_file_link_no_itemcode',
+                description: "AO {$user->name} submitted file link for verification.",
+                rfaReference: $record->rfa_reference
+            );
+
+            AuditLogger::audit(
+                event: 'rfa_created_without_itemcode',
+                auditable: $record,
+               
+                metadata: $record->toArray()
+            );
         }
     });
 
@@ -417,7 +479,7 @@ public function store_without_itemcode(Request $request)
         foreach ($itemLinks as $index => $itemLink) {
             $sharedLink = $request->input("link.{$index}");
             $clientName = $request->input("client_name.{$index}");
-
+            $currentNumber = $latestId + $index;
             // 1. Save primary AoModel record (Model hook generates rfa_reference on save)
             $rfa_file_link = new AoModel();
             $rfa_file_link->item_id     = $latestId;
@@ -431,7 +493,7 @@ public function store_without_itemcode(Request $request)
             $rfa_file_link->assigned_to_role_id      = 3; 
             $rfa_file_link->save();
 
-            $this->logActivity($rfa_file_link, 'File Link Sent', $rfa_file_link->created_at);
+            // $this->logActivity($rfa_file_link, 'File Link Sent', $rfa_file_link->created_at);
             
             $savedRecords[] = $rfa_file_link;
             $createdAoRecords[] = $rfa_file_link;
@@ -449,7 +511,7 @@ public function store_without_itemcode(Request $request)
             $rfa_file_link->assigned_to_role_id      = 3; //role id == 2 for supervisor
             $rfa_file_link_temp->save();
 
-            $this->logActivity($rfa_file_link_temp, 'File Link Save as Temporary, No Item Code yet', $rfa_file_link_temp->created_at);
+            // $this->logActivity($rfa_file_link_temp, 'File Link Save as Temporary, No Item Code yet', $rfa_file_link_temp->created_at);
 
             $savedRecords[] = $rfa_file_link_temp;
 
@@ -460,10 +522,82 @@ public function store_without_itemcode(Request $request)
             $rfa_saveToGDSV->status        = "For File Verification";
             $rfa_saveToGDSV->save();
 
-            $this->logActivity($rfa_saveToGDSV, 'File Link Save as Temporary, No Item Code yet', $rfa_saveToGDSV->created_at);
+            // $this->logActivity($rfa_saveToGDSV, 'File Link Save as Temporary, No Item Code yet', $rfa_saveToGDSV->created_at);
 
             $savedRecords[] = $rfa_saveToGDSV;
-        }
+
+            AuditLogger::action(
+                subject: $rfa_file_link,
+                action: 'AO sent a new RFA file link without item code',
+                remarks: "AO {$user->name} submitted file link for verification without an item code."
+            );
+
+            AuditLogger::history(
+                model: $rfa_file_link,
+                oldValues: null,
+                newValues: $rfa_file_link->toArray(),
+                remarks: 'Artwork record created.'
+            );
+
+            // 3. Activity Log (User Interaction)
+            AuditLogger::activity(
+                event: 'submitted_file_link_no_itemcode',
+                description: "AO {$user->name} submitted file link for verification.",
+                rfaReference: $rfa_file_link->rfa_reference
+            );
+
+            AuditLogger::audit(
+                event: 'rfa_created_without_itemcode',
+                auditable: $rfa_file_link,
+               
+                metadata: $rfa_file_link->toArray()
+            );
+
+
+            // 1. HISTORY LOG (Data snapshot + Artist's editable diary remarks) // manual logging
+                // HistoryLog::create([
+                //     'user_id'       => auth()->id(),
+                //     'rfa_reference' => $rfa_file_link->rfa_reference,
+                //     'model_type'    => AoModel::class,
+                //     'model_id'      => $rfa_file_link->id,
+                //     'old_values'    => null,
+                //     'new_values'    => $rfa_file_link->toArray(),
+                //     'remarks'       => 'Artwork record created.',
+                // ]);
+
+                // // 2. ACTION TAKEN LOG (What workflow step the user completed)
+                // ActionTakenLog::create([
+                //     'user_id'       => auth()->id(),
+                //     'rfa_reference' => $rfa_file_link->rfa_reference,
+                //     'subject_type'  => AoModel::class,
+                //     'subject_id'    => $rfa_file_link->id,
+                //     'action'        => 'AO sent a new RFA file link without item code',
+                //     'remarks'       => "Submitted file link for verification without an item code.",
+                // ]);
+
+                // // 3. ACTIVITY LOG (User click / form submission event)
+                // ActivityLog::create([
+                //     'user_id'       => auth()->id(),
+                //     'rfa_reference' => $rfa_file_link->rfa_reference,
+                //     'event'         => 'submitted_file_link_no_itemcode',
+                //     'description'   => "AO {$user->name} submitted a new file link.",
+                //     'ip_address'    => request()->ip(),
+                //     'user_agent'    => request()->userAgent(),
+                // ]);
+
+                // // 4. AUDIT LOG 
+                // AuditLog::create([
+                //     'user_id'        => auth()->id(),
+                //     'rfa_reference'  => $rfa_file_link->rfa_reference,
+                //     'auditable_type' => AoModel::class,
+                //     'auditable_id'   => $rfa_file_link->id,
+                //     'event'          => 'rfa_created',
+                //     'metadata'       => $rfa_file_link->toArray(),
+                //     'url'            => request()->fullUrl(),
+                //     'ip_address'     => request()->ip(),
+                //     'user_agent'     => request()->userAgent(),
+                // ]);
+            }
     });
 
     // 2. Send notifications outside transaction only for the primary AoModel records
@@ -655,8 +789,301 @@ public function aoAddedItemCode(Request $request)
 }
 
 
+    public function aoAddItemCode(Request $request) // index
+    {
 
+
+    // Fetch the target submission
+    $rfa = AoModel::where('rfa_reference', $request->item_id)->first();
+ 
+    $users= User::whereNotNull('email')->get();
+   
+    // Fetch all recipient emails linked to this submission batch
+    $selectedEmails = AoModel::
+
+        where('rfa_reference', $rfa)
+        ->pluck('to_email')
+        ->toArray();
     
+    // Fetch all available system users to populate options
+   // $users = User::all();
+    $item_detail = $rfa;
+    return view('ao.add_item_code', compact('item_detail', 'selectedEmails', 'users'));
+        
+    }
+    
+
+
+public function getNewLatestReference()
+{
+    $user   = auth()->user();
+    $userId = $user->id;
+    $prefix = 'RFA-' . now('Asia/Manila')->format('dmY') . '-';
+
+    // 1. Only reuse if there is an ACTIVE (status IS NULL) reference not yet saved in AoModel
+    $existingUnused = HistoryLog::where('user_id', $userId)
+        ->where('rfa_reference', 'LIKE', $prefix . '%')
+        ->whereNull('status')
+        ->orderBy('id', 'desc')
+        ->first();
+
+    if ($existingUnused && !AoModel::where('rfa_reference', $existingUnused->rfa_reference)->exists()) {
+        $ref = trim($existingUnused->rfa_reference);
+        $now = now('Asia/Manila')->format('Y-m-d H:i:s.v');
+
+        DB::table('history_logs')->where('id', $existingUnused->id)->update(['updated_at' => $now]);
+        DB::table('action_taken_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+        DB::table('activity_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+        // DB::table('audit_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+
+        return response()->json([
+            'new_ref' => $ref,
+            'reused'  => true
+        ]);
+    }
+
+    // 2. Otherwise, ignore CANCEL rows, grab the next number (reusing any cancelled number), and INSERT fresh rows with status = NULL
+    $newRef = DB::transaction(function () use ($prefix, $user, $userId) {
+        $latestAo = AoModel::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        // Ignore CANCEL rows so cancelled references can be generated and re-inserted with status = NULL
+        $latestHistory = HistoryLog::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->whereNull('status')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        $lastAoNum   = $latestAo ? (int) substr(trim($latestAo->rfa_reference), -3) : 0;
+        $lastHistNum = $latestHistory ? (int) substr(trim($latestHistory->rfa_reference), -3) : 0;
+
+        $lastNumber   = max($lastAoNum, $lastHistNum);
+        $generatedRef = $prefix . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        // 1. HISTORY LOG
+        HistoryLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'model_type'    => AoModel::class,
+            'model_id'      => 0,
+            'status'        => null,
+            'old_values'    => null,
+            'new_values'    => ['rfa_reference' => $generatedRef],
+            'remarks'       => 'Initiated new RFA Artwork Creation.',
+        ]);
+
+        // 2. ACTION TAKEN LOG
+        ActionTakenLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'subject_type'  => AoModel::class,
+            'subject_id'    => 0,
+            'action'        => 'AO initiated a new RFA ',
+            'remarks'       => 'Create new item  ',
+        ]);
+
+        // 3. ACTIVITY LOG
+        ActivityLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'event'         => 'initiated_new_rfa',
+            'description'   => "AO {$user->name} Created new Artwork {$generatedRef}.",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
+
+        // 4. AUDIT LOG
+        AuditLog::create([
+            'user_id'        => $userId,
+            'rfa_reference'  => $generatedRef,
+            'auditable_type' => AoModel::class,
+            'auditable_id'   => 0,
+            'event'          => 'rfa_initiated',
+            'metadata'       => ['rfa_reference' => $generatedRef],
+            'url'            => request()->fullUrl(),
+            'ip_address'     => request()->ip(),
+            'user_agent'     => request()->userAgent(),
+        ]);
+
+        return $generatedRef;
+    });
+
+    return response()->json(['new_ref' => $newRef]);
+}
+
+public function getExistingReferenceNum()
+{
+    $user   = auth()->user();
+    $userId = $user->id;
+    $prefix = 'RFA-' . now('Asia/Manila')->format('dmY') . '-';
+
+    // 1. Only reuse if there is ALREADY an active (status IS NULL) reference not yet saved in AoModel
+    $existingUnused = HistoryLog::where('user_id', $userId)
+        ->where('rfa_reference', 'LIKE', $prefix . '%')
+        ->whereNull('status') // <-- MUST be whereNull('status'), NOT where('status', 'CANCEL')
+        ->orderBy('id', 'desc')
+        ->first();
+
+    if ($existingUnused && !AoModel::where('rfa_reference', $existingUnused->rfa_reference)->exists()) {
+        $ref = trim($existingUnused->rfa_reference);
+        $now = now('Asia/Manila')->format('Y-m-d H:i:s.v');
+
+        DB::table('history_logs')->where('id', $existingUnused->id)->update(['updated_at' => $now]);
+        DB::table('action_taken_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+        DB::table('activity_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+        // DB::table('audit_logs')->where('rfa_reference', $ref)->update(['updated_at' => $now]);
+
+        return response()->json([
+            'new_ref' => $ref,
+            'reused'  => true
+        ]);
+    }
+
+    // 2. Otherwise, ignore CANCEL rows, grab the next number (e.g., 008 or 011), and INSERT fresh rows with status = NULL
+    $newRef = DB::transaction(function () use ($prefix, $user, $userId) {
+        $latestAo = AoModel::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        // Ignore CANCEL rows here so cancelled numbers like 011 can be generated & inserted again!
+        $latestHistory = HistoryLog::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->whereNull('status')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        $lastAoNum   = $latestAo ? (int) substr(trim($latestAo->rfa_reference), -3) : 0;
+        $lastHistNum = $latestHistory ? (int) substr(trim($latestHistory->rfa_reference), -3) : 0;
+
+        $lastNumber   = max($lastAoNum, $lastHistNum);
+        $generatedRef = $prefix . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        // 1. HISTORY LOG (Inserts a fresh row with status = NULL)
+        HistoryLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'model_type'    => AoModel::class,
+            'model_id'      => 0,
+            'status'        => null,
+            'old_values'    => null,
+            'new_values'    => ['rfa_reference' => $generatedRef],
+            'remarks'       => 'Initiated existing RFA item creation.',
+        ]);
+
+        // 2. ACTION TAKEN LOG
+        ActionTakenLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'subject_type'  => AoModel::class,
+            'subject_id'    => 0,
+            'action'        => 'AO initiated a new RFA  (existing item code)',
+            'remarks'       => 'Generated new RFA with existing item code.',
+        ]);
+
+        // 3. ACTIVITY LOG
+        ActivityLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'event'         => 'initiated_existing_rfa',
+            'description'   => "AO {$user->name} generated reference {$generatedRef} for existing item.",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
+
+        // 4. AUDIT LOG
+        AuditLog::create([
+            'user_id'        => $userId,
+            'rfa_reference'  => $generatedRef,
+            'auditable_type' => AoModel::class,
+            'auditable_id'   => 0,
+            'event'          => 'rfa_existing_initiated',
+            'metadata'       => ['rfa_reference' => $generatedRef],
+            'url'            => request()->fullUrl(),
+            'ip_address'     => request()->ip(),
+            'user_agent'     => request()->userAgent(),
+        ]);
+
+        return $generatedRef;
+    });
+
+    return response()->json(['new_ref' => $newRef]);
+}
+
+
+public function getAddFormReferenceNum()
+{
+    $user   = auth()->user();
+    $userId = $user->id;
+    $prefix = 'RFA-' . now('Asia/Manila')->format('dmY') . '-';
+
+    $newRef = DB::transaction(function () use ($prefix, $user, $userId) {
+        $latestAo = AoModel::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        // Ignore CANCEL rows so cancelled numbers can be reused and re-inserted with status = NULL
+        $latestHistory = HistoryLog::where('rfa_reference', 'LIKE', $prefix . '%')
+            ->whereNull('status')
+            ->orderBy('rfa_reference', 'desc')
+            ->first();
+
+        $lastAoNum   = $latestAo ? (int) substr(trim($latestAo->rfa_reference), -3) : 0;
+        $lastHistNum = $latestHistory ? (int) substr(trim($latestHistory->rfa_reference), -3) : 0;
+
+        $lastNumber   = max($lastAoNum, $lastHistNum);
+        $generatedRef = $prefix . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        // 1. HISTORY LOG
+        HistoryLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'model_type'    => AoModel::class,
+            'model_id'      => 0,
+            'status'        => null,
+            'old_values'    => null,
+            'new_values'    => ['rfa_reference' => $generatedRef],
+            'remarks'       => 'Added another RFA item form.',
+        ]);
+
+        // 2. ACTION TAKEN LOG
+        ActionTakenLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'subject_type'  => AoModel::class,
+            'subject_id'    => 0,
+            'action'        => 'AO added another RFA item form',
+            'remarks'       => 'Generated new RFA  for additional form .',
+        ]);
+
+        // 3. ACTIVITY LOG
+        ActivityLog::create([
+            'user_id'       => $userId,
+            'rfa_reference' => $generatedRef,
+            'event'         => 'added_rfa_form',
+            'description'   => "AO {$user->name} added another form   {$generatedRef}.",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
+
+        // 4. AUDIT LOG
+        AuditLog::create([
+            'user_id'        => $userId,
+            'rfa_reference'  => $generatedRef,
+            'auditable_type' => AoModel::class,
+            'auditable_id'   => 0,
+            'event'          => 'rfa_add_form_initiated',
+            'metadata'       => ['rfa_reference' => $generatedRef],
+            'url'            => request()->fullUrl(),
+            'ip_address'     => request()->ip(),
+            'user_agent'     => request()->userAgent(),
+        ]);
+
+        return $generatedRef;
+    });
+
+    return response()->json(['new_ref' => $newRef]);
+}
+
+
 
 }
 

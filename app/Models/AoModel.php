@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\ArtWorkNotification;
+use App\Services\AuditLogger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,77 +56,97 @@ class AoModel extends Model
      */
     protected static function booted(): void
     {
-        // 1. AUTOMATED HISTORY LOGS ENGINE (Runs on updates)
-        static::updated(function (AoModel $model) {
-            // A. Keep your legacy single-column status logger intact
-            if ($model->wasChanged('status')) {
-                ArtworkStatusLog::create([
-                    'status'     => $model->status,
-                    'artwork_id' => $model->id,
-                    'created_by' => Auth::id(),
-                    'updated_by' => Auth::id(),
-                ]);
-            }
-
-            // B. History Engine: Catch other attribute changes (specs, sizes, client details, etc.)
-            $changes = $model->getChanges();
-            unset($changes['updated_at']); // Skip system timestamp tracking
-
-            // If only the status changed, we skip the metadata history log 
-            // since either your action_taken logs or the legacy status logger handles it.
-            if (array_key_exists('status', $changes) && count($changes) === 1) {
-                return;
-            }
-
-            if (!empty($changes)) {
-                $oldValues = array_intersect_key($model->getOriginal(), $changes);
-
-                // Parentheses () ensure proper polymorphic loggable_type mapping for SQL Server
-                $model->activityLogs()->create([
-                    'user_id'     => Auth::id(),
-                    'log_type'    => 'history',
-                    'event'       => 'metadata_modified',
-                    'description' => (Auth::user()?->name ?? 'System') . " updated artwork parameter settings.",
-                    'properties'  => [
-                        'old' => $oldValues,
-                        'new' => $changes,
-                    ]
-                ]);
-            }
-        });
-
-        // 2. INITIALIZATION TRACKER (Runs on record creation)
-        static::created(function (AoModel $model) {
-            if (!empty($model->status)) {
-                // Legacy system tracker
-                ArtworkStatusLog::create([
-                    'status'     => $model->status,
-                    'artwork_id' => $model->id,
-                    'created_by' => Auth::id(),
-                    'updated_by' => Auth::id(),
-                ]);
-
-                // Modern unified action timeline logger
-                $model->activityLogs()->create([
-                    'user_id'     => Auth::id(),
-                    'log_type'    => 'action_taken',
-                    'event'       => 'status_initialized',
-                    'description' => "Artwork timeline tracking initialized with status: [{$model->status}].",
-                ]);
-            }
-        });
-
-        // 3. RFA Reference Generation on Creation
+        // 1. Generate RFA Reference first so it is available for creation logs
         self::generateRfaReferenceOnCreation();
+
+        // 2. AUTOMATED HISTORY LOGS ENGINE (Runs on updates - covers middle to finish)
+        // static::updated(function (AoModel $model) {
+        //     // A. Keep your legacy single-column status logger intact
+        //     if ($model->wasChanged('status')) {
+        //         ArtworkStatusLog::create([
+        //             'status'     => $model->status,
+        //             'artwork_id' => $model->id,
+        //             'created_by' => Auth::id(),
+        //             'updated_by' => Auth::id(),
+        //         ]);
+        //     }
+
+        //     // B. History Engine: Catch ALL attribute changes (status, specs, sizes, client details, etc.)
+        //     $changes = $model->getChanges();
+        //     unset($changes['updated_at']); // Skip system timestamp tracking
+
+        //     if (!empty($changes)) {
+        //         $oldValues = array_intersect_key($model->getOriginal(), $changes);
+
+        //         // Parentheses () ensure proper polymorphic model_type mapping for SQL Server
+        //         $model->historyLogs()->create([
+        //             'user_id'       => Auth::id(),
+        //             'rfa_reference' => $model->rfa_reference,
+        //             'old_values'    => $oldValues,
+        //             'new_values'    => $changes,
+        //             'remarks'       => request('diary_remarks'), // Editable by artist as their diary
+        //         ]);
+        //     }
+        // });
+
+        // // 3. INITIALIZATION TRACKER (Runs on record creation - covers start of lifecycle)
+        // static::created(function (AoModel $model) {
+        //     // A. Record initial creation snapshot in history_logs
+        //     $model->historyLogs()->create([
+        //         'user_id'       => Auth::id(),
+        //         'rfa_reference' => $model->rfa_reference,
+        //         'old_values'    => null,
+        //         'new_values'    => $model->getAttributes(),
+        //         'remarks'       => request('diary_remarks', 'Artwork record created.'),
+        //     ]);
+
+        //     if (!empty($model->status)) {
+        //         // B. Legacy system tracker
+        //         ArtworkStatusLog::create([
+        //             'status'     => $model->status,
+        //             'artwork_id' => $model->id,
+        //             'created_by' => Auth::id(),
+        //             'updated_by' => Auth::id(),
+        //         ]);
+
+        //         // C. Record initial workflow action in action_taken_logs
+        //         // $model->actionTakenLogs()->create([
+        //         //     'user_id'       => Auth::id(),
+        //         //     'rfa_reference' => $model->rfa_reference,
+        //         //     'action'        => 'status_initialized',
+        //         //     'remarks'       => "Artwork timeline tracking initialized with status: [{$model->status}].",
+        //         // ]);
+        //     }
+        // });
     }
 
     /**
-     * Native MorphMany relationship to the activity_logs table.
-     * Guarantees automatic populating of 'loggable_id' and 'loggable_type'.
+     * Native MorphMany relationship to the activity_logs table (clicks, page opens, timer events).
      */
-    public function activityLogs(): MorphMany
+    // public function activityLogs(): MorphMany
+    // {
+    //     return $this->morphMany(ActivityLog::class, 'loggable')->latest();
+    // }
+
+        public function activityLogs(): HasMany
     {
-        return $this->morphMany(ActivityLog::class, 'loggable')->latest();
+        return $this->hasMany(ActivityLog::class, 'rfa_reference', 'rfa_reference')->latest();
+    }
+
+    /**
+     * Native MorphMany relationship to the history_logs table (start-to-finish changes + artist diary).
+     */
+    public function historyLogs(): MorphMany
+    {
+        return $this->morphMany(HistoryLog::class, 'model')->latest();
+    }
+
+    /**
+     * Native MorphMany relationship to the action_taken_logs table (completed workflow steps & durations).
+     */
+    public function actionTakenLogs(): MorphMany
+    {
+        return $this->morphMany(ActionTakenLog::class, 'subject')->latest();
     }
 
     /**
@@ -181,53 +202,103 @@ class AoModel extends Model
     /**
      * Initial assignment of an artwork to an artist and companions.
      */
-public function assignTo(?User $artist, array $companionEmpIds, User $assignedBy): ?CommercialArtist
-{
-    return DB::transaction(function () use ($artist, $companionEmpIds, $assignedBy) {
-        $now       = Carbon::now();
-        $artistEmp = $artist?->emp_id;
+    public function assignTo(?User $artist, array $companionEmpIds, User $assignedBy): ?CommercialArtist
+    {
+        return DB::transaction(function () use ($artist, $companionEmpIds, $assignedBy) {
+            $now       = Carbon::now();
+            $artistEmp = $artist?->emp_id;
 
-        // 1. Create or update active assignment
-        $assignment = $this->activeAssignment ?? $this->assignments()->make();
-        $assignment->fill([
-            'user_id'     => $artistEmp,
-            'assigned_at' => $assignment->assigned_at ?? $now,
-            'status'      => CommercialArtist::STATUS_ASSIGNED,
-        ])->save();
+            // 1. Create or update active assignment
+            $assignment = $this->activeAssignment ?? $this->assignments()->make();
+            $assignment->fill([
+                'user_id'     => $artistEmp,
+                'assigned_at' => $assignment->assigned_at ?? $now,
+                'status'      => CommercialArtist::STATUS_ASSIGNED,
+            ])->save();
 
-        // 2. Sync companions (excluding the primary artist)
-        $activeCompanions = $this->syncCompanions($companionEmpIds, $artistEmp);
+            // 2. Sync companions (excluding the primary artist)
+            $activeCompanions = $this->syncCompanions($companionEmpIds, $artistEmp);
 
-        // 3. Update Artwork & FileVerification statuses
-        $this->update(['status' => self::STATUS_ASSIGNED]);
+            // 3. Update Artwork & FileVerification statuses (Automatically triggers history_logs!)
+            $this->update(['status' => self::STATUS_ASSIGNED]);
 
-        if ($this->fileVerification) {
-            $this->fileVerification->updateQuietly(['status' => self::STATUS_ASSIGNED]);
-        }
+            if ($this->fileVerification) {
+                $this->fileVerification->updateQuietly(['status' => self::STATUS_ASSIGNED]);
+            }
 
-        // 4. Record activity log
-        $artistName = $artist?->name ?? 'Unassigned';
+            // 4. Record workflow action in action_taken_logs
+            $artistName    = $artist?->name ?? 'Unassigned';
+            $companionList = !empty($activeCompanions) ? implode(', ', $activeCompanions) : 'None';
 
-        $this->activityLogs()->create([
-            'user_id'     => $assignedBy->id,
-            'log_type'    => 'history',
-            'event'       => 'artist_assigned',
-            'description' => "{$assignedBy->name} assigned artist [{$artistName}] to Item Code [{$this->item_code}].",
-            'properties'  => [
-                'artist_user_id' => $artistEmp,
-                'artist_name'    => $artist?->name ?? 'Unknown Artist',
-                'companions'     => $activeCompanions,
-            ],
-        ]);
+            $this->actionTakenLogs()->create([
+                'user_id'       => $assignedBy->id,
+                'rfa_reference' => $this->rfa_reference,
+                'action'        => 'artist_assigned',
+                'remarks'       => "{$assignedBy->name} assigned artist [{$artistName}] (Companions: {$companionList}) to Item Code [{$this->item_code}].",
+            ]);
 
-        // 5. Notify artist
-        if ($artist) {
-            $artist->notify(new ArtWorkNotification($assignment, 'gd_to_artist'));
-        }
+            // 5. Notify artist
+            if ($artist) {
+                $artist->notify(new ArtWorkNotification($assignment, 'gd_to_artist'));
+            }
 
-        return $assignment;
-    });
-}
+            return $assignment;
+        });
+    }
+
+    // ... keep your reassignTo(), syncCompanions(), and generateRfaReferenceOnCreation() methods below ...
+
+
+    /**
+     * Initial assignment of an artwork to an artist and companions.
+     */
+//     public function assignTo(?User $artist, array $companionEmpIds, User $assignedBy): ?CommercialArtist
+//     {
+//     return DB::transaction(function () use ($artist, $companionEmpIds, $assignedBy) {
+//         $now       = Carbon::now();
+//         $artistEmp = $artist?->emp_id;
+
+//         // 1. Create or update active assignment
+//         $assignment = $this->activeAssignment ?? $this->assignments()->make();
+//         $assignment->fill([
+//             'user_id'     => $artistEmp,
+//             'assigned_at' => $assignment->assigned_at ?? $now,
+//             'status'      => CommercialArtist::STATUS_ASSIGNED,
+//         ])->save();
+
+//         // 2. Sync companions (excluding the primary artist)
+//         $activeCompanions = $this->syncCompanions($companionEmpIds, $artistEmp);
+
+//         // 3. Update Artwork & FileVerification statuses
+//         $this->update(['status' => self::STATUS_ASSIGNED]);
+
+//         if ($this->fileVerification) {
+//             $this->fileVerification->updateQuietly(['status' => self::STATUS_ASSIGNED]);
+//         }
+
+//         // 4. Record activity log
+//         $artistName = $artist?->name ?? 'Unassigned';
+
+//         $this->activityLogs()->create([
+//             'user_id'     => $assignedBy->id,
+//             'log_type'    => 'history',
+//             'event'       => 'artist_assigned',
+//             'description' => "{$assignedBy->name} assigned artist [{$artistName}] to Item Code [{$this->item_code}].",
+//             'properties'  => [
+//                 'artist_user_id' => $artistEmp,
+//                 'artist_name'    => $artist?->name ?? 'Unknown Artist',
+//                 'companions'     => $activeCompanions,
+//             ],
+//         ]);
+
+//         // 5. Notify artist
+//         if ($artist) {
+//             $artist->notify(new ArtWorkNotification($assignment, 'gd_to_artist'));
+//         }
+
+//         return $assignment;
+//     });
+// }
 
 
     /**
@@ -400,11 +471,11 @@ public function assignTo(?User $artist, array $companionEmpIds, User $assignedBy
     public function isCompanyOffTime(): bool
     {
         $now = Carbon::now();
-   
+
         // 1. Check Weekends (Saturday or Sunday)
-        // if ($now->isWeekend()) {
-        //     return true;
-        // }
+        if ($now->isWeekend()) {
+            return true;
+        }
 
         // 2. Define your company holiday dates here (YYYY-MM-DD)
         $holidays = [
@@ -417,9 +488,9 @@ public function assignTo(?User $artist, array $companionEmpIds, User $assignedBy
         }
 
         // 3. Check business hours window boundaries (Before 8 AM or after 6 PM)
-        // if ($now->hour < 8 || $now->hour >= 18) {
-        //     return true;
-        // }
+        if ($now->hour < 8 || $now->hour >= 18) {
+            return true;
+        }
 
         return false;
     }

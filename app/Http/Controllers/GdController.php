@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\AoFileLink; // Your actual database model
 use App\Models\AoModel;
 use App\Models\ArtworkLog;
@@ -985,6 +986,25 @@ public function reassignArtist(Request $request)
         'status'  => 'success',
         'message' => 'Item successfully re-assigned!',
     ]);
+}
+
+public function gdActionTaken(Request $request){
+
+  $assignerName = auth()->user()?->name ?? 'Supervisor';
+
+       ActivityLog::create([
+                'user_id'     => auth()->id(),
+                'log_type'    => 'action_taken',
+                'loggable_type' => \App\Models\User::class,
+                // 'loggable_id'   => auth()->id(),
+                'event'       => $request->action_taken,
+                'description' => "{$assignerName} Doing Assessment",
+                'properties'  => [
+                    'gd_supervisor' => auth()->id(),
+                    'action_taken'    => 'Clicked Assessment button',
+                ]
+            ]);
+
 }
 
 public function gdArtist()
