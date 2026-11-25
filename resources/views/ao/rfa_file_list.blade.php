@@ -736,13 +736,47 @@ $('#FileSendTable').on('click', '.edit-btn', function() {
         }
     });
 });
-$('#ReadyForItemCodeTable').on('click', '.btn-add-itemcode', function() {
+// $('#ReadyForItemCodeTable').on('click', '.btn-add-itemcode', function() {
+//     var targetUrl = $(this).data('url'); // Grab the dynamic URL from the clicked button
+//     var rfa_ref = $(this).data('rfa');
+//     // Step 1: Show confirmation choice prompt
+//     Swal.fire({
+//         title: 'Are you sure?',
+//         text: "Do you want to open and Add Item Code? to "+ rfa_ref,
+//         icon: 'question',
+//         showCancelButton: true,
+//         confirmButtonColor: '#3085d6',
+//         cancelButtonColor: '#d33',
+//         confirmButtonText: 'Yes, proceed!',
+//         cancelButtonText: 'Cancel'
+//     }).then((result) => {
+//         if (result.isConfirmed) {
+            
+//             // Step 2: Show native SweetAlert loading screen feedback while routing transfers pages
+//             Swal.fire({
+//                 title: 'Loading...',
+//                 text: 'Please wait while we redirect you.',
+//                 allowOutsideClick: false,
+//                 allowEscapeKey: false,
+//                 allowEnterKey: false,
+//                 didOpen: () => {
+//                     Swal.showLoading(); 
+//                 }
+//             });
+
+//             // Step 3: Shift pages to the edit view
+//             window.location.href = targetUrl;
+//         }
+//     });
+// });
+$('#ReadyForItemCodeTable').off('click', '.btn-add-itemcode').on('click', '.btn-add-itemcode', function() {
     var targetUrl = $(this).data('url'); // Grab the dynamic URL from the clicked button
-    var rfa_ref = $(this).data('rfa');
+    var rfa_ref   = $(this).data('rfa');
+
     // Step 1: Show confirmation choice prompt
     Swal.fire({
         title: 'Are you sure?',
-        text: "Do you want to open and Add Item Code? to "+ rfa_ref,
+        text: "Do you want to open and Add Item Code to " + rfa_ref + "?",
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -751,8 +785,7 @@ $('#ReadyForItemCodeTable').on('click', '.btn-add-itemcode', function() {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            
-            // Step 2: Show native SweetAlert loading screen feedback while routing transfers pages
+            // Step 2: Show loading screen while saving logs and redirecting
             Swal.fire({
                 title: 'Loading...',
                 text: 'Please wait while we redirect you.',
@@ -760,15 +793,28 @@ $('#ReadyForItemCodeTable').on('click', '.btn-add-itemcode', function() {
                 allowEscapeKey: false,
                 allowEnterKey: false,
                 didOpen: () => {
-                    Swal.showLoading(); 
+                    Swal.showLoading();
                 }
             });
 
-            // Step 3: Shift pages to the edit view
-            window.location.href = targetUrl;
+            // Step 3: Save to logs first, then redirect to targetUrl
+            $.ajax({
+                url: '/toAddItemCode/{item_id}',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    rfa_reference: rfa_ref
+                },
+                complete: function() {
+                    // Uses complete() so it redirects cleanly once logging finishes
+                    window.location.href = targetUrl;
+                }
+            });
         }
     });
 });
+
 // Global Back-Button Cache Fix
 window.addEventListener('pageshow', function (event) {
     if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {

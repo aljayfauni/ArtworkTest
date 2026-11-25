@@ -239,7 +239,15 @@ class GdController extends Controller
     }
         public function gd_supervisor() // index
     {
-
+$user = auth()->user();
+        ActivityLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => null, // NULL dahil page visit lang ito, wala pang specific RFA
+            'event'         => 'page_visited',
+            'description'   => "{$user->name} visited GD Supervisor page.",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
 
      $totalUsers = User::count(); 
     

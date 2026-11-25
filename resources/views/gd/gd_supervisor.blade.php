@@ -728,67 +728,47 @@ var FileSendLinkTable = $('#FileSendTable_NoItemCode').DataTable({
             data: null,
             orderable: false,
             searchable: false,
-    render: function(data, type, row) {
-    // 1. Convert values to Booleans (handles true/false, "1"/"0", 1/0)
-    let isVerified =  row.is_verified ;
+render: function(data, type, row) {
+    let isVerified = row.is_verified;
     let isAoApprove = row.is_Ao_Approve;
-
-    // 2. Default state: Supplied File
-    // let btnText = "<b>Fill Up Supplied Verification!</b>";
-    // let btnClass = "btn-warning";
-    // let btnIcon = "fa-pencil";
-    // let disabled = "";
-     //rfa 
-    let is_rfa_reference_exist = row.is_rfa_reference_exist; 
-    let rfaClass = "btn-warning";
-    let rfaText  = "<b>Fill Up Supplied Verification!</b>";
+    let is_rfa_reference_exist = row.is_rfa_reference_exist;
+    let isAssessed = row.is_assessed; // Galing sa history_logs check
+console.log(isAssessed);
+    let rfaClass = "btn-primary";
+    let rfaText  = "Start To Assess";
     let rfaIcon  = "fa-pencil";
+    let disabled = "";
 
-
-        if (!is_rfa_reference_exist ) {
-        rfaText = "Fill Up Supplied Verification!";
-        rfaClass = "btn-warning";
-        rfaIcon = "fa-pencil";
-        disabled = "";
-    } else if (is_rfa_reference_exist) {
-        rfaText = "File Supplied Submitted";
+    if (is_rfa_reference_exist) {
+        // 1st Priority: Na-submit na ang file supplied
+        rfaText  = "File Supplied Submitted";
         rfaClass = "btn-success";
-        rfaIcon = "fa-paper-plane";
-         disabled = "";
+        rfaIcon  = "fa-paper-plane";
+    } else if (isAssessed) {
+        // 2nd Priority: Hindi pa submitted, pero nabuksan/na-assess na dati sa logs
+        rfaText  = "Re-Assess";
+        rfaClass = "btn-warning";
+        rfaIcon  = "fa-redo";
+    } else {
+        // 3rd Priority: Bagong-bago, hindi pa nabubuksan
+        rfaText  = "Start To Assess";
+        rfaClass = "btn-primary";
+        rfaIcon  = "fa-pencil";
     }
 
-    // 3. Conditional states
     if (!isAoApprove && isVerified) {
-        btnText = "Supplied Verified";
-        btnClass = "btn-success";
-        btnIcon = "fa-check";
         disabled = "disabled";
-    } else if (isAoApprove && !isVerified) {
-        btnText = "Supplied Submitted";
-        btnClass = "btn-primary";
-        btnIcon = "fa-paper-plane";
     }
 
-    // 4. Specifications Button logic
-    let is_specification_exist = row.is_specification_exist; 
-    let specClass = "btn-success";
-    let specText  = "Specifications";
-    let specIcon  = "fa-check";
-
-   
     return `
         <div class="btn-group btn-group-sm" role="group"> 
-            <!-- Verify Button --> 
-            <button type="button" class="btn ${rfaClass} btn-verify mr-1" data-id="${row.id}" data-rfareference="${row.rfa_reference}" data-client="${row.client_name ?? ''}" title="${rfaText}" ${disabled}> 
+            <button type="button" class="btn ${rfaClass} btn-assess mr-1" data-id="${row.id}" data-rfareference="${row.rfa_reference}" data-client="${row.client_name ?? ''}" title="${rfaText}" ${disabled}> 
                 <i class="fas ${rfaIcon} mr-1"></i> ${rfaText} 
             </button> 
-            <!-- Specifications Button 
-            <button type="button" class="btn ${specClass} btn-specifications" data-id="${row.id}" data-itemcode="${row.item_code ?? ''}" title="${specText}"> 
-                <i class="fas ${specIcon} mr-1"></i> ${specText} 
-            </button>  -->
         </div> 
     `;
 }
+
         },
       
     ]
@@ -993,124 +973,121 @@ $.ajax({
 });
 });
 
-$('#FileSendTable_NoItemCode').on('click', '.btn-verify', function () {
+$('#FileSendTable_NoItemCode').off('click', '.btn-assess').on('click', '.btn-assess', function () {
     var recordId = $(this).data('rfareference'); // rfa reference number
 
-    // 1. CLEAR PREVIOUS DATA: Reset the form so old data doesn't linger
-    $('#verificationModal_no_item_code').find('form').trigger('reset');
-    $('#item_code_label_no_item_code').text('');
-    $('#rfa_reference_label_no_item_code').text('');
-    $('#modal_file_link').attr('href', '#').addClass('d-none');
+    Swal.fire({
+        title: 'Start Assessment?',
+        text: 'Do you want to start to assess this item?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, start assessing',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
 
-    // 2. Show the modal immediately (optional, or show inside success)
-    $('#verificationModal_no_item_code').modal('show');
+        // 1. CLEAR PREVIOUS DATA
+        $('#verificationModal_no_item_code').find('form').trigger('reset');
+        $('#item_code_label_no_item_code').text('');
+        $('#rfa_reference_label_no_item_code').text('');
+        $('#modal_file_link').attr('href', '#').addClass('d-none');
 
-    $.ajax({
-        url: "/suppliedVerifiedNoItemCode/" + recordId, // Replace with your Laravel route URL
-        type: "GET",
-        dataType: "json",
-        success: function (response) {
-            console.log(response.data);
+        // 2. Show modal
+        $('#verificationModal_no_item_code').modal('show');
 
-            if (!response.data) {
-                console.error("No data found in response");
+        // 3. Save to logs AND fetch record data
+        $.ajax({
+            url: "/suppliedVerifiedNoItemCode/" + recordId,
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                if (!response.data) {
+                    $('#verificationModal_no_item_code').modal('hide');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No Data Found',
+                        text: 'No details were found for this record.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Populate text labels and inputs
+                $('#item_code_label_no_item_code').text(response.data.item_code);
+                $('#rfa_reference_label_no_item_code').text(response.data.rfa_reference);
+                $('#rfa_reference_no_item_code').val(response.data.rfa_reference);
+                $('#verify_file_id_no_item_code').val(recordId);
+                $('#item_code_no_item_code').val(response.data.item_code);
+                $('#client_no_item_code').val(response.data.client_name);
+                $('#spread_h_no_item_code').val(response.data.spread_h);
+                $('#spread_w_no_item_code').val(response.data.spread_w);
+                $('#spread_l_no_item_code').val(response.data.spread_l);
+                $('#folded_h_no_item_code').val(response.data.spread_h);
+                $('#folded_w_no_item_code').val(response.data.spread_w);
+                $('#folded_l_no_item_code').val(response.data.spread_l);
+                $('#default_color_text_no_item_code').val(response.data.colors);
+                $('#application_no_item_code').val(response.data.application);
+
+                $('input[name="file_source_no_item_code"]').prop('checked', false);
+                $(`input[name="file_source_no_item_code"][value="${response.data.file_source}"]`).prop('checked', true);
+
+                $('input[name="color_no_item_code"]').prop('checked', false);
+                $(`input[name="color_no_item_code"][value="${response.data.colors}"]`).prop('checked', true);
+
+                $('#number_of_colors_no_item_code').val(response.data.num_of_colors);
+
+                $('input[name="text_specs_no_item_code"]').prop('checked', false);
+                $(`input[name="text_specs_no_item_code"][value="${response.data.text_specs}"]`).prop('checked', true);
+
+                $('#file_link_no_item_code').val(response.data.file_link);
+                $('#text_specs_no_item_code').val(response.data.text_specs);
+                $('#item_description_no_item_code').val(response.data.file_info);
+
+                let imageTypes = response.data.image_type;
+                if (typeof imageTypes === 'string') {
+                    try { imageTypes = JSON.parse(imageTypes); } catch (e) { imageTypes = []; }
+                }
+
+                $('input[name="image_type_no_item_code[]"]').prop('checked', false);
+                if (Array.isArray(imageTypes)) {
+                    imageTypes.forEach((type) => {
+                        $(`input[name="image_type_no_item_code[]"][value="${type}"]`).prop('checked', true);
+                    });
+                }
+
+                const fileLink = response.data.file_link || response.file_link;
+                if (fileLink) {
+                    $('#modal_file_link').attr('href', fileLink).removeClass('d-none');
+                } else {
+                    $('#modal_file_link').addClass('d-none');
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Assessment started & details loaded!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to fetch full record:", error);
                 $('#verificationModal_no_item_code').modal('hide');
                 Swal.fire({
                     icon: 'warning',
-                    title: 'No Data Found',
-                    text: 'No details were found for this record.',
+                    title: 'Error',
+                    text: 'Could not load details. Please Assess First!',
                     confirmButtonText: 'OK'
                 });
-                return;
             }
-           
-            // Populate text labels and inputs
-            $('#item_code_label_no_item_code').text(response.data.item_code);
-            $('#rfa_reference_label_no_item_code').text(response.data.rfa_reference);
-            $('#rfa_reference_no_item_code').val(response.data.rfa_reference);
-            $('#verify_file_id_no_item_code').val(recordId);
-            $('#item_code_no_item_code').val(response.data.item_code);
-            $('#client_no_item_code').val(response.data.client_name);
-            $('#spread_h_no_item_code').val(response.data.spread_h);
-            $('#spread_w_no_item_code').val(response.data.spread_w);
-            $('#spread_l_no_item_code').val(response.data.spread_l);
-            $('#folded_h_no_item_code').val(response.data.spread_h);
-            $('#folded_w_no_item_code').val(response.data.spread_w);
-            $('#folded_l_no_item_code').val(response.data.spread_l);
-            $('#default_color_text_no_item_code').val(response.data.colors);
-            $('#application_no_item_code').val(response.data.application);
-
-            // Handle radio buttons safely
-            $('input[name="file_source_no_item_code"]').prop('checked', false);
-            $(`input[name="file_source_no_item_code"][value="${response.data.file_source}"]`).prop('checked', true);
-
-            $('input[name="color_no_item_code"]').prop('checked', false);
-            $(`input[name="color_no_item_code"][value="${response.data.colors}"]`).prop('checked', true);
-
-            $('#number_of_colors_no_item_code').val(response.data.num_of_colors);
-
-            $('input[name="text_specs_no_item_code"]').prop('checked', false);
-            $(`input[name="text_specs_no_item_code"][value="${response.data.text_specs}"]`).prop('checked', true);
-
-            $('#file_link_no_item_code').val(response.data.file_link);
-            $('#text_specs_no_item_code').val(response.data.text_specs);
-            $('#item_description_no_item_code').val(response.data.file_info);
-
-            $('input[name="text_specs_no_item_code"]').prop('checked', false);
-            $(`input[name="text_specs_no_item_code"][value="${response.data.text_specs}"]`).prop('checked', true);
-
-           
-            let imageTypes = response.data.image_type;
-
-            if (typeof imageTypes === 'string') {
-                try {
-                    imageTypes = JSON.parse(imageTypes);
-                } catch (e) {
-                    imageTypes = [];
-                }
-            }
-
-            $('input[name="image_type_no_item_code[]"]').prop('checked', false);
-
-            if (Array.isArray(imageTypes)) {
-                imageTypes.forEach((type) => {
-                    $(`input[name="image_type_no_item_code[]"][value="${type}"]`).prop('checked', true);
-                });
-            }
-
-       
-            // Handle links
-            const fileLink = response.data.file_link || response.file_link;
-            if (fileLink) {
-                $('#modal_file_link').attr('href', fileLink).removeClass('d-none');
-            } else {
-                $('#modal_file_link').addClass('d-none');
-            }
-
-            // Success SweetAlert (Toast style so it doesn't block the modal)
-            Swal.fire({ 
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: 'Details loaded successfully!',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true
-            });
-        },
-        error: function (xhr, status, error) {
-            console.error("Failed to fetch full record:", error);
-            $('#verificationModal_no_item_code').modal('hide'); // Hide modal before showing alert
-            
-            Swal.fire({
-                icon: 'warning',
-                title: 'Error',
-                text: 'Could not load details. Please Asses First!',
-                confirmButtonText: 'OK'
-            });
-        }
+        });
     });
 });
+
 
 $('#FileSendTable').on('click', '.btn-specifications', function (e) { 
     // Prevent default actions or Bootstrap data-toggle triggers from breaking execution order

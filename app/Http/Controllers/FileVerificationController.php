@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActionTakenLog;
+use App\Models\ActivityLog;
 use App\Models\AoModel;
 use App\Models\ArtWorkFileLinkTemp;
+use App\Models\AuditLog;
 use App\Models\CommercialArtist;
 use App\Models\FileSpecification;
 use App\Models\FileVerification;
+use App\Models\HistoryLog;
 use App\Notifications\ArtWorkNotification;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -174,6 +179,13 @@ public function FileRecievedLinkShowAll()
             ->addColumn('is_verified', function($data) use ($verifiedItemCodes) {
                 return in_array($data->item_code, $verifiedItemCodes);
             })
+
+                              ->addColumn('is_assessed', function ($data) {
+                return HistoryLog::where('rfa_reference', trim($data->rfa_reference))
+                    ->where('remarks', 'LIKE', '%assess%')
+                    ->exists();
+            })
+            
             ->addColumn('is_specification_exist', function($data) use ($specificationItemCodes) {
                 return in_array($data->item_code, $specificationItemCodes);
             })
@@ -274,6 +286,12 @@ public function FileRecievedLinkShowAllNoItemCode()
             ->addColumn('is_rfa_reference_exist', function($data) use ($rfa_reference) {
                 return in_array($data->rfa_reference, $rfa_reference);
             })
+
+                    ->addColumn('is_assessed', function ($data) {
+                return HistoryLog::where('rfa_reference', trim($data->rfa_reference))
+                    ->where('remarks', 'LIKE', '%assess%')
+                    ->exists();
+            })
             ->addColumn('ao_name', function($data) {
                 return strtoupper($data->ao_name);
             })
@@ -370,23 +388,209 @@ public function showSuppliedFileVerified($id)
     //     }
     // }
 
+// public function showSuppliedFileVerified_NoItemCode($id)
+// {
+//     try {
+//         // Decode URL-encoded characters (in case rfa_reference had slashes or spaces)
+//         $rfaReference = urldecode($id);
+
+//         // Use first() instead of firstOrFail() so it works on both Query Builder & Eloquent
+//         $data = getFileReceivedLinkById_NoItemCode()
+//             ->where('rfa_reference', $rfaReference)
+//             ->first();
+    
+//         if (!$data) {
+//             return response()->json([
+//                 'status'  => 'error',
+//                 'message' => 'Record not found for RFA: ' . $rfaReference
+//             ], 404);
+//         }
+
+//         return response()->json([
+//             'status' => 'success',
+//             'data'   => $data
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status'  => 'error',
+//             'message' => 'An error occurred: ' . $e->getMessage()
+//         ], 500);
+//     }
+// }
+
+// public function showSuppliedFileVerified_NoItemCode($id)
+// {
+//     try {
+//         // Decode URL-encoded characters (in case rfa_reference had slashes or spaces)
+//         $rfaReference = urldecode($id);
+
+//         // Use first() instead of firstOrFail() so it works on both Query Builder & Eloquent
+//         $data = getFileReceivedLinkById_NoItemCode()
+//             ->where('rfa_reference', $rfaReference)
+//             ->first();
+    
+//         if (!$data) {
+//             return response()->json([
+//                 'status'  => 'error',
+//                 'message' => 'Record not found for RFA: ' . $rfaReference
+//             ], 404);
+//         }
+
+//         $user   = auth()->user();
+//         $userId = $user->id;
+//         $ref    = trim($data->rfa_reference);
+//         $modelId = $data->id ?? 0;
+
+//         // 1. Anti-spam check: kung may ACTIVE (status IS NULL) assessment log na si GD Supervisor para sa RFA na ito, update updated_at na lang
+//         $existingAssess = HistoryLog::where('user_id', $userId)
+//             ->where('rfa_reference', $ref)
+//             ->where('remarks', 'GD Supervisor started item assessment (No Item Code).')
+//             ->whereNull('status')
+//             ->orderBy('id', 'desc')
+//             ->first();
+
+//         if ($existingAssess) {
+//             $now = now('Asia/Manila')->format('Y-m-d H:i:s.v');
+
+//             DB::table('history_logs')->where('id', $existingAssess->id)->update(['updated_at' => $now]);
+//             DB::table('action_taken_logs')->where('rfa_reference', $ref)->where('user_id', $userId)->orderBy('id', 'desc')->limit(1)->update(['updated_at' => $now]);
+//             DB::table('activity_logs')->where('rfa_reference', $ref)->where('user_id', $userId)->orderBy('id', 'desc')->limit(1)->update(['updated_at' => $now]);
+//             // DB::table('audit_logs')->where('rfa_reference', $ref)->where('user_id', $userId)->orderBy('id', 'desc')->limit(1)->update(['updated_at' => $now]);
+//         } else {
+//             // 2. Otherwise (or kung na-CANCEL na dati), mag-INSERT ng panibagong row sa 4 logs na may status = NULL
+//             DB::transaction(function () use ($user, $userId, $ref, $modelId) {
+//                 // 1. HISTORY LOG (Marks T0 start time of GD Assessment)
+//                 HistoryLog::create([
+//                     'user_id'       => $userId,
+//                     'rfa_reference' => $ref,
+//                     'model_type'    => AoModel::class,
+//                     'model_id'      => $modelId,
+//                     'status'        => null,
+//                     'old_values'    => null,
+//                     'new_values'    => ['rfa_reference' => $ref, 'stage' => 'GD Assessment Started'],
+//                     'remarks'       => 'GD Supervisor started item assessment (No Item Code).',
+//                 ]);
+
+//                 // 2. ACTION TAKEN LOG
+//                 ActionTakenLog::create([
+//                     'user_id'       => $userId,
+//                     'rfa_reference' => $ref,
+//                     'subject_type'  => AoModel::class,
+//                     'subject_id'    => $modelId,
+//                     'action'        => 'GD Supervisor started assessing RFA (No Item Code)',
+//                     'remarks'       => "Started item assessment for {$ref}.",
+//                 ]);
+
+//                 // 3. ACTIVITY LOG
+//                 ActivityLog::create([
+//                     'user_id'       => $userId,
+//                     'rfa_reference' => $ref,
+//                     'event'         => 'gd_started_assessment',
+//                     'description'   => "GD Supervisor {$user->name} started assessing {$ref}.",
+//                     'ip_address'    => request()->ip(),
+//                     'user_agent'    => request()->userAgent(),
+//                 ]);
+
+//                 // 4. AUDIT LOG
+//                 AuditLog::create([
+//                     'user_id'        => $userId,
+//                     'rfa_reference'  => $ref,
+//                     'auditable_type' => AoModel::class,
+//                     'auditable_id'   => $modelId,
+//                     'event'          => 'gd_assessment_started',
+//                     'metadata'       => ['rfa_reference' => $ref, 'item_id' => $modelId],
+//                     'url'            => request()->fullUrl(),
+//                     'ip_address'     => request()->ip(),
+//                     'user_agent'     => request()->userAgent(),
+//                 ]);
+//             });
+//         }
+
+//         return response()->json([
+//             'status' => 'success',
+//             'data'   => $data
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status'  => 'error',
+//             'message' => 'An error occurred: ' . $e->getMessage()
+//         ], 500);
+//     }
+// }
+
 public function showSuppliedFileVerified_NoItemCode($id)
 {
     try {
-        // Decode URL-encoded characters (in case rfa_reference had slashes or spaces)
         $rfaReference = urldecode($id);
 
-        // Use first() instead of firstOrFail() so it works on both Query Builder & Eloquent
         $data = getFileReceivedLinkById_NoItemCode()
             ->where('rfa_reference', $rfaReference)
             ->first();
-    
+
         if (!$data) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Record not found for RFA: ' . $rfaReference
             ], 404);
         }
+
+        $user    = auth()->user();
+        $ref     = trim($data->rfa_reference);
+        $modelId = $data->id ?? 0;
+
+        // Check kung na-assess na dati
+        $isReassess = HistoryLog::where('rfa_reference', $ref)
+            ->where('remarks', 'LIKE', '%assess%')
+            ->exists();
+
+        $remark = $isReassess
+            ? 'GD Supervisor re-assessed item. Supplied File Verification for No Item Code.'
+            : 'GD Supervisor started item assessment. Supplied File Verification for No Item Code';
+
+        // 1. HISTORY LOG
+        HistoryLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => $ref,
+            'model_type'    => AoModel::class,
+            'model_id'      => $modelId,
+            'status'        => null,
+            'old_values'    => null,
+            'new_values'    => ['rfa_reference' => $ref],
+            'remarks'       => $remark,
+        ]);
+
+        // 2. ACTION TAKEN LOG
+        ActionTakenLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => $ref,
+            'subject_type'  => AoModel::class,
+            'subject_id'    => $modelId,
+            'action'        => $remark,
+            'remarks'       => $remark,
+        ]);
+
+        // 3. ACTIVITY LOG
+        ActivityLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => $ref,
+            'event'         => $isReassess ? 'gd_reassess' : 'gd_assess',
+            'description'   => "{$user->name} - {$remark} ({$ref})",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
+
+        // 4. AUDIT LOG
+        AuditLog::create([
+            'user_id'        => $user->id,
+            'rfa_reference'  => $ref,
+            'auditable_type' => AoModel::class,
+            'auditable_id'   => $modelId,
+            'event'          => $isReassess ? 'gd_reassess' : 'gd_assess',
+            'metadata'       => ['rfa_reference' => $ref],
+            'url'            => request()->fullUrl(),
+            'ip_address'     => request()->ip(),
+            'user_agent'     => request()->userAgent(),
+        ]);
 
         return response()->json([
             'status' => 'success',
@@ -820,6 +1024,54 @@ public function suppliedVerified_no_item_code(Request $request)
         $recipientUser->notify(new ArtWorkNotification($suppliedVerified ,'gd_to_ao'));
             }
         
+
+        // ==========================================
+        // PROCESS 4: MANUAL LOGGING (GD Assessment Submitted)
+        // ==========================================
+        $user    = auth()->user();
+        $ref     = trim($request->input('rfa_reference_no_item_code'));
+        $modelId = $aoModelRecord->id ?? $suppliedVerified->id ?? 0;
+
+        // 1. Markahan na COMPLETED ang open assessment row sa HistoryLog (para ma-compute ang assessment time & hindi ma-CANCEL)
+        HistoryLog::where('rfa_reference', $ref)
+            ->where('remarks', 'LIKE', '%assess%')
+            ->whereNull('status')
+            ->update(['status' => 'COMPLETED']);
+
+        // 2. ACTION TAKEN LOG
+        ActionTakenLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => $ref,
+            'subject_type'  => FileVerification::class,
+            'subject_id'    => $suppliedVerified->id,
+            'action'        => 'GD Supervisor submitted supplied verification (No Item Code)',
+            'remarks'       => "Verified and submitted supplied file details for {$ref}. Status set to For Item Code Creation.",
+        ]);
+
+        // 3. ACTIVITY LOG
+        ActivityLog::create([
+            'user_id'       => $user->id,
+            'rfa_reference' => $ref,
+            'event'         => 'gd_submitted_supplied_verification',
+            'description'   => "GD Supervisor {$user->name} submitted supplied verification for {$ref}.",
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+        ]);
+
+        // 4. AUDIT LOG (Kung hindi nag-save si $aoModelRecord, i-log din dito para may record pa rin sa audit_logs)
+        // if (!$aoModelRecord) {
+            AuditLog::create([
+                'user_id'        => $user->id,
+                'rfa_reference'  => $ref,
+                'auditable_type' => FileVerification::class,
+                'auditable_id'   => $suppliedVerified->id,
+                'event'          => 'gd_supplied_verification_saved',
+                'metadata'       => $suppliedVerified->toArray(),
+                'url'            => request()->fullUrl(),
+                'ip_address'     => request()->ip(),
+                'user_agent'     => request()->userAgent(),
+            ]);
+        // }
 
         return redirect()->back()->with('success', 'Artwork request & specifications saved successfully!');
 

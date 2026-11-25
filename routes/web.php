@@ -47,6 +47,7 @@ Route::middleware(['auth','check.system.access','force.change.password'])->group
         Route::get('/showAllReadyForItemCode',[\App\Http\Controllers\AoFormController::class,'showAllReadyForItemCode'])->name('showAllReadyForItemCode');
 
         Route::get('/getArtworkFileDetail/{item_id}',[\App\Http\Controllers\ArtworkController::class,'getArtworkFileDetail'])->name('getArtworkFileDetail');
+         Route::get('/toAddItemCode/{item_id}',[\App\Http\Controllers\ArtworkController::class,'toAddItemCode'])->name('toAddItemCode');
 
         Route::post('/fileLink', [App\Http\Controllers\AoFormController::class, 'store'])->name('ao_send_link');//send link to gd
         Route::post('/saveNewItem', [App\Http\Controllers\AoFormController::class, 'store_without_itemcode'])->name('saveNewItem');//send link to gd no item code yet
